@@ -1,0 +1,162 @@
+\documentclass{config/minimal_uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 05}
+\ausgabe{13. September 2023}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+	\maketitle
+
+
+    \noindent \tb{Evaluation}: \quad
+	
+	\noindent Bitte nehmen Sie sich etwas Zeit, um den Vertiefungskurs zu evaluieren. Dies ist für die Verbessereung und Einrichtung zukünftiger Angebote wichtig:\\
+    \underline{\url{https://limesurvey.informatik.uni-bonn.de/index.php/395267?lang=en}}
+
+	\medskip
+    \medskip
+	
+\noindent \tb{Note}: \quad
+This worksheet contains more exercises than can likely be completed within the tutorial session.\\
+Look through the tasks and start with the ones that interest you most.\\
+Feel free to extend or modify the given exercises with any functionality you like.
+
+\medskip
+
+\noindent In some tasks, you will find references to pre-prepared programs. You can find and download them from this Sciebo share\furl{https://uni-bonn.sciebo.de/s/f3yJSCBKiDLHzHS} in the folder of the corresponding day.
+
+\medskip
+	
+	
+\noindent \tb{Setting up your development environment} \quad
+
+\begin{enumerate}
+	\item If you have not done so on a previous day, set up a virtual environment and an IDE.\\
+	More information can be found on Worksheet 1.
+	
+	\item Extend your \pp{venv} with the packages \pp{rich}, \pp{pydantic-ai}.
+\end{enumerate}
+
+\noindent \tb{Wiki R\textsl{AI}ce}
+	\newline
+	\noindent Write an Agent that autonomously plays Wiki Race.\\
+	If you joined us on Day 2, you probably built your own Wiki Race and had some fun playing it. Now it’s time to pass the fun part -- the actual gameplay -- over to the AI. After all, who needs fun, right?\\
+	If you don't know what Wiki Race was, please refer to the exercise sheet from Day 2.
+	\\
+	Build an Agent that plays Wiki Race for you.
+	\\
+	Before you start implementing an agent: Go back to the Slide \pp{Abstractions} and plan thse details.
+	
+	
+	Now it's time get started on your code.
+	\begin{itemize}
+		\item Create the class that models the dependencies the tool execution will need.
+		
+		\item Create the class that models the answer that is expected from the agent.
+
+		
+		\item Implement the tools the agent will need.
+		\item[]\begin{itemize}
+			\item Make sure to include some logging.
+			\item Inlcude some functionality to track the path the agent attempted, e.g. store all searched words that were successful in a list.
+			\item It might be useful for testing and development to keep the core functionality in a function that is callable without a \pp{RunContext}, that is then called from the tool-function.
+		\end{itemize}
+			
+			\item Initialize the agent
+			
+			\begin{itemize}
+				\item Write the prompts
+				\item Provide it with the tools
+				\item Specify the dependency type
+				\item Specify the outpt type
+				\item Make sure to implement some basic logging to see what your agent is up to
+			\end{itemize}
+			
+
+			
+			\item Run the Agent and keep a close eye on its work
+			
+			\item Validate if the result the agent produced alignes with the path that you tracked yourself
+			
+			\item Add some more tracking like: How many steps did the agent need? How many failed tool calls happend?
+			
+			\item Depending on your tool implementation: Can you save requests with some type of input validation before you call the API?
+		\end{itemize}
+		
+		You can find the API key to try things out in the readme.md.\newline
+		Please be careful with your spending. You all share the same budget. There will be \tb{no refill} if the budget is depleted.
+
+
+\medskip
+
+\newpage
+\begin{aufg}[Rich] \quad
+	With Rich you can easily create great terminal UIs\footnote{Remember to set the Emulate Terminal option in PyCharm's run configuration if necessary.}. 
+	\newline
+	Here are some ideas:\newline
+	
+	\noindent \tb{Colored Text} \quad
+	
+	\noindent Display Hello World on the console, but in color!
+	
+	\medskip
+	\medskip
+	
+	\noindent \tb{Pseudo Progress Bar} \quad
+	
+	\noindent Use Rich to display a progress bar that convincingly moves forward as if it were actually loading something. You can use the random library to generate a random wait time / random progress. Experiment a little with the values.\newline
+	Note: It may feel better if you generate multiple random numbers at once and combine them.
+	
+	\medskip
+	\medskip
+	
+	\noindent \tb{Layout} \quad
+	
+	\noindent Create a layout with multiple sections and fill them with any elements.
+	
+	\medskip
+	\medskip
+	
+	\noindent \tb{Live} \quad
+	
+	Create a live layout in which you display changing content.\newline
+	Possible contents could be:
+	\begin{itemize}
+		\item The current time
+		\item A text that builds up word by word
+		\item A continuously fast-incrementing number
+		\item A simple counter that increments each time the UI refreshes
+	\end{itemize}
+	
+	\medskip
+	\medskip
+	
+	\noindent \tb{Custom Renderables} \quad
+	
+	\noindent Write your own class that implements \pp{__rich__}. Think of some possible content and add the element to your live UI.\newline
+	Note: For example, you could simply rewrite elements from the previous task to use \pp{__rich__}.
+	
+	\medskip
+	\medskip
+	
+	\noindent \tb{Discord Overview (Extreme Skill Level Increase)} \quad
+	
+	\noindent Write a UI that shows you a preview of new messages in the channels of a Discord server.
+	\begin{itemize}
+		\item The layout could show an overview of the channels on the left -- similar to Discord’s own UI -- and “rotate through” them.
+		\item The main window could display the history of the latest messages in the current channel.
+	\end{itemize}
+	
+\end{aufg}
+
+	
+\end{document}

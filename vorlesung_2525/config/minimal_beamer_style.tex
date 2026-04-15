@@ -1,0 +1,98 @@
+\usepackage{xcolor}
+\usepackage{etoolbox}
+\usepackage{ragged2e}
+\usepackage{tikz}
+
+% Core colors reused across slides and helper macros.
+\definecolor{colorblue}{HTML}{004E9F}
+\definecolor{colorgray}{HTML}{909085}
+\definecolor{colororange}{HTML}{FCBA00}
+\definecolor{coloryellow}{HTML}{FCBA00}
+
+\beamersetleftmargin{4ex}
+\beamersetrightmargin{4ex}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=colorgray!4}
+\setbeamercolor{normal text}{fg=colorblue}
+\setbeamercolor{frametitle}{fg=coloryellow,bg=colorblue}
+\setbeamerfont{title}{series=\bfseries,size=\Large}
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{subtitle}{size=\normalsize}
+\setbeamerfont{footnote}{size=\tiny}
+\setbeamerfont{footnote mark}{size=\tiny}
+\setbeamercolor{footnote}{fg=colorgray}
+\setbeamercolor{footnote mark}{fg=colorgray}
+
+% Allow optional arguments after \frame.
+\apptocmd{\frame}{}{\justifying}{} 
+\let\raggedright\RaggedRight
+\let\footnoterule\relax
+\let\oldfootnote\footnote
+\renewcommand\footnote[1][]{\oldfootnote[frame,#1]}
+
+% Metadata commands compatible with previous template usage.
+\newcommand{\AuthorInformation}[1]{\def\LocalAuthorInformation{#1}}
+\newcommand{\AuthorEmail}[1]{\def\LocalAuthorEmail{#1}}
+\newcommand{\Eventname}[1]{\def\LocalEventname{#1}}
+\newcommand{\City}[1]{\def\LocalCity{#1}}
+\newcommand{\Date}[1]{\date{#1}\def\LocalDate{#1}}
+\newcommand{\MainTitle}[1]{\title{#1}}
+\newcommand{\SubTitle}[1]{\subtitle{#1}}
+\newcommand{\AuthorName}[1]{\author{#1}}
+\providecommand{\printgitversion}{false}
+\providecommand{\printfilename}{false}
+
+\providecommand{\LocalAuthorInformation}{}
+\providecommand{\LocalAuthorEmail}{}
+\providecommand{\LocalEventname}{}
+\providecommand{\LocalCity}{}
+\providecommand{\LocalDate}{}
+
+\setbeamertemplate{title page}{
+  \begin{frame}[plain,noframenumbering]
+    \vfill
+    \centering
+    {\usebeamerfont{title}\color{colorblue}\inserttitle\par}
+    \vspace{0.4cm}
+    {\usebeamerfont{subtitle}\color{coloryellow}\insertsubtitle\par}
+    \vspace{1.1cm}
+    {\color{colorblue}\insertauthor\par}
+    \vspace{0.2cm}
+    {\color{colorgray}\LocalAuthorEmail\par}
+    \vspace{0.2cm}
+    {\color{colorgray}\LocalAuthorInformation\par}
+    \vfill
+    {\color{colorgray}\footnotesize\LocalEventname\ |\ \LocalCity\ |\ \LocalDate\par}
+    \vfill
+  \end{frame}
+}
+
+% Typography helpers used by existing slide sources.
+\newcommand{\Utext}[1]{{\Huge\bfseries\MakeUppercase{#1}\par}}
+\newcommand{\Mtext}[1]{{\huge\bfseries\MakeUppercase{#1}\par}}
+\newcommand{\Htext}[1]{{\Large\bfseries\MakeUppercase{#1}\par}}
+\newcommand{\Ltext}[1]{{\large\bfseries\MakeUppercase{#1}\par}}
+\newcommand{\Stext}[1]{{\small\bfseries\MakeUppercase{#1}\par}}
+\newcommand{\utext}[1]{{\Huge\bfseries#1\par}}
+\newcommand{\mtext}[1]{{\huge\bfseries#1\par}}
+\newcommand{\htext}[1]{{\Large\bfseries#1\par}}
+\newcommand{\ltext}[1]{{\large\bfseries#1\par}}
+\newcommand{\stext}[1]{{\small\bfseries#1\par}}
+
+% Centered color cards used for chapter breaks and question slides.
+\newcommand{\framecard}[3]{
+  {
+    \setbeamercolor{background canvas}{bg=#1}
+    \begin{frame}[plain,noframenumbering]
+      \centering
+      \color{#2}#3
+    \end{frame}
+  }
+}
+\newcommand{\framecardorange}[1]{\framecard{colororange}{colorblue}{#1}}
+\newcommand{\framecardyellow}[1]{\framecard{coloryellow}{colorblue}{#1}}
+\newcommand{\framecardblue}[1]{\framecard{colorblue}{white}{#1}}
+
+\newboolean{sectiontoc}
+\setboolean{sectiontoc}{true}
+\newcommand{\silentsection}[1]{\setboolean{sectiontoc}{false}\section{#1}\setboolean{sectiontoc}{true}}

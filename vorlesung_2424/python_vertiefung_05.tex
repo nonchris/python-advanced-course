@@ -1,0 +1,1342 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+%\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+\documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\usepackage{ubo_tex_beamer/uni-template}
+\apptocmd{\frame}{}{\justifying}{} % Allow optional arguments after frame.
+\input{config/global_config}
+\input{config/custom-command}
+
+\AuthorName{Chris Geron}
+\AuthorEmail{s6chgero@uni-bonn.de}
+
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Organisatorisches \& Lernziel}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+% \setbeameroption{show notes}
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+\titlepage
+
+
+\section{Organisatorisches}
+\begin{frame}{Zur Erinnerung}
+	\begin{itemize}
+		\item Übungen finden von 14 c.t. bis 16 Uhr statt.
+		\item[] Wir nutzen die Computer-Räume U1.041, 42, 43 und 0.107 (bei Bedarf).
+		\nsl{Wer plant alles zu kommen?\\An die kommenden: CT oder ST?}
+		\pause
+		\item Die Folien sowie alle weiteren Materialien werden über Sciebo verteilt\furl{https://uni-bonn.sciebo.de/s/O4bU6jJ8UAN2pFR}.
+		\pause
+		\item[] Der Link befindet sich auch auf dem Info Bonn Discord\furl{https://discord.gg/mBm6bEchAe} in \pp{\#python-vertiefungskurs}.
+		
+		\item[] \begin{center}
+			\includegraphics[height=.25\textheight]{images/info-bonn.png}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+\section{asyncIO}
+
+\begin{frame}{Motivation}
+        \tb{IO-Operationen} sind standardmmäßig \tb{synchron} und damit blockierend.
+		\newline
+		Simple Beispiele: Lesen aus einer Datei, \pp{time.sleep()}
+		
+		\medskip
+		
+		Während dieser \tb{Wartezeit} könnte an einer anderen Stelle doch bereits \tb{sinnvolle} Arbeit verrichtet werden.
+		
+		\medskip
+		
+		Dies ist insbesondere bei Programmen wünschenswert, welche auf \tb{Anfragen} oder Events im Allgemeinen  \tb{reagieren} sollen. 
+
+	
+\end{frame}
+
+\begin{frame}{Was ist asyncIO?}
+        \pp{asyncio} ist eine \tb{built-in} Library von Python.
+		\newline
+		Mit ihr kommen zwei neuen \tb{Keywords}: \pp{async} \& \pp{await}.
+		
+		\medskip
+		
+		Sie bietet einen \tb{asynchronen} Programm-Loop, welcher in \tb{einem Thread} läuft.
+		
+		\medskip
+		
+		Durch das Verwenden von \pp{asyncio} kann die aktuell bearbeitete Funktion an bestimmten Stellen \tb{pausiert} werden, um in einer anderen Funktion weiterzuarbeiten, welche nicht auf IO wartet.
+
+	
+\end{frame}
+
+
+\begin{frame}{Was macht async jetzt?}
+        Funktionen, die asynchron ausgeführt werden sollen, werden durch \pp{async def(...):} \tb{gekennzeichnet}.
+		\newline
+		Innerhalb dieser Funktionen dürfen andere asynchrone Funktionen aufgerufen und auch erwartet werden.
+		
+		\medskip
+		
+		Wird eine \pp{async} Funktion \tb{aufgerufen}, gibt sie ein \tb{Coroutine}-Objekt zurück, statt die eigentliche Funktion auszuführen. 
+		
+		\medskip
+		
+		Das Keyword \pp{await} \tb{blockiert} den Programmfluss der Funktion so lange, bis das Ergebnis des \pp{awaitable}\footnote{Async-Tasks sind auch awitable: \url{https://docs.python.org/3/library/asyncio-task.html\#awaitables}} vorliegt. Dieses wird dann zurückgegeben.
+		
+		\medskip
+		
+		Spannend sind die async-\tb{Tasks}, wodurch mehrere Coroutinen \tb{quasi nebenläufig}\newline
+		laufen können. 
+
+
+\end{frame}
+
+
+\begin{frame}{Awaitable}
+
+		Ein \pp{awaitable}\furl{https://docs.python.org/3/library/asyncio-task.html\#awaitables} definiert sich dadurch, dass es \pp{\_\_await\_\_()}\footnote{Zudem existieren \_\_aiter\_\_(), \_\_aenter\_\_() und weitere} implementiert. \newline
+		Dadurch kann es mit \pp{await} erwartet werden.
+		
+		\medskip
+		
+		Die drei built-in Typen von \pp{awaitables} sind \tb{Coroutine}, \tb{Task} und \tb{Future}\footnote{Wird hier nicht weiter besprochen.}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Async-Loop beginnen}
+        Der asynchrone Programmfluss wird durch \tb{Aufrufen} von \pp{asyncio.run()} gestartet.
+
+		\medskip
+		
+		Die Funktion nimmt eine \tb{Coroutine} entgegen.
+		\begin{lstlisting}[language=pytiny]
+asyncio.run(main())
+		\end{lstlisting}
+		$\rightarrow$ Die zu \tb{übergebene} Funktion wird unintuitiver Weise \tb{\glqq ausgeführt\grqq} übergeben.
+		
+		\medskip
+		
+		Der \tb{Start} des Loops ist \tb{blockierend}.
+
+\end{frame}
+
+
+\begin{frame}{Async-Coroutine}
+        Ein \tb{Coroutine}-Objekt\furl{https://docs.python.org/3/library/asyncio-task.html\#coroutines} wird durch den \tb{\glqq Aufruf\grqq~} einer \pp{async}-Funktion \tb{erzeugt}.
+
+		\medskip
+		
+		Die eigentliche Funktion wird \tb{erst ausgeführt}, wenn es an einen \pp{Task} \tb{übergeben} oder mit \pp{await} \tb{erwartet} wird.
+		
+		\medskip
+		
+		Ein \pp{coroutine} muss vor Ende der erstellenden Funktion erwartet werden.
+		
+		\medskip
+		
+		Die Rückgabe einer nicht erwarteten \pp{coroutine} ist nicht möglich.
+\end{frame}
+
+
+% TODO: SleepToken Meme :P
+\begin{frame}[fragile]{Async-Coroutine}
+	\begin{lstlisting}[language=pytiny]
+import asyncio
+
+async def sleep(name: str, st=1):
+    """ helper to execute an 'IO-heavy' task (sleeping) """
+    print(f"[{name}] Before await")
+    await asyncio.sleep(st)
+    print(f"[{name}] After await")
+    return name
+
+async def main():
+    """ create and wait coroutines (synchronous behaviour) """
+    coro1 = sleep_token("call1")
+    coro2 = sleep_token("call2", st=2)
+    
+    # note coro2 will be executed completely before coro1
+    await coro2
+    await coro1
+
+# start main async-loop
+asyncio.run(main())
+	\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}{Async-Tasks}
+        Eine async-\tb{Task}\furl{https://docs.python.org/3/library/asyncio-task.html\#task-object} wird durch \pp{asyncio.create_task()} zur Bearbeitung gescheduled.
+		\newline
+		Hierdurch kann \tb{nebenläufiges Verhalten} erzielt werden.
+		
+		\medskip
+		
+		Sein Ende und das \tb{Ergebnis} können mit \pp{await} \tb{abgewartet} werden.
+		\newline 
+		Hierdruch kann sein \tb{Bearbeitungszustand} mit \pp{.done()} Abgefragt werden.
+		\newline
+		Das Ergebnis eines fertigen Tasks kann mit \pp{.result()} \tb{abgeholt} werden.
+		
+		\medskip
+		
+		\pp{asyncio.gather()} erwartet das Ende aller übergeben Tasks und gibt die Ergebnisse zurück.
+		\newline
+		Die Reihenfolge der Rückgabe entspricht der Reihenfolge der Übergabe.
+		
+		\medskip
+		
+		Ein Task muss theoretisch niemals awaited werden.
+		
+
+\end{frame}
+
+
+% TODO: SleepToken Meme :P
+\begin{frame}[fragile]{Async-Tasks}
+	\begin{lstlisting}[language=pytiny]
+import asyncio
+
+async def sleep(name: str, st=1):
+    """ helper to execute an 'IO-heavy' task (sleeping) """
+    print(f"[{name}] Before await")
+    await asyncio.sleep(st)
+    print(f"[{name}] After await")
+    return name
+
+async def main():
+    task1 = asyncio.create_task(sleep("call1"))  # create task
+    task2 = asyncio.create_task(sleep("call2"))
+    print(type(task1))  # >> <class '_asyncio.Task'>
+
+    res1, res2 = await asyncio.gather(task1, task2)  # wait for tasks to finish
+    print(res1, res2)  # >> call1, call2
+
+# start main async-loop
+asyncio.run(main())
+	\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Async-Taskgroup}
+        Das selbe Beispiel wie oben mit Hilfe von \tb{TaskGroup}\furl{https://docs.python.org/3/library/asyncio-task.html\#task-groups}.
+
+		\medskip
+		
+		In dieser können \tb{mehrere} Tasks einfach gescheduled werden.
+		
+		\medskip
+		
+		Beim \tb{Verlassen} des Context-Blocks wird sicher gestellt, dass alle \tb{Tasks fertig} sind.
+
+	\begin{lstlisting}[language=pytiny]
+async def main():
+    print(f"started at {time.strftime('%X')}")  # %X -> hh:mm:ss
+    async with asyncio.TaskGroup() as tg:
+        task1 = tg.create_task(sleep('call1'))
+
+        task2 = tg.create_task(sleep("call2"))
+
+    print(f"ended at {time.strftime('%X')}")
+
+    print(task1.result())
+    
+asyncio.run(main())
+	\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}{Wo können Async-Funktion untebrochen werden?}
+
+		Kurz: Überall, wo eine \tb{Interaktion} mit \pp{asyncio} passiert.
+		
+		\medskip
+		
+		 Der Programmfluss kann bei Aufrufen von \pp{async}-Funktionen und dem Nutzen von \pp{await} angehalten und woanders fortgeführt werden.
+
+\end{frame}
+
+
+\begin{frame}{Schützen von Ressourcen}
+        Wenn mehrere Funktionen \tb{\glqq zeitgleich\grqq}~laufen können, müssen geteilte \tb{Ressourcen} gegebenenfalls \tb{geschützt werden}\footnote{\url{https://docs.python.org/3/library/asyncio-sync.html\#synchronization-primitives}}.
+
+		\medskip
+		
+		Anders als bei Multithreading müssen nicht alle Zugriffe geschützt werden.
+		
+		\medskip
+		
+		Es sollte drauf geachtet werden, eine Ressource zu \tb{schützen}, wenn ihre Konsistenz über mehrere \tb{async-Aufrufe hinweg} notwendig ist.
+		
+		\medskip
+		
+		Zudem muss beachtet werden, dass Libraries potentiell \glqq versteckt\grqq~\pp{asyncio} verwenden, wodurch die Kontrolle an die Library zurückfällt.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Timeout}
+    	Mit \pp{asyncio.timeout()}\footnote{\url{https://docs.python.org/3/library/asyncio-task.html\#timeouts}} kann festgelegt werden, wann ein \pp{Task} beendet werden soll.
+
+		\medskip
+		
+		Mit \pp{asyncio.Timeout} kann ein Timeout festgelegt und rescheduled werden.
+		\newline
+		Zudem kann abgefragt werden, ob das Timeout erreicht wurde.
+
+    \begin{lstlisting}[language=pytiny]
+async def main():
+    try:
+        async with asyncio.timeout(10):
+            await long_running_task()
+    except TimeoutError:
+        print("The long operation timed out, but we've handled it.")
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Async-Subprocess}
+        \pp{asyncio} bietet eine Schnittstelle zum Ausführen von Subprozessen\footnote{Besser bekannt als Shell-Commands}.
+
+		\medskip
+		
+		Weiteres dazu kann hier nachgelesen werden:\newline \url{https://docs.python.org/3/library/asyncio-subprocess.html}
+
+\end{frame}
+
+\framecardfragen
+
+\section{Discord Bots}
+\subsection{Async in einer Folie}
+
+\begin{frame}{Async: Informell in vier Punkten + Fazit}
+	\begin{itemize}
+		\item \tb{Asynchrone} Programme können zwischen der \tb{Ausführung} verschiedener Funktionen \tb{wechseln}, wenn eine Funktion \tb{blockierend} auf (i.d.R.) I/O wartet.
+		
+		\pause
+		
+		\item[] Hierbei läuft das gesamte Programm immernoch in \tb{einem} Thread\footnote{Dennoch ist die Ausführung des Programms unvorhersehbar, daher kann es notwendig sein, Ressourcen zu schützen!}.
+		
+		\pause
+		
+		\item Ist eine \tb{Funktion} als \pp{async} gekennzeichnet, bedeutet dies, dass sie irgendwo auf (i.d.R.) I/O \tb{warten} wird.
+		
+		\pause
+		
+		
+		\item Solche Methoden nennen sich \tb{Coroutinen}.
+		
+		\pause
+		
+		\item Coroutinen \tb{müssen}, im Kontext von Discord.py, direkt mit \pp{await} \tb{abgewartet} werden.
+		
+		\pause
+		
+		\item[] \tb{Sobald} das Programm auf \pp{await} trifft, kann es an einer \tb{anderen} Stelle weiter arbeiten und zu diesem Aufruf \tb{zurückkehren}, sobald die Coroutine abgeschlossen ist.
+		
+		\item \tb{Fazit}: Durch \pp{asyncIO} wird \tb{keine Zeit} mit Warten auf I/O \tb{verschwendet}.
+		
+	\end{itemize}
+\end{frame}
+
+\framecardfragen
+
+\subsection{Überblick}
+
+\begin{frame}{Was kann ein Bot}
+        Discord \tb{Bots} sind Programme, welche mit Discords API\furl{https://discord.com/developers/docs/reference} interagieren, um \tb{Aktionen} innerhalb der Plattform durchzuführen.
+
+		\medskip
+		
+		In Discord sind Bots eine besondere \tb{Klasse} von Accounts\furl{https://discord.com/developers/docs/topics/oauth2\#bot-vs-user-accounts}, welche in der App durch das \pp{BOT}-Label \tb{gekennzeichnet} sind.
+		
+		\medskip
+		
+		Diese Accounts interagieren mit Discord über eine \tb{REST-API}.
+		
+		\medskip
+		
+		Damit ein Bot diese nutzen kann, benötigt er ein \tb{Token} für die API\furl{https://discord.com/developers/docs/reference\#authentication}.
+
+\end{frame}
+
+\begin{frame}{Eine Library für einfache Interaktion mit Discords API in Python: discord.py}
+        Für gängige Webdienste existieren zumeist \tb{Libraries}, welches die Interaktion mit\newline
+         deren API stark \tb{vereinfachen}.
+
+		\medskip
+		
+		Das Ökosystem um Pythons Discord Libraries ist seit der temporären Einstellung der Entwicklung von \pp{discord.py} 2021\furl{https://gist.github.com/Rapptz/c4324f17a80c94776832430007ad40e6} 
+		breit aufgestellt.
+		
+		\medskip
+		
+		Da \pp{discord.py}\furl{https://discordpy.readthedocs.io/en/stable/}
+		die \tb{größte} Library für Interaktion mit Discord via Python ist und seit Anfang 2022 wieder aktiv maintained wird\furl{https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78100287f1}
+		, führen wir hier in diese ein\footnote{Gezeigt wird die im August 2022 veröffentlichte \texttt{v2}}.
+
+\end{frame}
+
+\framecardfragen
+
+
+\subsection{discord.py - Überblick}
+
+\begin{frame}{Die wichtigsten Objekte in Kürze}
+	\begin{itemize}
+		\item Das \pp{discord.Guild}\furl{https://discordpy.readthedocs.io/en/latest/api.html\#guild} modelliert einen Discord-Server.
+
+		
+		\item Das \pp{discord.Member}\furl{https://discordpy.readthedocs.io/en/latest/api.html\#member} modelliert ein Mitglied eines Servers.
+
+		
+		\item Das \pp{discord.TextChannel}\furl{https://discordpy.readthedocs.io/en/latest/api.html\#textchannel} modelliert einen Text-Kanal auf einem Server.
+
+		
+		\item Das \pp{discord.Message}\furl{https://discordpy.readthedocs.io/en/latest/api.html\#message} modelliert eine versendete Nachricht.
+		
+		\item Das \pp{discord.ext.commands.Bot}\furl{https://discordpy.readthedocs.io/en/latest/ext/commands/api.html\#bot} realisiert unseren \tb{Bot-User}.
+		
+		\item Das \pp{discord.ext.commands.Context}\footnote{\url{https://discordpy.readthedocs.io/en/latest/ext/commands/api.html\#context}, bei Slash-Commands ist es stattdessen das \texttt{Interaction}-Objekt.} enthält den Kontext eines Commands.
+		
+		\item Jedes Element hat eine \tb{eindeutige} von Discord zugewiesene \pp{id}.
+		
+		\item Im Allgemeinen sind alle einem Kontext zugehörige Objekte voneinander erreichbar.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Aufsetzen eines Bots - Die minimalen Anforderungen}
+	\begin{itemize}
+		\item Wir brauchen eine \tb{Instanz} von \pp{discord.ext.commands.Bot}\footnote{
+		\texttt{Bot} ist eine Erweiterung von \texttt{discord.Client}: https://discordpy.readthedocs.io/en/latest/api.html\#discord.Client} oder einer davon erbenden Klasse.
+		
+		\pause
+		
+		\item Die \pp{Bot}-Klasse benötigt zur Instanziierung ein \tb{Prefix} und eine \tb{Intent}-Konfiguration\furl{https://discordpy.readthedocs.io/en/stable/api.html\#discord.Intents}.
+		
+		\pause
+		
+		\item Das \pp{Bot}-Objekt kann mit einem \pp{token} und der \pp{run()}-Methode \tb{gestartet} werden.
+		
+		\pause
+		
+		\item Es empfiehlt sich, direkt die \pp{setup_hook}\furl{https://discordpy.readthedocs.io/en/stable/ext/commands/api.html?highlight=setup_hook\#discord.ext.commands.Bot.setup_hook} mit zu \tb{überschreiben}.
+		
+		\pause
+		
+		\item Das \pp{Bot}-Objekt kennt \tb{alle} Server, Privatchats etc. des Bot-Clients. Es stellt eine Reihe von \tb{Gettern} zur Verfügung, um leicht auf diese Elemente zuzugreifen.
+	\end{itemize}
+\end{frame}
+
+
+% TODO: test this code - especially if setup_hook works
+\begin{frame}[fragile]{Ein ziemlich minimaler Discord-Bot}
+	\begin{lstlisting}[language=pytiny]
+import discord
+from discord.ext import commands
+
+class MyBot(commands.Bot):
+    def __init__(self, intents: discord.Intents = discord.Intents.all()):
+        super().__init__(command_prefix="b!", intents=intents)
+      
+     async def setup_hook():
+         """ load your cogs here, also push the app commands"""
+         await self.load_extension("my_sick_commands", package=__package__)
+         
+         self.tree.copy_global_to(guild=self.get_guild(int(os.getenv("MY_GUILD"))))
+         await self.tree.sync(guild=guild)
+         print(f"Bot is ready to go")
+         
+if __name__ == "__main__":
+    bot = MyBot()
+    bot.run(os.getenv("TOKEN"))
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Projekte gliedern mit Cogs}
+	\begin{itemize}
+		\item Schnell ist der Punkt erreicht, wo zusammengehörende \tb{Funktionalitäten} gekapselt in ein eigenes Modul \tb{ausgelagert} werden sollen.
+		
+		\pause
+		
+		\item Discord.py bietet dafür die \pp{commands.Cog}-Klasse\furl{https://discordpy.readthedocs.io/en/latest/ext/commands/api.html\#cog}.
+		
+		\pause
+		
+		\item \tb{Erbt} ein Objekt von dieser, kann es zur Laufzeit in den Bot \tb{geladen} werden.
+		
+		\pause
+		
+		\item Ein Modul, welches \pp{Cogs} enthält, \tb{benötigt} eine \pp{setup()}-Funktion.
+		
+		\pause
+		
+		\item Es wird via \pp{load_extension()}\furl{https://discordpy.readthedocs.io/en/latest/ext/commands/api.html\#discord.ext.commands.Bot.load_extension} in den Bot geladen.
+	
+		\pause
+	
+		\item Ein Cog existiert nur einmal und kann \tb{Command-übergreifend} Daten halten.
+		
+		\pause
+		
+		\item Cogs können im laufenden Betrieb neu geladen werden\furl{https://discordpy.readthedocs.io/en/latest/ext/commands/api.html\#discord.ext.commands.Bot.reload_extension}.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Ein ziemlich kleiner Cog}
+	\begin{lstlisting}[language=pytiny]
+# this could be the module 'my_sick_commands' mentioned in the previous example
+import discord
+from discord.ext import commands
+
+class UppercaseCog(commands.Cog):
+    # cog takes the bot (and should save it internally) - we can store arbitrary data here!
+    def __init__(self, bot):
+        self.bot = bot
+
+    # we need commands.command in Cogs and bot_instance.command in our main file
+    @commands.command()
+    async def uppercase(self, ctx: commands.Context, word: str):
+        """ a command to convert a single word to upper case """ 
+        await ctx.send(word.upper())
+
+# special load function, required to be able to load the module
+def setup(bot):
+    bot.add_cog(UppercaseCog(bot))
+	\end{lstlisting}
+	
+	\nll{Auf await hinweisen!}
+\end{frame}
+
+\framecardfragen
+
+\subsection{Event-basierte Operationen}
+\begin{frame}{Event-basierte Operationen: Überblick}
+	    \tb{Event}-basierte Operationen sind Operationen, die der Bot durchführt, wenn ein\newline
+	     bestimmtes Event \tb{aufgetreten} ist.
+	
+		\medskip
+		\pause
+		
+		Bots können auf eine ganze Reihe von Events\furl{https://discordpy.readthedocs.io/en/latest/api.html\#event-reference} hören. Unter Anderem:
+		%
+		\begin{itemize}
+			\item Empfang einer Nachricht \pp{on_message}
+			\item Join eines Members \pp{on_member_join}
+			\item Hinzufügen / Entfernen einer Reaction \pp{on_reaction_add} bzw. \pp{_remove}.
+			\item Die Veränderung eines Members \pp{on_member_update}
+			\item Oder auch einfach das Tippen in einem Channel \pp{on_typing}
+		\end{itemize}
+		
+		\medskip
+		\pause
+		
+		Events werden durch das \tb{Überschreiben} der Methode des Bots gehandelt.
+		
+		\medskip
+		\pause
+		
+		Hinweis: Viele dieser Events erfordern \tb{Privileged} Gateway Intents\furl{https://discord.com/developers/docs/topics/gateway\#privileged-intents}\furl{https://support-dev.discord.com/hc/en-us/articles/6207308062871-What-are-Privileged-Intents-}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Eventhandler überschreiben}
+	\begin{lstlisting}[language=pytiny]
+import discord
+from discord.ext import commands
+
+class MyBot(commands.Bot):
+    def __init__(self, intents: discord.Intents = discord.Intents.all()):
+        super().__init__(command_prefix="b!", intents=intents)
+        
+    # overwrite event handler in bot class itself
+    async def on_message(self, message: discord.Message, /) -> None:
+        print(f"{message.author} said {message.content}")
+        self.process_commands(message)  # otherwise all commands won't trigger
+
+@bot.event  # use the decorator instead of overwriting it in the class directly
+async def on_typing(channel: discord.abc.Messageable, user: discord.Member | discord.User, when):
+    await channel.send(f"Naaa, {user.mention} was schreiben wird denn schönes?")
+
+bot = MyBot()
+def start_bot():
+    bot.run(os.getenv("TOKEN"))
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Weitere Kategorie von Events: Klassische Commands}
+	    Eine spezifischere Teilkategorie von Events sind \tb{Commands}\footnote{Ein Beispiel eines Commands findet sich auf dem Beispiel zu \texttt{Cogs}, bei Commands außerhalb von Cogs muss \texttt{@bot.command()} als Decorator genutzt werden!}, mit welchen\newline
+	     Nutzer:innen gezielt mit einem Bot interagieren.
+	
+		\medskip
+		\pause
+		
+		Hierbei existiert der \tb{klassische} Message-Command\furl{https://discordpy.readthedocs.io/en/stable/ext/commands/api.html\#discord.ext.commands.command} mit der \tb{Syntax} \pp{prefix|command}.
+		\newline
+		Also simple \tb{Nachrichten}\footnote{
+			Da die Commands auf Nachrichten basieren, muss beim Überschreiben der \texttt{on\_message()}-Funktion ein Aufruf von \texttt{process\_commands(message)} enthalten sein.
+		}, welche einer besonderen Syntax folgen.
+		
+		\medskip
+		\pause
+		
+		Die Interaktion ist ähnlich einer mit \tb{Command-Line} ohne Auto-Completion.
+		
+		\medskip
+		\pause
+		
+		Die Typen der \tb{Argumente} müssen komplett vom \tb{Developer validiert} werden.
+		\newline
+		Dabei müssen Fehlerrückmeldungen und Hinweise selbst implementiert werden.
+		
+		\medskip
+		
+		Jeder Bot sollte für eine Command-Übersicht einen \tb{Help-Command} bieten.
+		
+		\medskip
+		\pause
+		
+		Jede Command-Funktion bekommt als \tb{erstes Argument} \pp{commands.Context} und danach die gegebenen Argumente.
+
+\end{frame}
+
+
+\framecardfragen
+
+
+% TODO hier ein code snippet.
+
+\subsection{Die neue Art der direkten Interaktion mit Bots}
+
+
+\begin{frame}{Application Commands}
+	    Die neuere Art der Interaktion sind die \tb{Application-Commands}\furl{
+		https://discordpy.readthedocs.io/en/latest/interactions/api.html?highlight=app_commands\#decorators
+		}\footnote{
+			Aufgrund des einheitlichen \texttt{/}-Prefixes oft einfach Slash-Commands genannt.
+		}.
+		
+		\medskip
+		\pause
+		
+		Sie sind direkt in Discord eingebaut und bieten \tb{Vorteile} gegenüber klassischen Commands:
+		
+		\medskip
+		\pause
+		
+		\begin{itemize}
+			\item Native \tb{Übersicht} aller verfügbaren Commands direkt in Discords UI.
+			
+			\medskip
+			\pause
+			
+			\item \tb{Kommunikation} und \tb{Validierung} der verfügbaren Parameter inklusive Typ.
+			
+			\medskip
+			\pause
+			
+			\item Ausführung und Antwort kann für andere Nutzer:innen \tb{unsichtbar} sein. 
+			
+			\medskip
+			\pause
+			
+			\item In Discord eingebautes Rechte-System für die Nutzung von Commands.
+		\end{itemize}
+		
+		\medskip
+		\pause
+		
+		Aus der Developer-Community folgte einiges an \tb{Kritik}, da Slash-Commands die Einführung des \pp{Message Content Intent} ermöglichten und damit die allgemeine Freiheit der Bots einschränken. Discord begründet dies vor allem mit Datenschutz.
+
+\end{frame}
+% TODO Bild einfügen
+
+\begin{frame}{Application Commands erstellen}
+	    Die Command-Funktion muss als \tb{ersten Parameter} eine \pp{Interaction}\furl{https://discordpy.readthedocs.io/en/stable/interactions/api.html?highlight=response\%20send\_message\#discord.InteractionResponse} entgegennehmen und kann danach \tb{weitere} (benötigte) Parameter definieren.
+	
+		\medskip
+		\pause
+		
+		Am \tb{Ende} muss die Funktion über \pp{interaction.response.send_message} auf diese \tb{Antworten}.
+		
+		\medskip
+		\pause
+		
+		Discord \tb{erwartet} eine sehr schnelle Antwort des Bots. \newline
+		Braucht der Command einige API-Calls, wird dieses \tb{Zeitlimit} schnell überschritten.\nsl{es reichen paar api calls}
+		\newline
+		Bei längeren Operationen ist es daher ratsam, die Interaction mit \pp{.defer()} zu\newline
+		 \tb{acknowledgen} und nach erfolgreichem Abschluss ein \tb{Followup} zu senden.
+		\newline
+		Dies geht über \pp{interaction.followup.send()}\furl{https://discordpy.readthedocs.io/en/stable/interactions/api.html?highlight=followup\#discord.Interaction.followup}.
+
+\end{frame}
+
+
+\begin{frame}{Command-Auswahl}
+	\begin{figure}
+		\includegraphics[height=0.7\textheight]{command_overview.png}
+		\caption{Übersicht aller verfügbaren Bots und Commands auf diesem Server.}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}{Ausführung und Antwort}
+	\begin{figure}
+		\includegraphics[width=.85\textwidth]{command_filled.png}
+		\caption{Ausfüllen aller Parameter des Commands\furl{https://github.com/nonchris/IOEAEEAE\_\_d\_SC\_RD-r\_PL\_C\_M\_NT-c\_S\_}}
+	\end{figure}
+	\begin{figure}
+		\includegraphics[width=.85\textwidth]{command_delivered.png}
+		\caption{Die Anwtort ist eine nur für die ausführende Person sichtbare Nachricht.}
+	\end{figure}
+\end{frame}
+
+% TODO: code beispiel
+
+
+\begin{frame}[fragile]{Slash-Commands}
+	\begin{lstlisting}[language=pytiny]
+from typing import Literal, Optional
+import discord
+from discord import app_commands
+
+# use @app_commands.command instead if command is in Cog (fn must then also take self!)
+@bot.tree.command(name="eaeeae__r_pl_c_m_ntc_s_", description="Convert to replacement case")
+async def replacement_case_command(
+        interaction: discord.Interaction,
+        text: str,
+        mode: Literal["silent", "loud"] | None, 
+        get_escaped: bool = False):
+    """ Convert text from sARCASTIC_cASE to EAEEAE__r_PL_C_M_NTc_S_ """
+
+    replacement_text = EAEEAE__r_PL_C_M_NTc_S_(text, eAE___SC_P_=True)
+
+    if get_escaped:
+        replacement_text = f"```{replacement_text}```"
+
+    await interaction.response.send_message(replacement_text, ephemeral=mode == "silent")
+	\end{lstlisting}
+\end{frame}
+
+% TODO: tasks
+
+
+\begin{frame}[fragile]{Weitere Commands}
+    \tb{ContextMenu}\furl{https://discordpy.readthedocs.io/en/stable/interactions/api.html\#contextmenu}\footnote{Beispiel aus \texttt{\_\_init\_\_} eins Cogs entnommen.}:
+	\newline
+	Fügt die Option hinzu, eine Aktion über das \tb{Kontext}-Menü von Discord auszulösen.
+	\begin{lstlisting}[language=pytiny]
+self.ctx_replacement = app_commands.ContextMenu(
+    name='EAEEAE__r_PL_C_M_NTc_S_',
+    callback=self.replacement_case_context)  # signature: (discord.Interaction, discord.Message)
+self.bot.tree.add_command(self.ctx_replacement)	
+	\end{lstlisting}
+	
+	\begin{figure}
+		\includegraphics[height=.2\textheight]{command_context.png}
+	\end{figure}
+	
+	Hinweis: Der \pp{tree} ist der \tb{zentrale} Ort für die Verwaltung von App-Commands.
+	\newline
+	Dieses Objekt muss zum Start des Bots an alle Guilds \tb{gepushed} werden\footnote{Beispiel: \url{https://github.com/nonchris/discord-bot/blob/7ea672f499e7992a0e2d6076a419e43548f31f56/src/discord_bot/main.py\#L87}}.
+	\nll{das ist eine Funktionsreferenz!}
+
+\end{frame}
+
+
+\begin{frame}{Discord.py: Buttons \& Dropdown}
+	    Discord bietet Bots die Option \tb{Buttons}\furl{https://discordpy.readthedocs.io/en/latest/interactions/api.html\#id1}\furl{https://github.com/Rapptz/discord.py/blob/master/examples/views/dynamic\_counter.py} und \tb{Select}-Menus\furl{https://discordpy.readthedocs.io/en/latest/interactions/api.html?\#select-menus}\furl{https://github.com/Rapptz/discord.py/blob/master/examples/views/dropdown.py} zu nutzen.
+		\newline
+		Diese können einer Nachricht angehängt werden.
+		
+		\medskip
+		\pause
+		
+		Die Elemente verhalten sich \tb{analog} zu klassischen UI-Elementen:
+		\pause
+		\begin{itemize}
+			\item Jedes \tb{erbt} von \pp{discord.ui.View}.
+			\item Jedes Element \tb{implementiert} eine \pp{callback}-Funktion, welche bei Press oder Auswahl ausgelöst wird.
+		\end{itemize}
+		
+		\medskip
+		\pause
+		
+		Pro versandtem View existiert \tb{eine} Instanz des Buttons bzw. DropDowns. Dieses kann u.A. weiteren \tb{individuellen} Kontext halten und weitere Methoden definieren.
+		
+		\medskip
+		\pause
+		
+		Wird der Bot \tb{neu gestartet}, sind alle vorherigen UIs nicht mehr funktionsfähig.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Tasks}
+
+	    Alle bisherigen Funktionalitäten erfordern eine explizite Interaktion oder ein bestimmtes Event.
+	
+		\medskip
+		\pause
+		
+		Für \tb{regelmäßig} auszuführende Aufgaben bietet Discord.py \tb{Tasks}\footnote{Diese liegen in \texttt{discord.ext.tasks}: \furl{https://discordpy.readthedocs.io/en/stable/ext/tasks/index.html}}.
+		
+		\medskip
+		\pause
+		
+		Tasks werden \tb{gescheduled} und laufen dann in festen \tb{Zyklen} ab.
+		
+		\medskip
+		\pause
+		
+		Tasks laufen unabhängig eines \pp{Guild}- / \pp{Message}-Kontextes.
+		
+		\medskip
+		
+		Daher müssen Informationen wie \pp{Guild}, etc. erst aus dem \pp{Bot} geholt werden\furl{https://discordpy.readthedocs.io/en/stable/ext/commands/api.html\#discord.ext.commands.Bot.get_guild}.
+
+	\pause
+	
+	\begin{lstlisting}[language=pytiny]
+@tasks.loop(seconds=60)  # task runs every 60 seconds
+async def my_background_task(self):      # task is defined in the bot itself, so self is the bot
+    channel = self.get_channel(1234567)  # channel ID goes here
+    self.counter += 1
+    await channel.send(self.counter)
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Embeds}
+    Discord bietet Bots die Möglichkeit, \tb{Nachrichten} als \pp{Embed}\furl{https://discordpy.readthedocs.io/en/stable/api.html\#embed} \tb{formatiert} zu versenden.
+
+\medskip
+\pause
+
+Diese bieten eine Reihe Formatierungs- und Strukturierungsoptionen.
+
+\medskip
+\pause
+
+Embeds werden einer Nachricht z.B. bei \pp{.send()} \tb{angehängt}.
+\newline
+Sie dürfen mehr Text als normale Nachrichten enthalten.
+
+\medskip
+\pause
+
+Die \tb{Limits} für Embeds können hier\furl{https://discord.com/developers/docs/resources/channel\#embed-object-embed-limits} eingesehen werden.
+
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Beispiel Embed}
+
+	
+		\begin{figure}
+			\includegraphics[height=.7\textheight]{embed.png}
+			\caption{Help Command von fury: \url{https://github.com/nonchris/discord-fury/}}
+		\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Hinweise \& Best Practices}
+	\begin{itemize}
+		\item Hinzufügen/ Entfernen von z.B. Rollen: \pp{set}-Operationen!
+		
+		\pause
+		
+		\item Nutze vernünftiges \tb{Logging}, da das Programm viel im Hintergrund laufen wird!
+		
+		\pause
+		
+		\item Das \tb{Context}-Objekt heißt immer \pp{ctx}.
+		
+		\pause
+		
+		\item Die \pp{.ext}-Module werden als \pp{from discord.ext import commands} bzw. \pp{tasks} eingebunden.
+		
+		\pause
+		
+		\item Discord.py bietet einiges an \tb{utility}-Functions, welche das Leben wirklich einfacher machen\furl{https://discordpy.readthedocs.io/en/stable/api.html\#utility-functions}.
+		\item Hat man einen Discord Bot, welcher Interactions anbietet und quasi regelmäßig genutzt wird, erhält man das coole (neue) \tb{Developer-Badge}.
+		
+		\pause
+		
+		\item \tb{TOKENS} \pause werden \pause \tb{NIEMALS} \pause in \pause den \pause \tb{CODE \pause EIN\pause GE\pause FÜGT\pause!!!} 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Sources und Samples}
+	\begin{itemize}
+		\item \tb{API-Reference}: \url{https://discordpy.readthedocs.io/en/stable/api.html}
+		
+		\item Discord.py \tb{Examples}:\\
+		\url{https://github.com/Rapptz/discord.py/tree/master/examples}
+		
+		\item Ein ziemlich gutes \tb{Template}:\\
+		\url{https://github.com/nonchris/discord-bot}
+		
+		\item \tb{Welcome} Dialogue (Info Bonn):\\
+		\url{https://github.com/Info-Bonn/welcome-dialogue/} 
+		
+		\item Role \tb{Selection}:\\
+		\url{https://github.com/nonchris/discord-role-selection}
+		
+		\item The \tb{future} of code:\\
+		\url{https://github.com/nonchris/IOEAEEAE__d_SC_RD-r_PL_C_M_NT-c_S_}
+		
+	\end{itemize}
+\end{frame}
+
+
+\framecardfragen
+
+\section{Rich}
+\subsection{Einfache Terminal Interfaces}
+
+\begin{frame}{Rich}
+	\begin{quotation}
+		Rich is a Python library for Rich text and beautiful formatting in the terminal.\furl{https://github.com/Textualize/rich}
+	\end{quotation}
+
+
+\nsl{Wollte über google-barkeit ranten, aber ist inzwischen voll gut geworden}
+\end{frame}
+
+
+\begin{frame}{Rich}
+	Rich bietet Optionen, um die Ausgabe im \tb{Terminal} einfach um \tb{Farben} und Styling zu erweitern.\pause\newline
+	Dies geht von simplem bunten Text bis hin zu ganzen \tb{Dashboards}.\pause\newline
+	
+	\medskip
+	
+	Rich ist Teil von Textual\furl{https://github.com/Textualize/textual}, einem Framework zur Entwicklung von Apps für Terminal und Webbrowser.\pause
+	
+	\medspace
+	
+	Anders als Textual bietet Rich keinen nativen Support für User-Input. Eingaben über stdin können natürlich trotzdem verarbeitet werden. 
+\end{frame}
+
+
+\begin{frame}{Rich - Beispiel Dashboard}
+	\only<1|handout:1>{
+		\begin{textblock}{12.3}(0.755, 1.65)
+			\includegraphics[width=\columnwidth]{images/wachmann_ui.png}
+			\tiny Dashboard des Routers aus Projekt Wachmann (Abt. IV)
+		\end{textblock}
+	}
+	
+	\pause
+	
+	\only<2|handout:2>{
+		\begin{textblock}{12.3}(0.755, 1.65)
+			\includegraphics[width=\columnwidth]{images/wachmann_startup.png}
+			\tiny Startup des Routers aus Projekt Wachmann (Abt. IV)
+		\end{textblock}
+	}
+\end{frame}
+
+
+
+\begin{frame}{Rich - Renderable}
+	Rich ist um \tb{renderbare} Objekte herum strukturiert. Die drei Haupt-Kategorien:\pause 
+	\begin{itemize}
+		\item Strings
+		\pause
+		\item Instanzen Richs vordefinierter Klassen wie \pp{Panel}, \pp{Table}, \pp{Text}, \pp{Layout}, ...
+		\pause
+		\item Beliebige Objekte, die über eine Methode \pp{__rich__(self) -> str}\furl{https://rich.readthedocs.io/en/stable/protocol.html\#console-customization} verfügen
+	\end{itemize}
+	\nsl{Es gibt auch noch rich\_console}
+	
+	\pause
+	\medskip
+	
+	Objekte, die renderbar sind, können mit der \pp{print}-Funktion von Rich ausgegeben werden, diese ist als drop-in Replacement für das built-in \pp{print} gedacht.
+	
+	\pause
+	\medskip
+	
+	Renderbare-Objekte dürfen wieder renderbare Objekte enthalten.
+	\nsl{zB eine Tabelle in einem Panel, oder einfach nur Panel in Layout}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Styling von Text}
+
+Durch Rich angezeigter Text kann \tb{gestyled}%
+\furl{https://rich.readthedocs.io/en/stable/style.html}
+\footnote{Nicht alle Styles werden von jedem Terminal unterstützt. Die Einstellung des Terminal-Emulators kann Einfluss auf die Interpretation von Farben haben.} 
+werden. Dazu bietet Rich das Setzen von \tb{Tags} und die \tb{Style}-Klasse. 
+\pause
+	
+  \begin{lstlisting}[language=pytiny]
+from rich.style import Style;from rich.text import Text
+print("[#ffc000]Seeing [bold italic red]Red[/bold italic red]!")
+style = Style(color="magenta2", bgcolor="bright_cyan", underline=True)
+print(Text("Eternal Blue", style=style))
+print(f"[{style}]Eternal Blue")  # equivalent to the line above
+  \end{lstlisting}
+\begin{textblock}{4.25}(10.945, 3.46)
+	\includegraphics[width=\columnwidth]{images/rich_color_merged.png}
+
+\end{textblock}
+  % \includegraphics[height=.15\textheight]{images/rich_color_merged.png}\newline
+\pause
+Es ist sehr ratsam Styles an einer \tb{zentralen Stelle} zu sammeln und ggf. kleinschrittig aufzubauen. Dies ermöglich einen  \tb{einheitlichen} und schnell anpassbaren Style für die Anwendung.
+
+%- in eckige klammer
+%- farben in zentralen variablen sammeln
+%- https://rich.readthedocs.io/en/stable/appendix/colors.html
+%- code
+\end{frame}
+
+\subsection{Dashboards}
+
+
+\begin{frame}[fragile]{rich - Layout I}
+Um die Anzeige in mehrere Teile aufzuteilen, exisitiert die \tb{Layout}-Klasse\furl{https://rich.readthedocs.io/en/stable/layout.html}.
+\pause
+
+\begin{itemize}
+	\item Ein Layout-Objekt kann vom Rest unabhängigen Inhalt enthalten.
+	\pause
+	\item Ein Layout-Objekt kann horizontal und vertikal \tb{geteilt} werden.
+	\pause
+	\item Das geteilte Layout verhät sich ähnlich zu einem \tb{Dictionary}.
+\end{itemize}
+\nsl{Verschachteln von Layouts das selbe wie verschachteln von Panels oder Tabellen. Layout ist auch "nur" ein renderable.}
+\pause
+
+  \begin{lstlisting}[language=pytiny]
+from rich.layout import Layout
+layout = Layout()¿\pause¿
+layout.split_column(
+    Layout(name="upper", size=3),
+    Layout(name="lower")
+)¿\pause¿
+layout["lower"].split_row(
+    Layout(name="left", ratio=25),
+    Layout(name="right", ratio=75),
+)
+	\end{lstlisting}
+
+
+
+  \end{frame}
+  
+  
+  \begin{frame}[noframenumbering]{Rich - Layout I}
+  	
+	\begin{textblock}{6.8}(0.755, 1.65)
+  		\includegraphics[width=\columnwidth]{images/rich_layout.png}
+  		\tiny Beispiel-Ausgabe des Layouts ohne Inhalt mit der print-Funktion
+  		\footnote{Damit die Anzeige in Pycharm korrekt gerendert werden kann, muss die \glqq Emulate terminal in output console\grqq~ Option in der Run-Configuration aktiviert sein: \url{https://github.com/Textualize/rich/issues/206\#issuecomment-1858786667}} von Rich
+  	\end{textblock}
+
+  	
+  \end{frame}
+
+
+  \begin{frame}[fragile]{Rich - Layout II}
+  	Ein \tb{Layout}-Objekt kann ein \tb{renderbares} Objekt enthalten. Dieses kann mit \pp{.update()} gesetzt werden.
+  	\nsl{Das macht natürlich nur bei den "Blättern" des Layout trees Sinn}
+  	
+  	\begin{lstlisting}[language=pytiny]
+# Add simple content to upper and left pannel
+layout["upper"].update(Panel("[bold red]Title: My Project[/bold red]", border_style="red"))
+layout["left"].update(Panel("[green]Whats next[/green]", border_style="green"))
+
+# Create a table for the right layout
+table = Table(title="Some Data", expand=True)  # expand: use all space in panel
+table.add_column("Header 1", justify="left", style="cyan")
+table.add_column("Header 2", justify="left", style="magenta")
+
+# Add rows to the table
+table.add_row("Row 1 Col 1", "Row 1 Col 2")
+table.add_row("Row 2 Col 1", "Row 2 Col 2")
+
+# Add the table to panel (nested renderables) and to layout
+table_panel = Panel(table, border_style="blue", title="Data")
+layout["right"].update(table_panel)
+
+  	\end{lstlisting}
+\end{frame}
+
+
+  \begin{frame}[noframenumbering]{Rich - Layout II}
+	
+	\begin{textblock}{6.8}(0.755, 1.65)
+		\includegraphics[width=\columnwidth]{images/rich_layout.png}
+		\tiny Beispiel-Ausgabe des Layouts ohne Inhalt mit der print-Funktion
+		\footnote{Damit die Anzeige in Pycharm korrekt gerendert werden kann, muss die \glqq Emulate terminal in output console\grqq~ Option in der Run-Configuration aktiviert sein: \url{https://github.com/Textualize/rich/issues/206\#issuecomment-1858786667}} von Rich
+	\end{textblock}
+	
+	\begin{textblock}{6.8}(8., 1.65)
+		\includegraphics[width=\columnwidth]{images/rich_filled.png}
+		\tiny Beispiel-Ausgabe des Layouts mit Inhalt mit der print-Funktion von Rich
+	\end{textblock}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Live Displays}
+	Um eine sich \tb{aktualisierende} Anzeige zu haben, bietet Rich den \tb{Live}-Kontextmanager\furl{https://rich.readthedocs.io/en/stable/live.html}.
+	
+	\begin{lstlisting}[language=pytiny]
+import itertools
+from rich.live import Live
+from rich.layout import Layout
+
+# screen True: display goes to full screen and restore cli afterwards
+with Live(layout := Layout(name="root")¿\furl{https://docs.python.org/3/whatsnew/3.8.html\#assignment-expression}¿, refresh_per_second=1, screen=True):
+    for i in itertools.count(1):
+       layout.update(f"{i} iters")
+	\end{lstlisting}
+	\nll{Walruss Operator}
+	
+	\pause
+	Jeder Part des Layouts kann \tb{manuell} via \pp{.update()}-Funktion aktualisiert werden.\newline
+	\pause
+	Objekte mit \pp{__rich__} Methode werden \tb{automatisch} bei jedem Refresh aktualisiert.
+	
+	\medskip
+	
+	\pause
+	Die \tb{Iteration} ist komplett \tb{unabhängig} von der Aktualisierung des Displays!\footnote{Um Ressourcen zu sparen ist daher dringend angeraten, ein sleep-Statement in die Schleife einzubauen.}
+%	- ggf. sleep einbauen
+\end{frame}
+
+\begin{frame}[fragile]{Rich - Progress Bars I}
+Eine der fortgeschrittenen Funktionen sind Ladebalken. Dazu bietet Rich verschiedene Erstellmöglichkeiten. \pause
+Wir betrachten die \tb{Progress}-Klasse\furl{https://rich.readthedocs.io/en/stable/progress.html\#advanced-usage}.
+\pause
+	\begin{textblock}{14.53}(0.755, 5.0)
+	\includegraphics[width=\columnwidth]{images/rich_progress.png}
+	\tiny Beispiel Ladebalken mit SpinnerColumn, TextColumns für Beschreibung und Prozentanzeigen, sowie TimeRemainingColumn für erwartete Endzeit.
+	\end{textblock}
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars II}
+	Das \tb{Progress}-Objekt ist eine \tb{Aggregation} aus mehreren Objekten\furl{https://rich.readthedocs.io/en/stable/progress.html\#columns}. 
+	Es definiert das Aussehen der Ladebalken. Eine Auswahl:
+	\pause
+	\begin{itemize}
+		\item \pp{BarColumn} die eigentliche Statusleiste
+		\pause
+		% TODO: besseres wort für rad
+		\item \pp{SpinnerColumn} eine Art Rad, welches sich dauerhaft bewegt.
+		\pause
+		\item \pp{TimeRemainingColumn} automatische Schätzung der verbleibenden Zeit.
+		\pause
+	\end{itemize}
+	
+	\nll{Außerhalb des zusammengesetzten Objekts existieren können. \\
+		Lebensdauer der Komponentenobjekte ist unabhängig.\\}
+	
+	\nsl{Eine "hat-eine"-Beziehung, bei der das zusammengesetzte Objekt auf bestehende Objekte verweist\\
+		Ein Progress-Objekt enthält Verweise auf verschiedene Spaltenobjekte (TextColumn, SpinnerColumn, etc.), aber diese Spaltenobjekte können auch außerhalb des Progress-Objekts existieren und wiederverwendet werden.}
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars III}
+
+	Auf ein Progress-Objekt können \tb{Tasks}%
+	\footnote{https://rich.readthedocs.io/en/stable/reference/progress.html\#rich.progress.Task}
+	mit \pp{.add_task()} \tb{registriert} werden.
+	
+	\medskip
+	
+	Als return gibt es eine \tb{TaskID}, diese wird zum \tb{Aktualisieren} des Fortschritts über das Progress-Objekt verwendet.
+	\pause
+	
+	\medskip
+	
+	Die \tb{update}-Funktion bietet \pp{completed} für absolute Schritte und \pp{advance} für inkrementelle Schritte.\furl{https://rich.readthedocs.io/en/stable/reference/progress.html\#rich.progress.Progress.update}
+	\pause
+	
+	\medskip
+	
+	Im Progress definierte \tb{Strings} haben lesenden \tb{Zugriff} auf Attribute der erstellten Tasks.
+\pause
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars IV}
+	\begin{lstlisting}[language=pytiny]
+# imports missing
+# note: using some of rich's built-in color styles like 'bar.complete', don't get confused by that
+progress = Progress(
+    TextColumn("[task.description]{task.description}"),
+    SpinnerColumn(style="bar.complete"),
+    BarColumn(),
+    TextColumn("[bright_green]{task.completed:>.1f}/{task.total} ({task.percentage:>3.0f}\%)", style="bright_green"),
+    TimeRemainingColumn(),
+)
+# register task
+task1 = progress.add_task("[bar.complete]Downloading", total=100)
+
+layout = Layout(progress)
+with Live(layout, refresh_per_second=10, screen=True):
+    while not progress.finished:
+        progress.update(task1, advance=random.random())
+        time.sleep(0.6)
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Rich - Letzte Hinweise}
+		Es kann passieren, dass \tb{Fehler im Hintergrund} auftreten (z.B. Sterben von Threads) und der Traceback wegen des Live-Displays \tb{nicht zu sehen} ist\furl{https://rich.readthedocs.io/en/stable/live.html\#redirecting-stdout-stderr}.
+	\newline 
+	Daher ist es wichtig, gutes \tb{Logging} und ggf. Health-Anzeigen in der Live-Ansicht zu haben.
+	
+	\medskip
+	
+	Themen, auf die nicht weiter eingegangen wurde:
+	\begin{itemize}
+		\item Markdown Formatting
+		\item Code Highlighting \& Traceback Formatting
+		\item Linewrapping
+		\item Verschiedene Designs u.A. von Panels und Tabellen\furl{https://rich.readthedocs.io/en/stable/appendix/box.html}
+	\end{itemize}
+\nll{Deadlocks aufpassen!}
+\end{frame}
+
+
+\framecardfragen
+
+\silentsection{Honorable Mentions}
+\subsection{Stoff für mindestens eine weitere Woche}
+
+
+\begin{frame}[fragile]{Honorable Mentions I}
+	\begin{itemize}
+		\item Abstract Baseclasses\furl{https://docs.python.org/3/library/collections.abc.html\#collections-abstract-base-classes}: Eigene typehint-bare \tb{Typen} erstellen.
+		
+		\item Beautiful Soup\furl{https://www.crummy.com/software/BeautifulSoup/bs4/doc/}: \tb{HTML} und XML parsen.
+		
+		\item Collections\furl{https://docs.python.org/3/library/collections.html} und insb. das \tb{defaultdict}.
+		
+		\item deepcopy\furl{https://docs.python.org/3/library/copy.html\#copy.deepcopy}: \tb{Vollständige} Kopien eines Objektes erzeugen.
+		
+		\item inspect\furl{https://docs.python.org/3/library/inspect.html\#module-inspect}: \tb{Funktionssiganturen} und anderen Dinge zur Laufzeit analysieren.
+		
+		\item langgraph\furl{https://langchain-ai.github.io/langgraph/}: \tb{Autonome LMM-Agenten} mit Tools und Kontrollfluss in Python.
+
+		\item os\furl{https://docs.python.org/3/library/os.html\#module-os}: Interaktion mit dem Datei- und \tb{Betriebssystem}.
+		
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Honorable Mentions II - Libraries mit P}
+	\begin{itemize}
+
+		
+		\item Pillow\furl{https://pypi.org/project/Pillow/} \tb{Bilder} einlesen und verarbeiten.
+		
+		\item pynput\furl{https://pypi.org/project/pynput/}: \tb{Tastatur} und Maus simulieren.
+		
+		\item PyPDF2\furl{https://pypi.org/project/PyPDF2/}: \tb{PDFs} einlesen und bearbeiten.
+		
+		\item python-telegram-bot\furl{https://pypi.org/project/python-telegram-bot/}: \tb{Telegram} Bots
+		
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Honorable Mentions III}
+	\begin{itemize}
+		
+		
+		\item qrcode\furl{https://pypi.org/project/qrcode/}: \tb{QR-Codes} erstellen.
+		
+		\item re\furl{https://docs.python.org/3/library/re.html}: \tb{RegEx} in Python.
+		
+		\item Selenium\furl{https://pypi.org/project/selenium/}: Einen \tb{Browser} mit Python steuern.
+		
+		\item subprocess\furl{https://docs.python.org/3/library/subprocess.html}: \tb{Command Line}-Befehle aus Python heraus ausführen.
+		
+		\item tempfile\furl{https://docs.python.org/3/library/tempfile.html}: \tb{Temporäre} (benannte) Dateien erstellen.
+	\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{Evaluation}
+	\begin{figure}
+		\begin{center}
+			\includegraphics[height=.66\textheight]{survey.png}
+			\caption{\url{https://limesurvey.informatik.uni-bonn.de/index.php/651666?lang=de-informal}}
+		\end{center}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}{Danksagung}
+	Dieser Kurs wäre nicht möglich gewesen, ohne:
+	\begin{itemize}
+		\item Meine Eltern
+		\item Felix Boes
+		\item Adrian Oeyen
+		\item Das großartige Tutor:innen Team
+		\item Das HISKP
+	\end{itemize}
+\end{frame}
+
+
+\framecardblue{
+	\Utext{
+		Vielen Dank, dass Du da warst!\\ -Chris}
+}
+
+
+\end{document}
+

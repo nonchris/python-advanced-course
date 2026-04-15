@@ -1,0 +1,1244 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\usepackage{ubo_tex_beamer/uni-template}
+\apptocmd{\frame}{}{\justifying}{} % Allow optional arguments after frame.
+\input{config/global_config}
+\input{config/custom-command}
+\SubTitle{Packaging, Typehinting II, Datenmodellierung,\\Requests, FastAPI}
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+\begin{document}
+
+\titlepage
+
+\section{Organisatorisches}
+\begin{frame}{Zur Erinnerung}
+	\begin{itemize}
+		\item Übungen finden von 13ct bis 15 Uhr statt.
+		\item[] Wir nutzen die Computer-Räume U1.042 \& U1.108.
+		\nsl{Wer plant alles zu kommen?\\An die kommenden: CT oder ST?}
+		\pause
+		\item Neue Teilnehmer:innen kommen bitte in den Raum U1.128
+		\pause
+		\item Die Folien sowie alle weiteren Materialien werden über Sciebo verteilt\furl{https://uni-bonn.sciebo.de/s/eADQTyhzRLkFSi6}.
+		\pause
+		\item[] Der Link befindet sich auch auf dem Info Bonn Discord\furl{https://discord.gg/mBm6bEchAe} in \pp{\#vertiefungskurs}.
+		
+		\item[] \begin{center}
+			\includegraphics[height=.25\textheight]{images/info-bonn.png}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+
+\framecardblue{
+  \Utext{Herzlich Willkommen}
+}
+
+\section{Module und Pakete in Python}
+
+
+%\begin{frame}[fragile]{Bedingungen in python}
+%	Bedingung und der dazugehöriger Block werden durch Einrückung gekennzeichnet.
+%	\begin{lstlisting}[language=python]
+%		zahl_1 = 42.0
+%		zahl_2 = 69
+%		wort_1 = "42069"
+%		
+%		if type(zahl_1) is int:
+%		print("Das ist eine Zahl!")
+%		
+%		if (not zahl_1 == zahl_2) and zahl_1 <= zahl_2:
+%		print("Das war aber ein sehr komplizerites 'zahl_1 < zahl_2'")
+%		
+%		if "69" in wort_1:
+%		print("Nice!")
+%	\end{lstlisting}
+%\end{frame}
+
+
+\subsection{Imports von Modulen}
+
+\begin{frame}[fragile]{Pakete und Module einbinden}
+	\begin{itemize}
+	\item Das gesamte Python-\tb{Ökosystem} baut auf dem Importieren (fremder) Pakete auf.
+	\pause
+	\item In Python gibt es \tb{zwei Möglichkeiten}, Pakete einzubinden.
+	\pause
+	\item[]	\begin{lstlisting}[language=pytiny]
+import random
+from random import randint
+    \end{lstlisting}
+
+	\item Erstere Struktur importiert das \tb{gesamte Modul} und stellt \tb{seinen Namespace} objekt-ähnlich zur Verfügung.
+	\footnote{Verändert der eigene Code den Wert einer globalen Variable des Moduls, so ändert er sich überall, wo das Modul mit der \texttt{import}-Struktur importiert ist.}
+	
+    \item Die \pp{from}-Struktur bindet eine \tb{Referenz} des importierten Objekts an den \tb{gegebenen Namen} innerhalb des importierenden Namespaces.
+	
+	\item Das Einbinden von fremder Funktionalität via \lpl{from module import *} \pause
+	widerspricht dem Konzept der Namespaceunterteilung und soll nicht verwendet werden.
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}{Ein Modul}
+	\begin{itemize}
+		\item Jede Python-Datei ist ein eigenständiges \pp{Modul} mit eigenem \tb{Namespace}.
+		\pause
+		\item \tb{Mehrere} Dateien in einem Ordner können zu einem gemeinsamen \pp{Package}\footnote{\texttt{Packages} werden oft auch in Pythons eigenen Docs als \texttt{Module} bezeichnet. Package ist im Grunde eine spezifischere Bezeichnung für ein Modul, welche etwas über die Struktur verrät. Zudem gilt immer: Ein Package besteht aus ein- bis n-Modulen.} zusammengefasst werden, welches dann als \tb{eins} importiert werden kann.
+		\pause
+		\item[] Hierzu muss in dem Verzeichnis eine Datei \pp{__init__.py}
+		\footnote{Einer der ganz wenigen Orte, wo \texttt{from x import *} Import sinnvoll sein kann, um alle Elemente anderer Package-Dateien aus init heraus zur Verfügung zu stellen.} liegen.
+		\pause
+		
+		\item Jedes Modul hat einen \tb{Namen}. Dieser besteht aus \pp{packagename.modulname}.
+		\pause
+		\item Einzige \tb{Ausnahme} ist die initial ausgeführte Datei. Diese heißt immer \pp{__main__}\footnote{Das Main-Modul eines durch \texttt{multiprocessing} erzeugten Prozesses heißt \texttt{\_\_mp\_main\_\_}}.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Ausführung und Import eines Moduls}
+	\begin{itemize}
+        \item Der \tb{Import} eines Moduls sorgt für dessen \tb{komplette Ausführung}.
+        \pause
+        \item Hierbei sollten lediglich \tb{Funktionen und Konstanten} definiert werden.
+        \pause
+		\item Wird ein Modul hingegen explizit als \tb{Programm aufgerufen}, so soll dieses nicht nur Funktionalitäten definieren, sondern auch eine \tb{Funktionalität ausführen}.
+		\pause
+		\item Aus diesem Grund soll ein Modul in der Lage sein zu \tb{unterscheiden}, ob es der initial ausgeführte Entrypoint, oder ein Import ist.
+		\pause
+		\item Dies geht über die \tb{Überprüfung} der in \pp{__name__} verfügbaren Information.
+		\pause
+	\end{itemize}
+    \begin{lstlisting}[language=pytiny]
+# some imports and functions
+
+if __name__ == '__main__':
+    some_functionality()
+            \end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}{Ein nützlicher Trick beim direkten Ausführen von Modulen I}
+    
+	\begin{itemize}
+		\item Es gibt Situationen, in denen ein \tb{Package direkt ausgeführt} wird, statt von anderem Code importiert zu werden. Beispiel: Command-Line Programme, wie \textsl{youtube-dl}\furl{https://github.com/ytdl-org/youtube-dl}.
+		\pause
+		\item Wird ein Package von einem \tb{anderen Skript} importiert, wird es zuerst \tb{vollständig initialisiert} und ist dann normal verfügar.
+		\pause
+		\item[] Ist ein Package initialisiert, so können Module dieses Packages \tb{innerhalb} des Packages durch \pp{eigener_package_name.modul} adressiert werden.
+		\pause
+		\item Wird ein Package \tb{direkt ausgefürt}, ist dieses \tb{nicht initialisiert} und importierte Module im selben Packages werden \tb{nicht} mehr durch die \pp{package.modul}-Adressierung gefunden.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Ein nützlicher Trick beim direkten Ausführen von Modulen II}
+
+Eine simple, aber effektive \tb{Lösung} ist die Verwendung dieses Codeblocks, \tb{bevor} die eigenen Imports in der initial-ausgeführten Datei des Packages angegeben werden.
+\pause
+
+
+\begin{lstlisting}[language=pytiny]
+# make sure we can import other modules from our package when it is run directly
+# package is None when the module is executed directly (and not imported)
+# a module is frozen when it's packaged in an executable that doesn't rely on external dependencies
+if __package__ is None and not hasattr(sys, "frozen"):
+    import os.path
+
+    # get path of the current file
+    path = os.path.realpath(os.path.abspath(__file__))
+    # add current directory to list of directories interpreter searches when a module is required
+    sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
+
+# import things from your package here!
+from packaging_sample_project import some_functions
+\end{lstlisting}
+	
+\end{frame}
+
+
+\subsection{Packaging von Modulen}
+\begin{frame}{Was ist packaging}
+	\begin{itemize}
+		\item \tb{Standardisierte} Struktur des Projektes.
+		\pause
+		\item Hält sich an \tb{Konventionen}, durch welche - in diesem Falle Python - standardmäßig mit dem Projekt umgehen kann.
+		\pause
+		\item Problemlose \tb{Einbindung} fremden Codes und Bereitstellung des eigenen Codes.
+		\pause
+		\item Oft werden solche Pakete durch Package Manager verteilt.
+		\item[] Python verfügt über einen eigenen \tb{Package Manager} \pp{pip}.
+	\end{itemize}
+	
+\end{frame}
+
+\subsection{Packaging in Python}
+
+\begin{frame}{Quellen}
+	\begin{itemize}
+		\item Tutorial, welches auch die letztendliche \tb{Distribution} des Packages mit abdeckt:
+		\item[] \url{https://packaging.python.org/en/latest/tutorials/packaging-projects/}
+		\item \tb{Sample Project}, welches die Projektstruktur realisiert:
+		\item[] \url{https://github.com/pypa/sampleproject}
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Wie sieht das in python aus?}
+% TODO example code
+\begin{verbatim}
+my_project/
+├── LICENSE             # Lizenz unter der das Projekt läuft
+├── pyproject.toml      # Setup und Metadaten zum Projekt
+├── README.md           # Klassische readme des Projekts
+├── src/                # Ordner, der den Code enthält
+│   └── package_name/   # Package, welches den Code enthält
+│       ├── __init__.py # Entrypoint für das package
+│       └── example.py  # Erste weitere Datei, welche Code enthält
+└── tests/						# Wenn tests existieren sollten die hier liegen 
+\end{verbatim}
+	\begin{itemize}
+		\item In \lpl{src/}\footnote{Dies ist der Ordner, welcher Pycharm als \texttt{Sources Root} gegeben werden sollte.} können mehrere Packages liegen, welche dann zur Verfügung gestellt werden können.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Die pyproject.toml spezifiziert...}
+	\begin{itemize}
+		\item \tb{Metadaten} über das Projekt:
+		\begin{itemize}
+			\item Name, Author, Description, ...
+		\end{itemize}
+		\item die \tb{kompatiblen} Python Versionen
+		\item die von dem Package benötigten \tb{Dependencies} und deren Versionsnummern\footnote{Aus dem Python Package Index: \url{https://pypi.org}}
+		\item weitere zum Build relevante Dinge, welche auf dem Standardwert des pypa Beispiel-Projekts\furl{https://github.com/pypa/sampleproject/blob/main/pyproject.toml} gelassen werden können
+	\end{itemize}
+	
+	
+\end{frame}
+
+\begin{frame}[fragile]{Dependencies spezifizieren}
+	\begin{itemize}
+		\item In der \lpl{.toml} gibt es ein Feld namens \lpl{dependencies}, dort können Dependencies angegeben werden.
+		\item Dependencies sollten für \tb{Reproduzierbarkeit} immer mit einer Versionsnummer\footnote{wie Packages ihre Versionsnummern angeben kann variieren} angegeben werden.
+		\begin{itemize}
+			\item Versionsnummern können mit \lpl{==}, \lpl{>=},  \lpl{\~=} spezifiziert werden.
+			\item Hierbei bedeutet \lpl{\~=} \glqq kompatibel mit\grqq
+			\item Selbige Art von \tb{Versionpinning} kann auch in der \lpl{requirements.txt} vorgenommen werden.
+		\end{itemize}
+	\end{itemize}
+	
+	
+	\begin{lstlisting}[language=pytiny]
+dependencies = [
+    fastapi ~= 0.92.0,  # größer gleich 0.92.0, aber kleiner 0.93.x
+    openai-whisper >= 20230124,
+]
+	\end{lstlisting}
+%
+\end{frame}
+
+\begin{frame}[fragile]{Entrypoint setzen}
+	\begin{itemize}
+		\item Wenn das Package \tb{direkt} ausführbaren Code enthält, muss hierfür ein \tb{Entrypoint} in der \lpl{.toml} spezifiziert werden.
+		\item Dies passiert, indem eine \tb{Funktion} innerhalb des Packages angegeben wird, welche durch einen \tb{Command} aufgerufen werden soll.
+	\end{itemize}
+	
+	
+	\begin{lstlisting}[language=pytiny]
+[project.scripts]
+run_package = "package_name:main"
+	\end{lstlisting}
+	
+	
+\begin{itemize}
+	\item Nach dem \tb{Install} via \lpl{pip} kann durch die Eingabe des Commands \lpl{run_package} die main-Funktion des Packages \lpl{package_name} \tb{ausgeführt} werden.
+\end{itemize}
+	
+\end{frame}
+
+\begin{frame}{Eigenes Package installieren und ausführbar machen}
+	\begin{itemize}
+		\item Ein eigenes Paket kann in eine Python Umgebung \tb{installiert} werden durch:
+		\item[] \lpl{python3 -m pip install -e .}
+		\begin{itemize}
+			\pause
+			\item Unter der Annahme, dass man sich im \tb{Wurzelverzeichnis} des Projektes befindet (dort wo die \lpl{.toml} liegt).
+			\pause
+			\item \lpl{-e} sorgt dafür, dass das Paket als \tb{editierbar} installiert wird.
+			\item[] Dadurch kann der Code einfach weiter entwickelt werden, ohne das Paket dauerhaft neu installieren zu müssen.
+			\pause
+			\item[] Diese Flag sollte \tb{nicht} im Deployment verwendet werden!
+			
+		\end{itemize}
+		\pause
+		\item Wie bei allen \tb{Installationen} von Python-Paketen sollte auch hier darauf geachtet werden, in einem \tb{venv}\furl{https://docs.python.org/3/library/venv} zu arbeiten!
+	\end{itemize}
+	
+\end{frame}
+
+\subsection{Weitere wichtige Hinweise zum packaging}
+
+\begin{frame}{requirements.txt}
+	\begin{itemize}
+		\item Die vermutlich am weitesten verbreitete Form zur \tb{Spezifikation} von Dependencies.
+		\item Unterschied zur Dependency-Angabe in der \lpl{.toml}:
+		\begin{itemize}
+			\item Die in der \lpl{.toml} spezifizierten Dependencies sollen das \tb{Minimum} sein, um das Package nutzen zu können.
+			\item Die \lpl{requirements.txt} File wird in der Regel dazu genutzt, eine ganze\\ Python-\tb{Umgebung} anzugeben\footnote{z.B. inklusive des jupyter-notebook packages}.
+		\end{itemize}
+		
+		\item[]
+		\item Hinweis: \tb{Alle} Packages einer \lpl{requirements.txt} installieren geht durch:
+		\item[] \lpl{python3 -m pip install -r requirements.txt}\footnote{\texttt{python -m} zum Ausführen von \texttt{pip} sorgt dafür, dass das immer mitgelieferte Modul \texttt{pip} ausgeführt wird, statt dass \texttt{pip} als executable vorliegen muss.}
+
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}{setup.py}
+	\begin{itemize}
+		\item Ist eine \tb{dynamische} Art und Weise, die Daten aus der \lpl{.toml} anzugeben, die in vielen Projekten zu finden ist.
+		\item Seit PEP 621\furl{https://peps.python.org/pep-0621/} \tb{veraltet}.
+		\item[] Motivation: Vereinfachung und \tb{Vereinheitlichung} der Spezifikation von\\ Projekt-Metadaten.
+		\item Beide Wege, ein Projekt zu spezifizieren fühlen sich sehr \tb{ähnlich} an. Ist ein Weg klar, so ist der andere auch verständlich!
+	\end{itemize}	
+\end{frame}
+
+
+\framecardfragen
+
+
+\section{Typehinting II}
+\subsection{Abstrakt}
+\begin{frame}{Warum Typehinting}
+	\begin{itemize}
+		% TODO Spiderman meme von variable auf str auf int
+		\item Python ist \tb{dynamisch} typisiert. Eine Variable kann alles sein.
+		\item Für mehr \tb{Nachvollziehbarkeit} des Codes wurde Typehinting eingeführt.\footnote{PEP484: \url{https://peps.python.org/pep-0484/}, eingeführt mit python3.5}
+		\item Typehints geben den \tb{erwarteten} Typ bzw. die \tb{möglichen Typen} einer Variable an.
+		\item[] Dieses hilft
+		\begin{itemize}
+			\item beim \tb{Dokumentieren} des eigenen Codes für sich selbst und für andere.
+			\item der \tb{IDE} dabei, den Code zu verstehen und sinnvollere \tb{Vorschläge} zu machen.
+			\item Libraries dabei, \tb{automatische} Checks und Conversions vorzunehmen.
+			\item statischen \tb{Typecheckern}, wie \pp{mypy}\furl{https://mypy-lang.org/}, dabei, unseren Code zu testen.
+		\end{itemize}
+	\end{itemize}	
+\end{frame}
+
+
+\begin{frame}{Was machen Typehints intern?}
+	\begin{itemize}
+
+		
+		% TODO: soll dieser Punkt rein und ist der korrekt so? - nicht hier. und gilt nur partiell fir zb Iterable
+		% \item An sich kommunizieren TypeHints nur, welche Special Methods und andere Funktionaitäten ein Objekt zur Verfügung stellt.
+		
+		\item Typehints werden zur \tb{Laufzeit nicht überprüft}, sind noch verfügbar und sind z.B. mit dem \pp{inspect}\furl{https://docs.python.org/3/library/inspect.html\#introspecting-callables-with-the-signature-object}-Module oder \pp{obj.__annotations__} \tb{auslesbar}.
+		\pause
+		
+		\item Einige \tb{Libraries} machen aktiv davon Gebrauch, um Signaturen zu erkennen oder Datenschemata zu erstellen und zu \tb{validieren}.
+		\pause
+		
+		\item Mit Hilfe von Typehints lässt sich nativ Funktionsüberladung á la Java realisieren\furl{https://youtu.be/yWzMiaqnpkI?t=483}.
+		Jedoch mit signifikanten Performaceverlusten.
+	\end{itemize}
+	
+\end{frame}
+
+
+\subsection{Konkret}
+\begin{frame}[fragile]{Erinnerung: Typehinting - Die Grundlagen}
+	\begin{itemize}
+		\item Grundlegend wird der vorgesehene Typ einer \tb{Variablen} wie folgt angegeben:
+		\item[]\begin{lstlisting}[language=pytiny]
+variablenname: typ = wert
+		\end{lstlisting}%\pause
+		
+	\item \tb{Funktionsparameter} dürfen ebenfalls mit Typehinting versehen werden. %\pause
+	\item[] Ebenso der vorgesehene \tb{Rückgabetyp}:
+	\item[]\begin{lstlisting}[language=pytiny]
+def f(param: type, param_2: type) -> Rückgabetyp:
+    ...
+	\end{lstlisting} %\pause
+	
+	\item Primäre Quelle für dieses Kapitel: \url{https://docs.python.org/3/library/typing}
+	\end{itemize}
+	
+
+	
+\end{frame}
+
+
+%TODO: Die Fußnoten sollen erst wenn der Punkt da ist auftauchen
+\begin{frame}[fragile]{Typehinting - Grundlagen \#2}	
+	\begin{itemize}
+		\item Sollen \tb{mehrere} Typen erlaubt sein, erlaubt python die Notation:
+		\footnote{Diese Notation ist ab python3.10 verfügbar.  In früheren Versionen werden die Hilfsklassen \texttt{Union} und ggf. \texttt{Optional} aus dem \texttt{typing} Modul benötigt.}
+		
+		\item[]\begin{lstlisting}[language=pytiny]
+type1 | type2
+		\end{lstlisting}%\pause
+		
+		
+		
+		\pause
+		
+		\item[]
+		\begin{lstlisting}[language=pytiny]
+def my_math_fn(arg1: int | float) -> int | float | None:
+    return None  # TODO: this is a valid return, but maybe do something useful here?
+		\end{lstlisting}
+
+		\pause
+		
+		\item Alle bekannten built-in \tb{Datentypen} können als Typehint verwendet werden.
+		
+		\pause
+		
+		\item[] Hierbei können \glqq generische\grqq~ Typen noch \tb{genauer} spezifiziert werden.
+		\footnote{Diese Notation ist ab python3.9 verfügbar. In früheren Versionen werden die Hilfsklassen \texttt{List}, \texttt{Dict}, etc aus \texttt{typing} benötigt.}
+		
+		\item[]\begin{lstlisting}[language=pytiny]
+my_character_list: list[str] ¿\pause¿ = ["cool", "funny", "cyber"]¿\pause¿¿\pause¿
+my_important_tuple: tuple[str, int, float] = ("42", 42, 42.0)¿\pause¿
+my_dict: dict[str | int, list[int | str] | bool] = {"69": [1, "nicer", "key"], 1: True}¿\pause¿
+		\end{lstlisting}%\pause
+		
+	\item Ist der Typ \tb{beliebig}, kann das explizit mit \pp{Any}
+	\footnote{Ebenfalls aus dem \texttt{typing} Modul} angeben werden.
+	\end{itemize}
+	
+	% TODO: @Felix wie render ich folien mit und ohne "memes"?
+	% yep this comment below is in there deliberately
+	\only<6|handout:4>{
+		\begin{textblock}{14.28}(1.22, 5.9)
+			\% this is funny, because people expect characters like 'a', 'b' but instead it's character attributes, funny. right? yeah. they'll laugh for certain. hmmm...
+		\end{textblock}
+	}
+\end{frame}
+
+\begin{frame}[fragile]{Weiterführendes Typisieren}
+	\begin{itemize}
+		
+		\item \tb{Typen} können auch in \tb{Variablen} (\pp{Type aliases}) gespeichert werden.
+		\footnote{Es gibt keine Naming Convention für Aliases. Eine verbreitete Notation ist \texttt{typenameT}. Pythons Docs unterscheiden nicht zwischen Alias und \glqq normaler\grqq~ Variable.}
+		\pause
+		
+		\item[]\begin{lstlisting}[language=pytiny]
+numberT = int | float
+x: numberT = 3.14
+		\end{lstlisting}
+		\pause
+		
+		\item \tb{Weitere} Typen können mit \pp{TypeVar}\footnote{Ebenfalls aus dem \texttt{typing} Modul} erstellt werden.
+		
+		\item[] Dies ist nützlich, um z.B. \tb{generische} Typen \pp{TypeVar("T")} zu erstellen.
+		
+		\item[]\begin{lstlisting}[language=pytiny]
+K, V = TypeVar("K"), TypeVar("V")
+dict[K, V] = {}
+		\end{lstlisting}
+		
+		\pause
+		
+	\item Es existieren Typen für \tb{besondere} Eingenschaften, wie \pp{Callable}, \pp{Literal}, \pp{Iterable}.
+	
+	\item[]\begin{lstlisting}[language=pytiny]
+choicesT = Literal["yes dear", "no"]  # narrower specification what a string should contain
+fn: Callable[[choicesT, int], list | None]  = lambda c, i: [c, i] if i % 2 == 0 else None
+
+fn("yes dear", 2)  # >> ["yes dear", 2]
+fn("yes", 1)  # >> None
+	\end{lstlisting}
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Typing von self}
+	\begin{itemize}
+		\item Das Typehinten von \pp{self} ist nicht einfach möglich.
+		\pause
+		\item \pp{self} ist erst \tb{definiert}, wenn die Klasse definiert ist.
+		\pause
+		\item Während die Klasse also geparsed wird und die Typehints evaluiert werden, ist \pp{self} noch \tb{nicht} bekannt.
+		\pause
+		\item Abhilfe schafft der \tb{Hilfstyp} \pp{Self} aus dem \pp{typing}-Modul\furl{https://peps.python.org/pep-0673/}.
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Anmerkungen}
+	\begin{itemize}
+		\item Die \pp{Ellipsis} oder \pp{...} ist ein Typ, welcher primär als \tb{Platzhalter} genutzt wird.
+		\pause
+		
+		\item Im Typehinting kommt sie zum Einsatz um
+		\pause
+		
+		\begin{itemize}
+			\item ein \pp{tuple}, oder andere Sequenzen \tb{beliebiger} Länge zu beschreiben
+			\item[]\begin{lstlisting}[language=pytiny]
+my_tuple: tuple[int, ...] = (1, 2, 3)  # (1,) would be also okay
+			\end{lstlisting}
+			
+			\pause
+			\item beliebige Parameter-Signaturen einer Funktion zu symbolisieren
+			\item[]\begin{lstlisting}[language=pytiny]
+# parameters are arbitrary, important is that we get a list
+fn: Callable[..., list]  = lambda x, y, z, a, b, c: []  
+			\end{lstlisting}
+
+		\end{itemize}
+		\pause
+	\item Bei \pp{*args} und \pp{**kwargs} werden nur die Typen der \tb{Argumente} angegeben.
+	\item[]\begin{lstlisting}[language=pytiny]
+def some_fn(*args: str | int | float, **kwargs: int | float) -> None:
+    ...
+	\end{lstlisting}
+	
+	\end{itemize}
+	
+\end{frame}
+
+\framecardfragen
+
+% TODO: typehint self?
+
+\section{requests}
+
+% Credits: Base aus dem Python Vorkurs 2122
+\begin{frame}{Netzwerk Input/Output}
+	\begin{itemize}
+		\item Python hat ein \tb{eingebautes} Netzwerk I/O Paket \pp{urllib}
+		\pause
+		\item Jeder normale Mensch \tb{benutzt} \pp{requests}
+		\begin{itemize}
+			\item \pp{pip install requests}
+		\end{itemize}
+		\pause
+		\item \pp{requests} bietet einfache Funktionen zum \tb{anfragen} (GET) und \tb{senden} (POST) von Daten.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Anfragen}
+	\begin{itemize}
+        \item Es gibt verschiende Arten von \tb{Anfragen} an eine Website.
+        \item[] Anfragen können über zwei Arten \tb{Kontext} übergeben:
+        \item[] \begin{itemize}
+            \item Die \tb{Path-Parameter} in der URL: \pp{url/\{server_id\}/\{channel_id\}}.
+            \item Die \tb{Query-Parameter}, welche an die URL angehängt werden.
+        \end{itemize}
+		\item Eine \pp{GET}-Anfrage fragt \tb{Informationen} bei einem Server an.
+		\item[] Hierbei sollte die Anfrage keine Veränderung des Zustands des Servers verursachen.
+		
+		% TODO: formulier das besser.
+		\item Eine \pp{POST}-Anfrage soll dem Server eine \tb{Veränderung} mitteilen.
+		\item[] Diese Aufforderung, etwas zu verändern, kann simpler Text oder auch eine Datei sein.
+		\item \pp{POST}-Anfragen können \tb{Query-Parameter} enthalten.
+		\item[] Diese werden der Anfrage mit der Syntax \pp{?arg1=val1&arg2=val2} angehängt.
+	\end{itemize}
+\end{frame}
+
+
+
+
+
+%---FOLIE---
+\begin{frame}[fragile]{GET - Die Basics}
+
+	\begin{lstlisting}[language=pytiny]
+import requests
+
+# what my ip?
+resp: requests.Response = requests.get('https://httpbin.org/ip')
+
+if resp.status_code != 200:
+    print(f"There was an error: {resp.status_code} - exiting")
+    exit(1)
+
+message = resp.json()  # die reponse in eine json parsen
+print(message)
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{GET - Etwas spannender. Ein Bild runterladen.}
+	
+	\begin{lstlisting}[language=pytiny]
+import requests
+
+resp: requests.Response = requests.get('https://avatars.githubusercontent.com/u/58270603?v=4')
+
+if resp.status_code != 200:
+    print(f"There was an error: {resp.status_code} - exiting")
+    exit(1)
+
+message = resp.content  # content of request as bytes
+print(message)
+
+# open file in write and bytes mode
+with open("img.png", "wb") as f:
+    f.write(resp.content)
+	\end{lstlisting}
+\end{frame}
+
+
+% NO zu cookies
+%\begin{frame}[fragile]{POST \& GET für ein simples Registrieren.}
+%	
+%\begin{lstlisting}[language=pytiny]
+%import requests
+%
+%url = "http://127.0.0.1:3001"
+%
+%# http://127.0.0.1:3001?username=CyberChris
+%data = {"username": "CyberChris"}
+%r = requests.post(f"{url}/register", params=data)
+%
+%user_cookie = r.cookies.get("user_id")
+%print(f"user_id cookie: {user_cookie}")
+%
+%who_am_i = requests.get(f"{url}/whoami", cookies={"user_id": user_cookie})
+%print(who_am_i.text)
+%
+%	\end{lstlisting}
+%\end{frame}
+
+
+
+% TODO: more requests
+% -> session
+
+\framecardfragen
+
+\section{Decorators}
+\subsection{Syntactic Sugar - Function Decorators}
+\begin{frame}{Function Decorators}
+	\begin{itemize}
+		\item Um eine Funktion um zusätzliche Funktionalitäten zu ergänzen, verwendet man \tb{Function Decorators}\footnote{Sinnvolle, verständliche Beispiele für Funktion Decorators: \url{https://realpython.com/primer-on-python-decorators/}}.
+		\pause
+		
+		\item Ein Decorator nimmt die zu wrappende Funktion entgegen, fügt um ihrem Aufruf \tb{weitere Funktionalität} hinzu und gibt eine \tb{neue Funktion} zurück.
+		\pause
+		\item Er wird durch ein \pp{@} \tb{gekennzeichnet} und steht oberhalb der gewrappten Funktion.
+		\pause
+		\item Er ist ein beliebtes Tool von bekannten \tb{Libraries}, wie \lpl{dataclass}, \lpl{FastAPI} oder auch \pp{discord.py}. 
+		\pause
+		\item Ein sehr simpler, aber mächtiger Decorator, ist der \pp{@cache}-Decorator\furl{https://docs.python.org/3/library/functools.html\#functools.cache}.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, noframenumbering]{Function Decorators - Simples Beispiel}
+	\begin{lstlisting}[language=pytiny]
+def call_me_twice(old_function: Callable) -> Callable:
+    def new_function():
+        old_function()
+        old_function()
+
+    return new_function
+
+@call_me_twice
+def say_cyber():
+    print("Cyber!")
+
+say_cyber()  # >> Cyber![NEWLINE]Cyber!
+	\end{lstlisting}
+	
+	Einfach gesagt übergibt man einer \tb{Decoratordefinition} ein Funktionsobjekt
+	und nutzt dieses, um ein neues Funktionsobjekt zu erzeugen und zurückzugeben.
+	
+\end{frame}
+
+\subsection{Mehr Beispiele}
+
+\framecardfragen
+
+% TODO: Beispiel zeigen?
+
+\section{Einschub}
+\subsection{Warum Mutable Defaults bei Parametern mit Defaultwerten ein Problem sind}
+
+\begin{frame}{Warum Mutable Defaults bei Parametern mit Defaultwerten ein Problem sind}
+	\begin{itemize}
+		\item Die \tb{Standardwerte} für die Parameter werden einmal zu \tb{Beginn} der Laufzeit evaluiert und sind dann \tb{fest}.
+		\pause
+		\item[] Jedes erstellte \tb{Objekt} einer Klasse erhält also die \tb{selbe} Referenz auf das selbe Objekt.
+		\pause
+		\item Dies ist kein Problem, wenn das Argument \tb{immutable} ist.
+		\pause
+		\item Wird eine \pp{list} als Default benötigt, lässt sich diese z.B. als \pp{tuple} realisieren.
+		\pause
+		\item Ansonsten ist die \tb{gängige} Methode, das Argument auf \pp{None} zu setzen und in der \pp{__init__} dann korrekt zu initialiseren.
+	\end{itemize}
+\end{frame}
+
+\framecardfragen
+
+
+\section{Daten Modellieren}
+\subsection{dataclasses}
+% \subsection{Das Entfernen der Herdplatte}
+\begin{frame}[fragile]{Wer kennt es nicht?}
+	\begin{itemize}
+		\item Häufig kommenden Situationen zu Stande, in denen \tb{Daten} in einer eigenen Klasse \tb{paketiert} werden sollen.
+		\pause
+		\item[] Nutzer eines Systems, entpackte WLAN-Pakete einer Messreihe, Tasks einer Queue...
+		\pause
+		\item Jede Klasse erfordert die selben, immer wiederkehrenden \tb{Boilerplate}-Elemente.
+		\pause
+		\item Pythons \pp{dataclass}-Modul\furl{https://docs.python.org/3/library/dataclasses} schafft Abhilfe.
+		\pause
+		\item Der \tb{Decorator} \pp{dataclass.dataclass} erstellt aus einem \tb{Bauplan} für eine Klasse die eigentliche Klasse mit all den standardmäßig benötigten Methoden.
+		\pause
+		\item Weitere \tb{Methoden} und Attribute können ganz normal, wie bei jeder Klasse definiert werden.
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Beispiel: Eine simpler Kommentar-Klasse}
+
+\pause
+
+\begin{minipage}{0.45\textwidth}
+\begin{lstlisting}[language=pytiny]
+class ManualImmutableComment:
+    __init__(self, id: int, name: str, replies: list[str]):
+        self.id: int = id
+        ...
+
+    def __repr__(self): ...
+
+    def __eq__(self, other): ...
+    
+    def __ne__(self, other): ...
+
+    def __lt__(self, other): ...
+    def __le__(self, other): ...
+    def __gt__(self, other): ...
+    def __ge__(self, other): ...
+    
+    def __hash__(self): ...
+    
+    # TODO: start your functionality here!
+	\end{lstlisting}
+\end{minipage}
+\hfill
+\pause
+\begin{minipage}{0.45\textwidth}
+	\begin{lstlisting}[language=pytiny]
+@dataclass(frozen=True, order=True)
+class ImmutableComment:
+    id: int
+    text: str = ""
+    items: list[str] = field(default_factory=list, repr=False, compare=False)
+    
+    # TODO: start your functionality here!
+	\end{lstlisting}
+\pause
+	\begin{itemize}
+		\item \pp{frozen}: Klasse ist Immutable.
+		\item \pp{order}: Generiert Compare-Methoden anhand von paarweisen Vergleichen der Attribute.
+		\item \pp{field}: Ermöglicht mutable kwargs.
+	\end{itemize}
+\end{minipage}
+	
+\end{frame}
+
+
+
+\begin{frame}{Die Post-Init Methode}
+	\begin{itemize}
+		\item Nachdem in der \tb{generierten} \pp{__init__} alle Attribute gesetzt sind, wird die Methode \pp{__post_init__(self)} aufgerufen, welche überschrieben werden kann. 
+		\pause
+		\item Diese bietet eine \tb{Hook}, um im init-Prozess weitere Arbeit (z.B. Type-Conversions) durchzuführen\footnote{TypeChecks und Conversions werden von der dataclass Alternative \glqq attrs\grqq~ built-in angeboten: \url{https://www.attrs.org/en/stable/}}.
+		\pause
+		\item Muss ein \pp{super}-Constructor aufgerufen werden, passiert dies ebenfalls hier.
+	\end{itemize}
+\end{frame}
+
+\framecardfragen
+
+\section{Properties}
+% TODO: hippedi hoppedi meme
+
+\begin{frame}{Properties - Überblick}
+	\begin{itemize}
+		\item Teilweise liegen Daten in einer \tb{intern} sinnvollen, aber von außen nicht gut nutzbaren Form vor. (Stichwort: Timestamp vs. datetime).
+		\pause
+		\item[] Es wäre wünschenswert, diese nach außen besser zur \tb{Verfügung} stellen zu können.
+		\item[] Ohne diese Form dauerhaft mit up-to-date halten zu müssen!
+		\pause
+		\item Ebenso kann es beim Setzen eines Attributes sinnvoll sein, eine solche \tb{Conversion} oder Checks in die andere Richtung durchzuführen\footnote{Ohne dabei in den Java-like getter+setter Jungle abzurutschen}.
+		\pause
+		\item Außerdem gibt es Fälle, in denen Variablen vielleicht als \tb{Read-Only} zur Verfügung gestellt werden sollen.
+		\pause
+		\item All diese Probleme werden durch den \pp{@property}-\tb{Decorator}\furl{https://docs.python.org/3/library/functions.html\#property} gelöst.
+	\end{itemize}
+\end{frame}
+
+\subsection{Beispiel}
+
+
+\begin{frame}{Properties - Hinweise}
+	\begin{itemize}
+		\item Property-Getter Aufrufe sollen keine \tb{unerwarteten Effekte} auf das Objekt haben!
+		\pause
+		\item Beim Schreiben der Klasse muss stark darauf geachtet werden, ob auf die interne- oder externe \tb{Version} eines Attributes zugegriffen wird.
+		\pause
+		\item \tb{Wartet} ein Property-Getter auf I/O oder auf ein Lock, so kann der (scheinbar harmlose) Zugriff auf ein Attribut zu einem \glqq Hängen\grqq~ des Programms führen!
+		\pause
+		\item Property-Setter können \tb{schnell unübersichtlich} werden, wenn sie mehr Funktionalität als simple TypeChecks/ Conversions vornehmen!
+		\item[] Sollen sie mehr als dies tun, ist es ratsam doch eine \glqq klassische\grqq~ (Setter-) Funktion zu nutzen.\footnote{Im Allgeminen sind properties nur netter syntaktischer Zucker. Es ist nichts falsch daran, klassisch mit gettern und settern zu arbeiten.}.
+	\end{itemize}
+\end{frame}
+
+% TODO: hier "nicht-pythonic gemecker"-Meme einbauen
+
+\framecardfragen
+
+\section{Pydantic}
+\subsection{Data Validation at runtime}
+
+\begin{frame}{Pydantic}
+	\begin{quotation}
+		 Pydantic is the most widely used data validation library for Python.\furl{https://docs.pydantic.dev/latest/}
+	\end{quotation}
+\end{frame}
+
+% TODO: Meme irgendwas mit statische typisierung ah shit here we go again
+\begin{frame}{Pydantic - Überblick}
+	\begin{itemize}
+		\item \pp{Pydantic}\footnote{Wir besprechen die im Juli 2023 erschienene v2.x, auch bei aktuell wirkenden Tutorials ist ggf. Vorsicht geboten. FastAPI kommt seit 0.100.0 ebenfalls mit v2.} bietet sehr ähnliche \tb{Features} zu \pp{dataclasses}.
+		\pause
+		\item[] Die Idee ist ebenfalls das \tb{Erstellen} von Klassen mit Hilfe von Typehints.
+		\pause
+		\item Der entscheidende Unterschied: \pp{Pydantic} \tb{validiert} die gegebenen Daten.
+		\item[] Hierbei kann zwischen \textsl{automatischer Type-Conversion} und \textsl{strikter Typ-Validierung mit Auftreten von Ausnahmen bei Typ-Abweichungen} gewählt werden.
+		\pause
+		\item \pp{Pydantic} bietet ein direktes \tb{Interface}, um Objekte als \pp{JSON} zu serialisieren.
+		\item[] Hierdurch eignet es sich perfekt, um von Libraries wie \pp{FastAPI} genutzt zu werden.
+		\pause
+		\item Zudem ist es sehr \tb{performant}, denn \pause es ist \pause in \tb{Rust} geschrieben.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Pydantic - How to}
+	\begin{itemize}
+		\item \pp{Pydantic} baut auf seinem \pp{BaseModel} auf.
+		\item Klassen, die von \pp{Pydantic} validiert werden sollen, erben von diesem.
+		\item[] Die Deklaration der Klasse funktioniert identisch zur \pp{dataclass}.
+		\item[] Unterschiede \& ausgewählte weitere Funktionen\footnote{Mehr zum BaseModel: \url{https://docs.pydantic.dev/latest/usage/models/\#model-methods-and-properties}}:
+		\begin{itemize}
+			\item Die post-init Funktion heißt hier \pp{model_post_init(self, \_\_context: Any)}
+			\item \pp{model_dump()} gibt ein \pp{dict} der erstellten Felder zurück.
+			\item \pp{model_dump_json()} gibt ein \pp{JSON}-string zurück.
+			\item Ein Modell kann ein Feld mit dem Typ eines anderen Modells halten.
+		\end{itemize}
+		\item Es ist ebenfalls ein Drop-In Replacement für pythons \pp{dataclass} verfügbar\footnote{Dieses ist kein kompletter Ersatz für pydantics Basemodel. Siehe: \url{https://github.com/pydantic/pydantic/issues/710}}.
+	\end{itemize}
+\end{frame}
+	
+\begin{frame}[fragile]{Pydantic - Beispiel}
+	\begin{lstlisting}[language=pytiny]
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    name: str = 'Undisclosed'
+
+class Pet(BaseModel):
+    type: str
+    name: str | None
+
+class UserAndPet(BaseModel):
+    user: User
+    pet: Pet
+
+pi = User(name="Das Pi", id=31415)
+dongo = Pet(name="Dongo", type="Labrador")
+
+pair = UserAndPet(user=pi, pet=dongo)
+\end{lstlisting}
+\end{frame}
+
+\subsection{Live Beispiel}
+
+\framecardfragen
+
+\section{FastAPI}
+
+\subsection{Eine RestAPI - Überblick}
+
+\begin{frame}{REST-Bedingungen\footnote{Folie der 4. POOSE-Vorlesung von Felix Boes entnommen.}}
+    \vspace{-0.3ex}
+    Eine Webanwendung ist \tb{RESTful}, wenn sie folgende Bedingungen erfüllt. \pause
+    \begin{itemize}
+      \item Client-Server-Architektur: Der \tb{Dienst} besteht aus Server- und Clientanteilen. \pause
+      \item \tb{Zustandslosigkeit}: Anfragen und Antworten sind durch einzelne REST-Nachrichten \tb{vollständig} beschrieben. \pause
+        Zwischen Client und Server besteht keine Sitzung (auf der \tb{HTTP}-Kommunikationsebene, aber vlt. auf anderen Kommunikationsebenen). \pause
+      \item Caching: Wegen der Zustandslosigkeit liegt es (sehr oft) nahe, Antworten zu cachen. \pause
+      \item \tb{Einheitliche} Schnittstelle (fundamentale Designbedingung):
+        \begin{itemize}
+          \item \tb{Ressourcenadressierung} durch URIs \pause
+          \item Ressourcenänderung durch geeignete Ressourcendarstellungen \pause
+          \item \tb{Selbsterklärende} Nachrichten \pause
+          \item Hypermedia as the Engine of Application State (\tb{HATEOAS}) \pause
+        \end{itemize}
+      \item Mehrschichtige Systeme: Hinter der Schnittstelle wird der Dienst durch das Zusammenspiel von aufeinander aufbauenden Anwendungen und Diensten realisiert.
+    \end{itemize}
+  \end{frame}
+
+
+\begin{frame}[fragile]{Antworten\footnote{Ebenfalls aus der POOSE übernommen.}}
+    Aufbau einer \tb{Antwort} (Response):
+    
+    \begin{lstlisting}[language=pltiny]
+  PROTOCOL_VERSION | STATUS_CODE | STATUS_MESSAGE
+  CONTENT (Optional)
+    \end{lstlisting}\pause
+    
+    Die zulässigen Statuscodes und Statusnachrichten sind in fünf Gruppen eingeteilt\footnote{Eine vollständige Übersicht findet sich u.A. hier: \url{https://http.cat/}}.
+    \begin{itemize}
+      \item Informational responses (100-199)
+      \item \tb{Successful} responses (200-299)\footnote{FunFact: Der inoffizielle Statuscode 218 \glqq This is fine\grqq\ wird verwendet, um Fehler an einem reverse-Proxy vorbei zu schmuggeln.} Beispiel: \lpl{200 = OK}
+      \item Redirection messages (300-399)
+      \item \tb{Client} error responses (400-499) Beispiel: \lpl{404 = RESSOURCE NOT FOUND}
+      \item \tb{Server} error responses (500-599)
+    \end{itemize}\pause
+    
+    Der Typ des erhaltenen \lpl{CONTENT} ist in der Regel der gewünschte Rückgabetyp.
+    
+    \note{\LARGE XX:51}
+  \end{frame}
+
+\subsection{FastAPI}
+
+\begin{frame}{FastAPI}
+    \begin{quotation}
+        FastAPI framework, high performance, easy to learn, fast to code, ready for production\furl{https://fastapi.tiangolo.com/}
+    \end{quotation}
+\end{frame}
+
+\begin{frame}{FastAPI - Übersicht}
+	\begin{itemize}
+		\item FastAPI bietet alle \tb{Tools}, um einen eine besagte RestAPI zu bauen.
+		\pause
+		\item Dies geschieht hauptsächlich durch das \tb{Definieren} von Routen.
+		\pause
+		\item Für jede Route wird eine \tb{Funktion} (\pp{endpoint}) registriert, welche bei \tb{Anfrage} an die Route ausgeführt wird.
+		\pause
+		\item Durch die Nutzung von \pp{Startlette}\furl{https://www.starlette.io/} und \pp{Pydantic} ist FastAPI sehr \tb{perfomant}.
+		\pause
+		\item Ausgeführt wird die Anwendung via \pp{uvicorn}\furl{https://www.uvicorn.org/}.
+		\pause
+		\item Eine automatische \tb{Dokumentation} der API steht unter \pp{/docs} zur Verfügung. 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{FastAPI - Die FastAPI-Klasse}
+	\begin{itemize}
+        % TODO: ironic star wars meme
+        \item Die Library \pp{FastAPI} hat noch keine vollständige Dokumentation der eigenen API\footnote{\url{https://github.com/tiangolo/fastapi/discussions/9153}. Viele Klassen sind ein 1:1 Import von Starlette, daher lassen sich oft deren Docs heranziehen.}.
+        \pause
+		\item Das \pp{FastAPI}-Objekt\furl{https://fastapi.tiangolo.com/reference/fastapi/} wird einmal instanziiert und bildet den \tb{Kern} des Webservers.
+		\pause
+		\item[] Auf ihm werden alle \tb{Routen} definiert, sowie auch die Metadaten, wie Titel, Beschreibung und Version der Anwendung.
+		\pause
+		\item \pp{uvicorn} nimmt dieses Objekt als \pp{app} entgegen und führt dieses dann aus. % TODO: sagt man das so?
+	\end{itemize}
+
+    \begin{lstlisting}[language=pytiny]
+app = FastAPI(title="Demo Server", description="Simple Requests",
+    version="v0.0.1",
+    contact={
+        "name": "Cyber AG",
+        "url": "https://github.com/nonchris/",
+    },
+    terms_of_service="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+)             
+    \end{lstlisting}
+    
+\end{frame}
+
+
+\begin{frame}{uvicorn - Der Webserver}
+	\begin{itemize}
+        % TODO: ironic star wars meme
+        \item \pp{uvicorn} nimmt das \pp{FastAPI}-Objekt entgegen und stellt den \tb{Server} zu Verfügung.
+        \pause
+        \item Dies beinhaltet u.A. das Festlegen der \tb{Webadresse} und des \tb{Ports}.
+        \item[] Standard ist \url{http://localhost:8000}
+        \pause
+        \item Dabei bietet  \pp{uvicorn} u.A. die Option, bei \tb{Veränderung} der Source-Dateien den Webserver automatisch neu zu laden.
+        \pause
+        \item \pp{uvicorn} kann sowohl von dem \tb{CLI}, als auch direkt aus einem Python-\tb{Skript} ausgeführt werden.
+        \item Pycharm bietet eine extra Run-Konfiguration für FastAPI.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{FastAPI - Erstes Beispiel}
+    \begin{lstlisting}[language=pytiny]
+# assuming this code is in a file named main.py
+from fastapi import FastAPI
+
+app = FastAPI()  # the main webserver
+
+
+# routes can be defined using decorators
+@app.get("/")
+async def read_root():
+    return {"Hello": "World"}
+
+# we can define path-parameters with {param} in the ressource path
+# to access them we require the same-named parameter in our signature
+# query parameters are required by defining them in the signature
+@app.post("/api/v1/items/{item_id}")
+def read_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id, "q": q}
+        
+    \end{lstlisting}
+    \begin{lstlisting}[language=pytiny]
+uvicorn main:app --reload
+    \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Parameter}
+	\begin{itemize}
+		\item \tb{Path-Parameter} können entgegengenommen werden, indem die Signatur der Funktion einen Parameter des \tb{gleichen} Namens enthält.
+		\pause
+		\item \tb{Query-Parameter} werden normal in der \tb{Funktionssignatur} deklariert.
+		\item Sind die Parameter typ-annotiert, so übernimmt FastAPI automatisch die \tb{Validierung} und Konvertierung.
+		\pause
+		\item Eine Funktion kann auch nur einen \tb{Parameter} \pp{request: fastapi.Request}\furl{https://fastapi.tiangolo.com/advanced/using-request-directly/} entgegennehmen.
+		\pause
+		\item Dieser enthält den \tb{gesamten} Kontext \pp{path_params}, \pp{query_params}, \pp{cookies}, etc.
+		\pause
+		\item Durch die Nutzung der \pp{Request}-Klasse, existieren \tb{keine} automatischen Typvalidierungen mehr.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Routen definieren}
+	\begin{itemize}
+		\item Eine \tb{Route} kann durch den \pp{app.get()}- bzw \pp{app.post()}-\tb{Decorator} definiert werden.
+		\pause
+		\item Eine weitere Option ist \pp{app.add_api_route(path, endpoint, methods)}.
+		\item[] Diese wird insbesondere dann relevant, wenn der Code in \tb{mehrere Dateien} aufgeteilt wird oder wenn \tb{Methoden} als Endpoint genutzt werden sollen.
+		\pause
+		\item Es ist good practice, alle Routen einer API-Version in einen \tb{Namespace} zu packen.
+		\item[] Beispiel: \pp{url:port/api/v1/here_the/route_name}.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Responses}
+	\begin{itemize}
+		\item Jede Endpoint-Funktion muss eine \tb{Response} zurückgeben.
+		\pause
+		\item Eine Response\footnote{\url{
+        https://fastapi.tiangolo.com/tutorial/response-model/}} kann sein:
+		\item[] \begin{itemize}
+			\pause
+            \item ein \pp{dict}.
+            \pause
+            \item ein Objekt, welches von \tb{Pydantic}'s \pp{BaseModel} erbt.
+            \pause
+            \item eine Response aus \pp{fastapi.responses}, z.B. die \pp{JSONResponse}.
+            \pause
+            \item eine geworfene \pp{fastapi.HTTPException}. %Adrian told me so
+            \pause
+        \end{itemize}
+		\item Die Nutzung des \pp{BaseModel} sorgt für eine bessere \tb{automatisch} erstellte Dokumentation.
+		\pause
+		% TODO: hierzu ein beipsiel mit Status code
+		\item Der Response Typ, sowie der erwartete \tb{Statuscode} können innerhalb der Funktion normal erstellt und zurückgegeben werden.
+		\pause
+        \item Alternativ können die erwarteten Typen bereits bei der \tb{Registrierung} der Route gesetzt werden.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{FastAPI - Zweites Beispiel}
+    \begin{lstlisting}[language=pytiny]
+import uuid
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class User(BaseModel):
+    name: str
+    id: uuid.UUID | None = None
+
+    def model_post_init(self, ctx):
+        if self.id is None:
+            self.id = uuid.uuid4()
+
+@app.post("/api/v1/register/{u_name}")
+async def read_item(request: Request):
+    u = User(name=request.path_params["u_name"])
+    return JSONResponse(content=u.model_dump_json(), status_code=200)
+    \end{lstlisting}
+\end{frame}
+
+
+% TODO: THIS and middleware needs some work!
+%\begin{frame}[fragile]{Cookies}
+%	\begin{itemize}
+%		\item Das Erstellen und Entpacken von \pp{Cookies}\furl{https://fastapi.tiangolo.com/advanced/response-cookies/} ist einfach möglich.
+%
+%        \item[]\begin{lstlisting}[language=pytiny]
+%response = JSONResponse(content=content)
+%response.set_cookie(key="user_id", value=user.uuid)
+%        \end{lstlisting}
+%
+%    \item Es können noch weitere Flags wie \pp{expires} und \pp{samesite} gesetzt werden.
+%    \item Das Abfragen von Cookies ist gleichermaßen simpel\footnote{Bei Funktionen mit expliziten Parametern, müssen Cookies dementsprechend annotiert werden: \url{https://fastapi.tiangolo.com/tutorial/cookie-params/}}:
+%    
+%    \item[]\begin{lstlisting}[language=pytiny]
+%async def endpoint_x(request: Request):
+%    response = JSONResponse(content=content)
+%    user_id = request.cookies.get("player_id")
+%    \end{lstlisting} 
+%
+%    % TODO: den noch überprüfen bzgl params bei cookie initialisieren.
+%    \item Hinweis: Cookies können das Testing erschweren, wenn Backend und Client nicht auf dem selben Host/ der selben Domain laufen.
+%
+%\end{itemize}
+%\end{frame}
+%%user_id = request.cookies.get("player_id")
+%
+%\begin{frame}{Middleware}
+%	\begin{itemize}
+%		\item Eine Middleware\furl{https://fastapi.tiangolo.com/tutorial/middleware/} ist eine Funktion, welche jeden \pp{Request} vor der Weitergabe an die Zielfunktion anpasst und jede \pp{Response} vor dem dem Versand.
+%		\item Sie kann \pp{Request} und \pp{Response} beliebig bearbeiten.
+%		\item Eine Middleware, wird spätestens bei der Implementierung von Authentifizierungen relevant.
+%	\end{itemize}
+%\end{frame}
+%
+\framecardfragen
+
+\section{Ein sauberer Abschluss}
+\subsection{atexit}
+\begin{frame}[fragile]{atexit}
+	\begin{itemize}
+		\item Wird ein Programm (gracefully) \tb{beendet}, bekommt es Zeit, um kontrolliert zu terminieren.
+		\pause
+		\item Diese \tb{Zeit} kann genutzt werden, um Daten aus dem Speicher auf ein persistentes Medium zu übertragen, erstellte temporäre Dateien zu entfernen, und mehr.
+		\pause
+		\item Python bietet das \pp{atexit}-Modul für genau diesen Zweck.
+		\pause
+		\item Dieses bietet einen \tb{Decorator}, sowie eine explizite \pp{register}-Funktion.
+		\pause
+		\item Hier \tb{registrierte} Funktionen werden beim Signal zu enden ausgeführt.
+		\pause
+	\end{itemize}
+ \begin{lstlisting}[language=pytiny]
+@atexit.register
+def goodbye():
+    print('You are now leaving the Python sector.')	
+
+def goodbye_with_args(name: str, adjective: str):
+   print(f"Goodbye {name}, was {adjective} to meet you!")
+
+atexit.register(goodbye_with_args, 'Donny', 'nice')
+	\end{lstlisting}
+\end{frame}
+
+
+
+
+% Copyright: Kristi
+% \begin{frame}[fragile]{}
+% 	\begin{figure}[ht]
+% 		\centering
+% 		\begin{tikzpicture}[scale=0.75]
+	
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecoblue, draw=black] (0,0) rectangle (2,2) node[midway] {\textcolor{white}{task 3}};
+% 			\filldraw[fill=identecoyellow, draw=black] (0,2) rectangle (2,4) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (0,4) rectangle (2,6) node[midway] {\textcolor{white}{task 1}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,-,red] (3,6.3) -- (3,-0.5) node[anchor=south east] {};
+	
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecoblue, draw=black] (4,4) rectangle (6,6) node[midway] {\textcolor{white}{task 3}};
+% 			\filldraw[fill=identecoyellow, draw=black] (7,4) rectangle (9,6) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (10,4) rectangle (12,6) node[midway] {\textcolor{white}{task 1}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,-,red] (13,6.3) -- (13,-0.5) node[anchor=south east] {};
+			
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecogray, draw=black] (14,1) rectangle (16,1.5);
+% 			\filldraw[fill=identecoyellow, draw=black] (14,1.5) rectangle (16,3) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (14,3) rectangle (16,3.5);
+% 			\filldraw[fill=identecoyellow, draw=black] (14,3.5) rectangle (16,3.75);
+% 			\filldraw[fill=identecogray, draw=black] (14,3.75) rectangle (16,4.75) node[midway] {\textcolor{white}{task 1}};
+% 			\filldraw[fill=identecoblue, draw=black] (14,4.75) rectangle (16,6) node[midway] {\textcolor{white}{task 3}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,->] (18,6.3) -- (18,-0.5) node[anchor=south east] {time};
+			
+% 		\end{tikzpicture}
+% 		\label{fig-models}
+% 	\end{figure}
+	
+% \end{frame}
+
+
+
+\framecardfragen
+
+
+
+\end{document}
+

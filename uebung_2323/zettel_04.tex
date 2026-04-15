@@ -1,0 +1,241 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 04}
+\ausgabe{14. September 2023}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Hinweis}: \quad
+Dieser Zettel enthält mehr Aufgaben, als vermutlich innerhalb des Tutoriums machbar sind.\\
+Schauen Sie sich die Aufgaben an und bearbeiten Sie zuerst die Aufgaben, welche Sie ansprechen.\\
+Fühlen Sie sich frei, gegebene Aufgaben um beliebige Funktionaliät zu erweitern oder zu modifizieren.
+
+\medskip
+
+\noindent In einigen Aufgaben finden Sie Referenzen zu bereits vorbereiteten Programmen. Diese können Sie aus diesem Sciebo-Share\furl{https://uni-bonn.sciebo.de/s/eADQTyhzRLkFSi6} im Ordner des entsprechenden Tages finden und runterladen.
+
+\medskip
+
+
+\noindent \tb{Entwicklungsumgebung aufsetzen} \quad
+
+    \begin{enumerate}
+        \item Falls dies nicht bereits an einem vorherigen Tag geschehen ist, setzen Sie sich ein Virtual Environment und eine Entwicklungsumgebung auf.\\
+        Mehr dazu finden Sie auf Zettel 1.
+
+    \end{enumerate}
+
+\medskip
+\medskip
+
+	\noindent \tb{Busy Counting} \quad
+
+\noindent Soll Threads und Prozesse miteinander vergleichen.\\
+
+Hinweise:
+\begin{enumerate}
+	\item Erzeugen Sie manuell eine beliebige aber feste Anzahl $n$ an \tb{Threads}. Die Anzahl sollte kleiner / gleich Ihrer Prozessorkerne sein.
+	
+	\item Jeder Thread soll für eine konfigurierbare Zeit $t$ auf einer eigenen Variable schnellstmöglich hoch zählen.
+	
+	\item Danach sammelt der Main-Thread die Ergebnisse ein.
+	
+	\item Wiederholen Sie das selbe Vorgehen, nur diesmal mit \tb{Prozessen}.
+	
+	\item Vergleichen Sie die Resultate. Sind die Threads oder Prozesse mit Ihren Zahlen im Durchschnitt höher gekommen?
+	
+	\item Wiederholen Sie das Experiment und beobachten Sie im TaskManager die CPU Auslastung. Stellen Sie Unterschiede in der Auslastung fest?
+	
+\end{enumerate}
+
+
+	\medskip
+
+
+\noindent \tb{Pipe-Ping-Pong} \quad
+
+\noindent Diese Aufgabe soll Sie mit der Nutzung von \pp{Pipes} vertraut machen.
+Hinweise:
+\begin{enumerate}
+	\item Erzeugen Sie eine Pipe und einen weiteren Prozess, welcher das eine Ende der Pipe übergeben bekommt.
+	
+	\item Bauen Sie den Code so auf, dass sowohl in dem Main-Prozess als auch dem Kind jeweils eine while-Schleife dauerhaft Daten aus der Pipe ausließt, bzw. auf diese wartet.
+	
+	\item Jedes Mal, wenn der Main-Prozess \pp{ping} sendet, soll das Kind mit \pp{pong} antworten.
+	
+	\item Ist die an das Kind gesendete Nachricht \pp{None}, soll sich der Kindprozess beenden.
+	
+\end{enumerate}
+
+\medskip
+
+
+   \noindent \tb{Threadsafety-Decorator} \quad
+
+\noindent Schreiben Sie einen Decorator \pp{@with_lock}, welcher die Methode einer Klasse threadsicher machen kann.\\
+Welche potentiellen Nachteile hat das Nutzen eines solchen Decorators?
+Hinweise:
+\begin{itemize}
+	\item Nehmen Sie an, dass Ihre Klasse ein internes Lock hält, welches einen festen Namen hat, z.B. \pp{self.lock}.
+	\item Überlegen Sie sich, wie Sie dafür sorgen können, dass das \pp{Lock} immer vor Aufruf der Methode allokiert und am Ende wieder freigegeben wird.
+	
+\end{itemize}
+
+
+
+
+\medskip
+
+
+
+\medskip
+\noindent \tb{Read-Write Lock} \quad
+
+	Im Rahmen dieser Aufgabe sollen Sie selbst eine Implementation des in der Standard-Library fehlenden \pp{Read-Write Lock}\furl{https://en.wikipedia.org/wiki/Readers\%E2\%80\%93writer\_lock} schreiben.
+  
+    \noindent
+    \begin{enumerate}
+    	\item Machen Sie sich mit \pp{Condition}-Variables\furl{https://docs.python.org/3/library/threading.html\#threading.Condition} vertraut.\\
+    	Im Grunde sind diese ein Weg, eine Anzahl von Threads an einem Punkt (blockierend) warten zu lassen. Sobald die Condition signalisiert wird, erhalten alle Threads, die gerade auf die Condition warten, das Signal, dass sie weiter machen können.
+    	
+    	\item Überlegen Sie sich, welche Informationen Sie benötigen, um den Überblick über den Zustand des Locks behalten.
+    	
+    	\item Welche Methoden muss das Lock anbieten, um nutzbar zu sein?
+    	
+    	\item In welchen Fällen können Sie zwischen \pp{Read}- und \pp{Write}-Modus wechseln?
+    	
+    	\item Schreiben Sie eine Decorator, welches das \pp{Contex-Protocol} implementiert, sodass Sie mit z.B. \pp{with lock.write} das \pp{Lock} im Lese-Modus allokieren können.
+    	
+    	\item[] Hinweis: Dieser Schritt kann ein wenig tricky sein, da Sie unter Umständen eine Hilfklasse benötigen, welche die eigentlichen \pp{\_\_enter\_\_()} und \pp{\_\_leave()\_\_} Funktionen implementiert.\\
+    	Hintergrund: \pp{enter} nimmt keinen Parameter entgegen, somit müssen Sie vor Aufruf der eigentlichen Kontext-Methode bereits festgelegt haben, welcher Modus genutzt werden soll, um dann ein Objekt mit der richtig konfigurierten \glqq Kontext-Umgebung\grqq, auf welchem dann \pp{__enter__()} aufgerufen wird, zurückgeben zu können. 
+    	
+    \end{enumerate}
+    
+    \pagebreak
+    
+    
+    \noindent \tb{Fast-Bogo-Stort} \quad
+ 
+ \noindent Bogosort\furl{https://en.wikipedia.org/wiki/Bogosort} ist ein Sortieralgorithmus, welcher auf zufälligem Mischen der Eingabe basiert. Es wird so oft gemischt, bis das Array (zufällig) sortiert ist.\\
+ Wir wollen diesen Algorithmus nun \glqq effizient\grqq~ machen.
+ 
+\begin{enumerate}
+	\item Erstellen Sie ein Array oder eine Liste mit $n$-Werten.
+	\item Teilen Sie das Array in kleinere Teil-Arrays einer festen Größe (z.B. 3 Elemente) ein.
+	\item Jedes dieser Teil-Arrays soll nun via Bogo-Sort in einem eigenen Prozess sortiert werden.
+	\item[] Hinweis: Nutzen Sie eine \pp{Pool}-Methode\furl{https://docs.python.org/3/library/multiprocessing.html\#module-multiprocessing.pool} Ihrer Wahl aus Multiprocessing für das Verteilen der Aufgaben.
+	\item Kombinieren Sie die (sortierten) Ergebnisse der Prozesse analog zu Mergesort zu einem sortierten Array der Ursprungsgröße.
+	
+\end{enumerate}
+ 
+ 
+     \noindent \tb{Sleepy-Queue} \quad
+ 
+ \begin{enumerate}
+ 	\item Erstellen Sie eine \pp{Queue} und starten Sie $n$ Prozesse.
+ 	
+ 	\item Die Prozesse sollen den aktuellen Zeitpunkt\furl{https://docs.python.org/3/library/time.html\#time.time} speichern, dann für eine zufällige Zeit schlafen und nach dem Aufwachen ein Tupel aus \pp{(Zeitpunkt vor sleep, Zeitpunkt nach sleep, Zeit die geschlafen werden sollte)} über die \pp{Queue} an den Main-Prozess schicken.
+ 	
+ 	\item Der Main-Prozess soll daraus berechnen, wie lange die \tb{echte} Schlafenszeit des Kindes war und um wie viel diese von der Ziel-Schlafenszeit abwich.
+ 	
+ 	\item Wie erklären Sie sich eventuelle Differenzen, in denen der Prozess länger geschlafen hat, als eigentlich angestrebt war?
+ 	
+ 	\end{enumerate}
+ 	
+ 	
+      \noindent \tb{Ein Passwort bruteforcen} \quad
+      
+      \noindent In dieser Aufgabe sollen Sie sich anschauen, wie ein simpler, sehr stark vereinfachter Bruteforce Angriff auf ein Passwort aussehen könnte.
+ 
+ \begin{enumerate}
+ 	\item Nutzen Sie die Itertools Funktionen, um alle \tb{Permuationen} und \tb{Kombinationen} aus den Werten einer Liste zu erstellen.
+ 	
+ 	\item Schreiben Sie einen sehr simplen \glqq Passwort-Checker\grqq, welcher einfach zwei Listen aus Buchstaben auf Gleichheit überprüft.
+ 	
+ 	\item Legen Sie ein Passwort \textsf{kurzer} Länge (für den Anfang 4 Zeichen) fest.
+ 	
+ 	\item Nehmen Sie an, dass die Buchstaben, welche das Passwort enthält, bekannt sind.\\
+ 	Zur Vereinfachung können Sie die Liste, welche das Passwort repräsentiert, einfach mit Hilfe des \pp{random}-Moduls mischen.
+ 	
+ 	\item Nutzen Sie nun die Methoden aus \pp{Itertools}, um das Passwort mit \tb{Bruteforce} zu raten.
+ 	
+ 	\item Was bemerken Sie bei der Laufzeit, wenn Sie die Länge des Passworts vergrößern?
+ 	
+ \end{enumerate}	
+ 
+ 
+\pagebreak
+
+     \noindent \tb{Sortieren nach zweiter Bedingung} \quad
+     Ziel dieser Aufgabe ist es, eine Liste zu sortieren und dabei eine zweite \glqq passiv\grqq \; mit zu sortieren. Ein UseCase könnte sein, dass Sie Punkte-Paare haben, welche z.B. nach $Y$-Achse sortiert werden sollen.
+
+\begin{enumerate}
+	\item Erstellen Sie zwei Listen oder Arrays gleicher Länge mit zufälligen Werten.
+	
+	\item Verbinden Sie die beiden Objekte paarweise durch die \pp{zip}-Funktion miteinander.
+	
+	\item Nutzen Sie dir \pp{sorted} Funktion, um die Elemente nach ihrem zweiten Eintrag zu sortieren.
+	
+	\item Überprüfen Sie die Korrektheit des Ergebnisses.
+	
+	\item Entpacken Sie die kombinierten Elemente wieder.
+
+\end{enumerate}
+
+     \noindent \tb{Die filter-Funktion} \quad
+     
+\noindent Ziel dieser Aufgabe soll es sein, Sie mit simplen Anwendungen der \pp{filter()}-Funktion vertraut zu machen.
+
+\begin{enumerate}
+	\item Erstellen Sie ein \pp{dict}, in welchem jeder Key auf ein \pp{int} oder \pp{None} mapped.
+	
+	\item Filtern Sie Ihr Dict auf die Einträge, deren Values nicht \pp{None} sind.
+	
+	\item Summieren Sie diese Values auf.
+	
+	\item Auf wie viele Zeilen bekommen Sie Ihre Lösung komprimiert?
+	
+\end{enumerate}
+
+
+     \noindent \tb{Logging} \quad
+
+\noindent Ziel dieser Aufgabe soll es sein, Sie mit simplen Anwednungen der \pp{filter()}-Funktion vertraut zu machen.
+
+\begin{enumerate}
+	\item Lösen Sie die \pp{logging}-Aufgabe von gestern.
+	
+\end{enumerate}
+
+
+
+ 
+ 
+ \medskip
+ 
+    
+
+    
+    
+
+	
+
+	
+	
+
+
+
+
+\end{document}

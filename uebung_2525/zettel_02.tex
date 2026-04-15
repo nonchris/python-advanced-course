@@ -1,0 +1,228 @@
+\documentclass{config/minimal_uebungszettel}
+\input{config/config.tex}
+
+\title{Exercise 02}
+\ausgabe{semptember 9, 2025}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Note}: \quad
+This sheet contains more exercises than can probably be completed during the tutorial.\\
+Take a look at the exercises and start with the ones that appeal to you first.\\
+Feel free to extend or modify the given exercises with any functionality you like.
+
+\medskip
+
+\noindent In some exercises you will find references to already prepared programs. You can find and download these from this Sciebo share\furl{https://uni-bonn.sciebo.de/s/f3yJSCBKiDLHzHS} in the folder of the corresponding day.
+
+\medskip
+
+
+\noindent \tb{Setting up a Development Environment} \quad
+
+    \begin{enumerate}
+        \item If this has not already been done on a previous day, set up a virtual environment and a development environment.\\
+        You can find more about this on Sheet 1.
+
+        \item Extend your \pp{venv} with the packages \pp{fastapi} and \pp{requests}.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+
+\medskip
+\noindent \tb{Wiki Race} \quad
+  
+    \noindent
+    The Wikipedia game has the goal of finding the fastest path from a starting article to a predefined target article by clicking only on links within the articles. \\
+    \noindent You are now to implement this game for the console.
+    Starting with the article on \texttt{Ball\_python}, all possible links should be displayed on the console.\\
+
+    \medskip 
+    \noindent For this, you can use the pre-made URL of the Wikipedia API\footnote{\url{https://wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&format=json&titles=SEARCH-TERM}}.
+
+    \noindent With \texttt{input()}, the desired next article from the displayed selection can be chosen.\\
+    The program should then load and display the new links of the corresponding page.\\
+    \medskip
+    The game is won once the article \texttt{Python\_(programming\_language)} is reached.
+
+	\medskip
+	\noindent Note: The Wikipedia API requires you to specify a user agent. You don't need to fake a legitimate browser, it's just important to say what you are. For example:
+	\begin{lstlisting}[language=pytiny]
+headers = {
+	"User-Agent": "LectureExampleBot/1.0 (contact: your-real@email.com)"
+}
+	\end{lstlisting}
+
+\pagebreak
+
+\medskip
+\noindent \tb{Packaging a Program} \quad
+
+
+    \noindent The goal of this exercise is to package a program of your choice into a program executable from the command line. The task is broken down into very small steps, so it may look like more than it actually is. \newline
+    The task assumes that you use the sample project as starting point. You can also build your projectstructure from scratch. Then you can skip steps 1 to 4.
+    \begin{enumerate}
+        % TODO Gitlab
+        \item Download the \pp{PyPa sample project}\furl{https://github.com/pypa/sampleproject/archive/refs/heads/main.zip}.
+        \item Extract it to a location of your choice.
+        \item Give the package a meaningful name.
+        \item Move it out of the \pp{src/} folder into your projects root.
+        \item[] \begin{itemize}
+        	\item Remove the now empty \pp{src/} folder
+        	\item If you want to: make sure to adjust all properties in the \pp{pyproject.toml} accordingly
+        	\item (Having the modules in \pp{src/} has some sideeffects, you can just avoid by not having that subfolder.)
+        \end{itemize}
+        \item Insert a program – e.g. your Wiki Race implementation – into \pp{simple.py} (feel free to rename this file too!).
+        \item[] The important part here is that all functionalities are wrapped in functions (or classes), and that the program can be started by calling a function.
+        \item Import your start function into \pp{__init__.py} and call it in \pp{main()}.
+        \item Adjust the \pp{pyproject.toml} so that the metadata corresponds to your project. (Simply delete optional content that is not needed.)
+        \item[] In particular, adjust the name of your command line program under \pp{[project.scripts]}.
+        \item Open a terminal, ensure you are in the root directory of your project and that your \pp{venv} is activated\furl{https://docs.python.org/3/library/venv.html\#how-venvs-work}\footnotetext{The \texttt{venv} does not have to be in the same directory. You can also switch directories after activating the \texttt{venv}.}.
+        \item Install your package with \pp{python3 -m pip install -e .}
+        \item Call the command line program you created.
+    \end{enumerate}
+
+    \medskip
+    \noindent \tb{Typehinting} \quad
+    
+        \noindent The goal of this exercise is to familiarize you with more advanced concepts of type hinting.
+        \begin{enumerate}
+            \item Add meaningful type hints to the code in \pp{typehinting.py}.
+            \item[] Note: Think about \pp{type aliases}.
+            \item Create functions and objects that match the type hints given later in the file.
+        \end{enumerate}
+
+    \pagebreak
+    
+    
+    \medskip
+    \noindent \tb{Mutable Keyword Argument Defaults} \quad
+    \begin{itemize}
+    	\item Define a function that has an empty \pp{list} as default value for a keyword argument.
+    	\item Add a function body that does at least append one element to the list and print it afterwards.
+    	\item Call the function mutliple times in your script and observe the behavior.
+    	\item Finally, change the function in a way that it creates a new empty list every time the function is called, while still maintaining the keyword argument structure, with a reasonable default.
+    \end{itemize}
+    
+    \medskip
+    \noindent \tb{Pydantic} \quad
+
+    \noindent The goal is to model bands and their members as data classes.
+    
+        \noindent
+        \begin{enumerate}
+            \item Model the given UML diagram. You may extend the model with any functionalities and helper functions.
+            \end{enumerate}
+            
+            Tips for proceeding:
+            \begin{itemize}
+                \item Generally make sure to create a good string representation for your models early on.
+                \item Start by modeling \pp{BandMember}.
+                \item Then create the rough design of the \pp{Band} model.
+                \item Finally, add \pp{json} serializability.
+            \end{itemize}
+            
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=.9\textwidth]{images/band-uml.png}
+        \caption{The UML diagram to be modeled}
+    \end{figure}
+
+    \pagebreak
+
+    \medskip
+    \noindent \tb{FastAPI} \quad
+    
+        \noindent The goal of this exercise is to give you ideas for a possible API. Two systems of roughly equal complexity are proposed below.\\
+        Again, you are free to choose whether to use \pp{Pydantic} or \pp{dataclass} for your data models.
+
+        \noindent
+        \tb{Notify}:
+        \begin{itemize}
+            \item A route to which messages (e.g. text) can be sent.
+            \item The server stores these messages internally.
+            \item Another route allows retrieval of all stored messages.
+            \item[] Possible approach:
+            \item[] \begin{itemize}
+                \item Consider what additional context the message should include.
+                \item[] Should a sender or the timestamp of receipt be stored as well? How about a unique identifier – keyword \pp{uuid}?
+                \item Model a data class that matches your ideas.
+                \item Define a route that can receive a message and provides the corresponding parameters.
+                \item Store the messages internally.
+                \item Add another route that allows querying the messages.
+                \item[] Should there perhaps be an option to query only the first n messages?
+            \end{itemize}
+            \item Possible extensions:
+            \item[] \begin{itemize}
+                \item A route to query whether any data is available
+                \item Multiple differently named channels
+                \item An overview of which channels exist (and whether data is available).
+            \end{itemize}
+        \end{itemize}
+
+        \medskip
+        \tb{URL Shortener}:
+        \begin{itemize}
+            \item A route that allows registering a URL along with the desired short link.
+            \item A route that, when the short link is called, returns the original link.
+            \item[] Possible approach:
+            \item[] \begin{itemize}
+                \item Consider what additional context a shortened URL should contain.
+                \item[] Should perhaps the creator or the timestamp of creation be stored?
+                \item Model a data class that matches your ideas.
+                \item Define a route that can receive a message and provides the corresponding parameters.
+                \item Store the messages internally.
+                \item[] How do you ensure that each short link is only available once?
+                \item Add another route that allows calling the shortened links.
+            \end{itemize}
+            \item Possible extensions:
+            \item[] \begin{itemize}
+                \item An overview of all shortened links.
+                \item[] Should links be able to be explicitly registered as invisible?
+                \item A route to remove links.
+                \item[] How can we ensure that only the creator can delete the link? What kind of unique identifier could they get?
+                \item Should the name of the shortened link be optional?
+                \item[] How could a random link be generated?
+                \item Tricky: Would you like to allow storing images?
+            \end{itemize}
+        \end{itemize}
+
+	\medskip
+	\noindent \tb{HTTP Header Manipulation with \pp{requests}} \quad
+		
+		\noindent The goal of this exercise is to deepen your understanding of working with HTTP headers in web requests. The following task requires you to explicitly set headers such as \pp{User-Agent} and \pp{Referer} in order to access an API.
+		
+		\medskip
+		\tb{API Query with Custom Headers}:
+		\begin{itemize}
+			\item Send a GET request to an API at the URL: \url{https://supersecretstuff.miguelcz.com/validate-request}.
+			\item Set the following HTTP headers:
+			\begin{itemize}
+				\item \pp{User-Agent}: Use a legitimate browser agent such as `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 SecretStuffApp/42.0`.
+				\item \pp{Referer}: Set the value to `https://supersecretstuff.miguelcz.com`.
+			\end{itemize}
+			\item Check the status code of the response. If the code is not 200, output a meaningful error message.
+			\item If the status code is 200, parse the JSON response and display the content in the console.
+			\item[] Possible approach:
+			\item[] \begin{itemize}
+				\item Use the \pp{requests} module in Python to send the GET request.
+				\item Set the required HTTP headers in a dictionary and pass them to the request.
+				\item Use the \pp{response.json()} method to parse the response.
+			\end{itemize}
+		\end{itemize}
+		
+
+\end{document}

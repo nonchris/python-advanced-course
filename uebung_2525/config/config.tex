@@ -1,0 +1,71 @@
+\vorlesung{Python Advanced Course}
+\semester{SoSe 2025}
+\author{Chris Geron}
+\assi{}
+\tutor{
+	Sophia Sirtl, Linus Rodríguez Gómez, Miguel Cortina Zapp, Jonas Reif
+}
+
+
+\renewcommand{\itswg}{false}
+
+\usetikzlibrary{fit, positioning, shapes.geometric, shapes.misc}
+
+\newcommand{\tb}[1]{\textbf{#1}}
+
+\definecolor{colorblue}{HTML}{07529A}   % Uni Blau 100%
+\definecolor{colorgray}{HTML}{909085}   % Unigrau
+\definecolor{coloryellow}{HTML}{eab90c} % Unigelb
+
+%
+% Ablaufdiagram
+%
+\tikzstyle{startstop} = [draw, rounded rectangle, text centered, draw=black,thick]
+\tikzstyle{io} = [draw, trapezium, trapezium left angle=70, trapezium right angle=110, text centered]
+\tikzstyle{process} = [rectangle, text centered, draw=black,thick]
+\tikzstyle{decision} = [diamond, aspect=1.5, text centered, draw=black,thick]
+
+
+%
+% Bäume zeichnen
+%
+\tikzstyle{baum} = [
+  every node/.style={fill=coloryellow!25, minimum size=1.5ex, thick, draw=black, text=black},
+  every edge/.style={thick, draw=black}
+]
+
+\tikzset{
+  tri/.style={
+    draw,
+    isosceles triangle,
+    isosceles triangle apex angle=22,
+    shape border rotate=90,
+    inner sep=0.1pt,
+    minimum width=0.5cm,
+  }
+}
+
+% UML Diagramme
+\providecommand{\umltextcolor}{}
+\providecommand{\umlfillcolor}{}
+\providecommand{\umldrawcolor}{}
+\renewcommand{\umltextcolor}{colorblue}
+\renewcommand{\umlfillcolor}{coloryellow!20}
+\renewcommand{\umldrawcolor}{coloryellow}
+
+\tikzstyle{classdiag} = [
+  every node/.style = {font=\footnotesize}
+]
+
+
+\newcommand{\lazytt}[1]{
+\smallskip
+\noindent\fbox{
+  \centering
+  \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{
+    \footnotesize\texttt{#1}
+  }
+}\smallskip
+}
+
+

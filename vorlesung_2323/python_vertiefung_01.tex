@@ -1,0 +1,1289 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\usepackage{ubo_tex_beamer/uni-template}
+\apptocmd{\frame}{}{\justifying}{} % Allow optional arguments after frame.
+\input{config/global_config}
+\input{config/custom-command}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+\AuthorName{Chris Geron \& Adrian Oeyen}
+\AuthorEmail{\{s6chgero, s6adoeye\}@uni-bonn.de}
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Organisatorisches \& Lernziel}
+
+\setbeameroption{show notes}
+\setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+\titlepage
+
+
+\framecardblue{
+  \Utext{Herzlich Willkommen}
+  \nsl{Hallo and die Erstis}
+}
+
+
+\begin{frame}{Wer bin ich}
+    \begin{itemize}
+        \item Chris Geron\furl{https://github.com/nonchris/} (s6chgero@uni-bonn.de)
+        \pause
+        \item Informatik 6. Semester
+        \pause
+        \item SHK bei Abt. IV bei Projekt Wachmann\furl{https://itsec.cs.uni-bonn.de/wachmann/}
+        \pause
+        \item Seit drei Jahren Tutor (EDV für Physiker:innen, Python Vorkurs, POOSE)
+        \pause
+        \item Dozent bei der Stiftung für Jugend und Medien\furl{https://www.sk-jugend.de/}
+        \pause
+        \item Fachschaftsaktiv
+        \pause
+        \item Freizeit: Python, Metal, Konzerte, Achterbahnen,\pause~ Mit Freunden treffen
+        \pause
+        \item Admin auf Info Bonn \& Uni Bonn: Connect
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Das Team}
+    \nsl{Nach vorne rufen\\}
+  Tutorinnen und Tutoren:
+  \begin{itemize}
+    \item Adrian Oeyen (s6adoeye@uni-bonn.de)
+    \nsl{Adrian hält heute auch die VL mit}
+    \pause
+    \item[] \begin{itemize}
+        \item Informatik 6. Semester
+        \pause
+        \item Seit zwei Jahren Tutor (AlPro, POOSE, Python Vorkurs)
+        \pause
+        \item Leidenschaft für Nichen-Programmiersprachen
+        \nsl{Und auch Discord Admin\\}
+    \end{itemize}
+    \pause
+    \item Mathilde Schreck (s65jschr@uni-bonn.de)
+    \pause
+    \item[] \begin{itemize}
+      \item Informatik 3. Semester
+      \pause
+      \item zum ersten Mal Tutorin
+      \pause
+  \end{itemize}
+    \item Cyber Chris (cyberchris@uni-bonn.de)
+    \pause
+    \item[] \begin{itemize}
+        \item Cyber
+        \nsl{CyberChris, bist du hier?}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\framecardfragen
+
+\section{Organisatorisches}
+\begin{frame}{Ein paar Worte vorweg}
+	\begin{itemize}
+		\item Übungen finden von 13 bis 15 Uhr statt.
+		\item[] Wir haben die Computer-Räume U1.042, U1.012, U1.128 zur Verfügung.
+		\nsl{Wer plant alles zu kommen?\\An die kommenden: CT oder ST?}
+		\pause
+		\item Zur Aufteilung in die Gruppen ist der Treffpunkt heute im Innenhof des IZ.
+		\item[] Bitte sei für die Aufteilung 5-10 Minuten früher da.
+		\pause
+		\item Die Folien sowie alle weiteren Materialien werden über Sciebo verteilt\furl{https://uni-bonn.sciebo.de/s/eADQTyhzRLkFSi6}.
+		\pause
+		\item[] Der Link befindet sich auch auf dem Info Bonn Discord\footnote{https://discord.gg/mBm6bEchAe} in \pp{\#vertiefungskurs}.
+		
+		\item[] \begin{center}
+			\includegraphics[height=.25\textheight]{images/info-bonn.png}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{QR-Code zum Discord in groß}
+	\begin{itemize}
+		\item[] \begin{center}
+			\includegraphics[height=.9\textheight]{images/info-bonn.png}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+
+\section{Die Programmiersprache Python}
+
+% TODO: Die Zitate einbauen
+\begin{frame}[fragile, noframenumbering]{Einleitung}
+\nll{Mod: Chris\\
+Bei Fragen bitte einfach melden :)}
+  \begin{itemize}[]
+    \item Python\furl{https://www.python.org/} ist eine \tb{interpretierte} Programmiersprache. 
+    \pause
+    \item Python verfügt zudem über \tb{Garbage-Collection}.
+    \pause
+    \item Entwickelt von Guido van Rossum\furl{https://gvanrossum.github.io/}.
+    \pause
+    \item Da die Sprache nicht kompiliert wird, spricht man praktisch nie über statische, sondern nur über \tb{dynamische} Eigenschaften. 
+    \pause
+    \item Außerdem sind Pythonprogramme praktisch \tb{plattformagnostisch}.
+    \pause
+    \item Python wird ständig \tb{weiterentwickelt}.
+    \pause
+    \item Wir führen hier in \lpl{python3.10} ein.
+  \end{itemize}
+  \nll{A: Aber wie sieht denn so ein Programm aus?}
+\end{frame}
+
+\begin{frame}[fragile, noframenumbering]{Gute Programme}
+  Gute Pythonprogramme haben die folgende Form:
+  \begin{lstlisting}[language=pytiny]
+# Fremden Code einbinden
+from random import randrange
+# Weitere Imports ...
+
+def main():
+    """Hier beginnt das Programm mit der Hauptarbeit"""
+    print(f"Dieser Code ist eine {1+randrange(10)} von 10")
+
+if __name__ == "__main__":
+    main()
+
+  \end{lstlisting}
+  \nll{A: Gibt es noch andere wichtige Dinge, um gute Programme zu schreiben?}
+\end{frame}
+
+% TODO: Alles in Python sind Objekte
+
+\subsection{Typen in Python}
+
+\begin{frame}[fragile]{Dynamische Typisierung}
+  In Python haben Variablen einen Namen und einen Wert, aber keine benennbare Speicheradresse. 
+  Variablen sind \tb{dynamisch typisiert}. 
+  Ihr Typ\footnote{
+    Der Typ einer Variable oder einer Expression \texttt{EXPR} wird mithilfe von \texttt{type(EXPR)} zurückgegeben.
+  } ist zur Laufzeit änderbar.
+  \begin{lstlisting}[language=pytiny]
+meine_variable = 1              # >> type(meine_variable): <int>
+meine_variable = "never gonna"  # >> type(meine_variable): <str>
+meine_variable = KlasseA()      # >> type(meine_variable): <KlasseA>
+  \end{lstlisting}
+
+  Um den Programmcode nachvollziehbar zu gestalten, ist eine klare Namensgebung und Einhaltung von Typen einer Variable sehr wünschenwert. 
+
+  \medskip
+
+  Um den \tb{vorgesehenen}, nicht erzwungenen Typ einer Variable für Entwickler:innen und IDEs\footnote{
+    Siehe z.B.\ \url{https://www.jetbrains.com/help/pycharm/type-hinting-in-product.html} .
+  } zu dokumentieren, verwendet man \tb{Typehinting}\footnote{\url{https://docs.python.org/3/library/typing.html}.
+  }.
+  
+\end{frame}
+
+
+% Hier erwähnen das Typhinting nicht bindend ist.
+\begin{frame}[fragile]{Typehinting - Grundlagen}
+  Grundlegend wird der \tb{vorgesehene Typ} einer Variablen wie folgt angegeben:
+  \begin{lstlisting}[language=pytiny]
+variablenname: typ
+  \end{lstlisting}
+
+  Funktionsparameter dürfen ebenfalls mit Typehinting versehen werden. 
+  Vorgesehene \tb{Rückgabetypen} werden wie folgt angegeben:
+  \begin{lstlisting}[language=pytiny]
+def f(param: typ, ...) -> Rückgabetyp:
+  ...
+  \end{lstlisting} 
+
+
+  \nll{A: Und was mit meinen eigenen Typen?}
+\end{frame}
+
+\begin{frame}[fragile]{Typehinting - Eigene Typen}
+  Neben den Python Standardtypen können auch \tb{eigene Typen} als Typehint verwendet werden.
+
+  \begin{lstlisting}[language=pytiny]
+class Cybifier:
+    def __init__(self, amount: int):
+        self.amount = amount
+      
+    def cybifiy(self, text: str) -> str:
+        return ("Cyber" * self.amount) + text
+
+def cool_function(cybifier: Cybifier):
+    ... 
+
+  \end{lstlisting}
+  \nll{C: Jetzt haben wir über Typen geredet - aber was für Typen kann ich angeben?\\C -> A}
+\end{frame}
+
+
+\subsection{Datentypen}
+
+\begin{frame}[fragile]{Grundtypen}
+  In Python exisiteren verschiedene Grundlegende Datentypen.
+  \begin{itemize}
+    \pause
+    \item \pp{int} speichert eine \tb{Ganzzahl} beliebiger Größe.
+    \pause
+    \item \pp{float} speichert eine \tb{Gleitkommazahl} Zahl mit 64 bit Repräsentation.
+    \pause
+    \item \pp{str} speichert eine unveränderbare \tb{Zeichenkette} beliebiger Länge.
+    \pause
+    \item \pp{bytes} speichert eine unveränderbare Kette von \tb{Bytes}. \pp{str} und \pp{bytes} können mithilfe von \pp{encode}/\pp{decode} umgewandelt werden.
+  \end{itemize}
+\end{frame}
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Dynamische Arrays}
+  Der Typ \lpl{list} realisiert \tb{dynamische Arrays}. 
+  Allerdings haben die Elemente des Arrays keinen festen Typ\footnote{
+    Ab python3.9 können die nativen Typen \texttt{dict}, \texttt{list} und weitere für typehints genutzt werden.
+    In früheren Versionen müssen die Helferklassen aus dem \textsl{typing} modul verwendet werden.
+  }. 
+  \lpl{list}-Objekte können durch \lpl{[]} oder \lpl{list()} erzeugt werden. 
+  \begin{lstlisting}[language=pytiny]
+arr = ["list", "kann", ["alles", "enthalten"], 69]
+arr_von_zahlen = [42, 420, 99]
+
+arr.append(42)                # Anhängen eines bel. Objektes
+arr.extend(arr_von_zahlen)    # Elemente eines Arrays an Array anhängen
+drittes_elm = arr[2]          # Lesen einer Stelle des Arrays
+letztes_elm = arr[-1]         # Lesen einer Stelle des Arrays
+nach_dem_ersten = arr[1:]     # Lesen eines Intervalls (alles nach 1ter Stelle)
+ersten_drei_elm = arr[:3]     # Lesen eines Intervalls (alles bis zur 3ten Stellen)
+letzten_drei_elm = arr[-3:]   # Lesen eines Intervalls (alles ab der 3t letzten Stellen)
+arr[0] = "hello"              # Objekt an einer Stelle verändern
+del arr[1]                    # Objekt an einer Stelle entfernen
+
+  \end{lstlisting}
+  \nsl{C: wie benutze ich so ne Liste jetzt?\\
+  A: append, indizierung mit Klammern, Funktions-Übersicht unvollständig\\
+  C: Muss mir die ganzen Indizes merken, kann ich nicht Namen geben?
+  }
+
+\end{frame}
+\fussy
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Hashende Abbildungen}
+  Der Typ \lpl{dict} realisiert \tb{hashende Abbildungen}. 
+  Weder die Keys noch die Values haben einen festen Typ\footnote{
+    Ab python3.9 können die nativen Typen \texttt{dict}, \texttt{list} und weitere für typehints genutzt werden.
+    In früheren Versionen müssen die Helferklassen aus dem \textsl{typing} modul verwendet werden.
+  }.
+  \lpl{dict}-Objekte können durch \lpl{\{\}} oder \lpl{dict()} erzeugt werden. 
+  \begin{lstlisting}[language=pytiny]
+meine_abb = {
+    "sixtynine"   : "1 nicer key!"
+    "foo"         : ["deeper", 21],
+}
+meine_abb["schlüssel"] = "value"  # neuen Schlüssel hinzufügen
+wert_von_key = meine_abb["foo"]   # >> ["deeper", 21]
+wert_von_key = meine_abb["eye"]   # >> KeyError
+wert_von_key = meine_abb.get("eye", None)   # >> None
+"foo" in meine_abb                # >> True
+meine_abb.items()  # >> [('sixtynine', '1 nicer key!'), ('foo', ['deeper', 21])]
+meine_abb.get("sixtynine", "Not in there")  # >> "1 nicer key!"
+meine_abb.get("seventy", "Not in there")    # >> "Not in there"
+my_great_dict = meine_abb | {1: 2}  # >> {"sixtynine": "1 nicer key!", "foo": ["deeper", 21], 1: 2}
+  \end{lstlisting}
+  Analog zur Memberfunktionen \lpl{items()} existieren \lpl{keys()} und \lpl{values()}.
+
+  \nsl{
+  Keys sind geordnet in Einfügereihenfolge\\
+  C: Gibts Einschränkungen für Keys?\\
+  Keys: Immutable\\
+  C: Was sind hier wichtige Funktionen?\\
+  A: Eckige Klammern mit Schlüssel\\
+  items -> kv tuple\\
+  binärer oder Operator (geht erst seit "kurzem" :)\\
+  A->A: Genug der Fragen - Was wenn nur die hashende Eigenschaft interessiert?}
+\end{frame}
+\fussy
+
+\begin{frame}[fragile]{Ungeordnete Menge}
+  Der Typ \pp{set} realisiert eine \tb{ungeordnete Menge}. Ein \pp{set} implementiert Funktionalität für \tb{Elementtest}, und die grundlegenden \tb{mathematischen} Operationen auf Mengen.\footnote{
+    Beispiel aus den Python docs \url{https://docs.python.org/3/tutorial/datastructures.html\#sets}
+  }
+  \begin{lstlisting}[language=pytiny]
+basket = {'apple', 'orange', 'apple', 'pear', 'banana'}  # >> {'orange', 'banana', 'pear', 'apple'}
+'orange' in basket     # >> True
+'crabgrass' in basket  # >> False
+
+a = set('abracadabra')  # >> {'a', 'r', 'b', 'c', 'd'}
+b = set('alacazam')     # >> {'a', 'l', 'c', 'z', 'm'}
+    
+d = a - b  # >> {'r', 'd', 'b'} Differenz
+
+d.add(42)                     # >> {'r', 'd', 'b', 42}
+d.intersect_update({'r', 3})  # >> {'r'}
+  \end{lstlisting}
+
+Equivalent zu \pp{-} gibt es \pp{|} für die Vereinigung, \pp{&} für den Schnitt und \pp{^} für die symmetrische Differenz.
+\nsl{C: Alle Generischen-Typen waren bislang mutbale. Gibt es denn auch etwas unveränderliches?}
+\end{frame} 
+
+\begin{frame}[fragile]{Tuple}
+  Der Typ \pp{tuple} repräsentiert eine \tb{unveränderbare} Sammlung von Daten \tb{fester} Länge.
+
+\medskip
+
+\begin{lstlisting}[language=pytiny]
+my_tuple = (1, "cybercyber", "py goes brrrr")
+my_tuple[0]  # >> 1
+my_tuple[1] = "notcyber"  # >> Throws error since assignment is not allowed
+
+# Tuples can be unpacked
+first, second, _ = my_tuple 
+first   # >> 1
+second  # >> "cybercyber"
+\end{lstlisting}
+
+Mithilfe von \pp{tuple} kann eine Funktion \tb{mehrere} Werte zurückgeben.
+\nsl{A: Wo wir gerade bei unversänderlichen Datenstrukturen sind. Willst du nicht was über die andere immutable Datenstruktur erzählen?\\
+\LARGE A -> C}
+\end{frame}
+
+% TODO: Um f String Sachen erweitern
+
+\begin{frame}[fragile]{Strings}
+  Zur simplen \tb{Textformatierung} verwendet man unter anderem \lpl{f-Strings}, \lpl{split}- und \lpl{join}-Operationen.
+  \begin{lstlisting}[language=pytiny]
+f_string  = f"Der Wert ist: {x}"      # >> 'Der Wert ist: ["42", "a", "drei"]'
+arr       = "42,a,drei".split(",")    # >> ["42", "a", "drei"]
+joined    = " ----> ".join(arr)       # >> "42 ----> a ----> drei"
+  \end{lstlisting}
+
+Mithilfe von \tb{raw-strings} kann ein String erzeugt werden bei dem escape Zeichen\footnote {
+  Liste der escape Zeichen \url{https://docs.python.org/3/reference/lexical_analysis.html\#string-and-bytes-literals}
+} nicht interpretiert werden.
+
+\begin{lstlisting}[language=pytiny]
+print("This is\na text\nwith multiple lines")
+# >> "This is"
+# >> "a text"
+# >> "with multiple lines"
+
+print(r"This is\na text\nwith multiple lines") # >> "This is\na text\nwith multiple lines"
+\nsl{Wurden ja bereits formal eingeführt.\\
+Hier sind paar extras:\\
+Bei Zeitdruck: "Ja das sind Fäden" und weiter.\\
+A: f-Strings sind ja cool, können die noch mehr?}
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{f-strings - Nützliche Formattierung}
+Automatisches Abschneiden von \pp{float} nach n-Nachkommastellen
+
+    \begin{lstlisting}[language=pytiny]
+# round floats
+pi = 3.141592653
+print(f"pi is approximately: {pi:.3f}")  # >> pi is approximately 3.142
+    \end{lstlisting}
+    \pause
+
+Text kann automatisch mit einer gegebenen Größe links / rechts aligned werden\footnote{\url{https://docs.python.org/3/library/string.html\#format-specification-mini-language}}.
+    
+    \begin{lstlisting}[language=pytiny]
+for num in [128, -65]:
+    print(f"# >> {num:<+7d} ==> {num:>11b}")
+# >> +128     ==>    10000000
+# >> -65      ==>    -1000001¿\pause¿
+
+my_str = "\n".join(f"{i: <{len(str(max(l)))}}: x" for i in [2, 111])
+# >> 2  : x
+# >> 111: x
+    \end{lstlisting} 
+
+    \begin{lstlisting}[language=pytiny]
+print(f"{'init':_^8}()")  # > __init__()
+    \end{lstlisting}
+
+    \pause
+
+    \begin{lstlisting}[language=pytiny]
+print(f"{str(3+4) * 2 = }")  # > str(3+4) * 2 = '77'
+    \end{lstlisting}
+\nsl{
+	my\_str ist vermutlich das was man pythonic nennen würde. oder wie Michael sagen würde:\\ "Pythonic hör ich nur als Ausrede dafür, dass man den Code nicht verstehen kann"\\~\\
+	C: Aber jetzt haben wir so viel zu Defeinieren von Daten gelernt. Kann ich denn jetzt darauf Entscheidungen treffen? - Weil so ein linear ausgeführtes Programm ist doch schon ziemlich lame...\\}
+\nll{Chris -> Adrian}  
+\end{frame}
+
+
+\subsection{Kontrollstrukturen}
+
+\begin{frame}[fragile]{Bedingungen in Python I}
+  Bedingung und der dazugehörige Block werden durch \tb{Einrückung} gekennzeichnet.
+  Ein Block wird nach Konvention um genau \tb{vier} Leerzeichen\footnote{
+    Python unterscheidet Tabs und Leerzeichen. Es ist empfohlen, Leerzeichen zu verwenden und im Texteditior auto-conversion von Tabs zu Leerzeichen zu aktivieren.
+  } weiter eingerückt.
+  \begin{lstlisting}[language=pytiny]
+zahl_1 = 42.0
+zahl_2 = 69
+wort_1 = "42069"
+
+if type(zahl_1) is int:
+    print("Das ist eine Zahl!")
+  
+if (not zahl_1 == zahl_2) and zahl_1 <= zahl_2:
+    print("Das war aber ein sehr komplizerites 'zahl_1 < zahl_2'")
+  
+if "69" in wort_1:
+    print("Nice!")
+
+x = "even" if zahl_1 % 2 == 0 else "odd"  # >> "even"
+  \end{lstlisting}
+
+\nsl{C: Wie sehen denn die ganzen bekannten Konzepte in Python aus?}
+\end{frame}
+
+%% Man kann hier in deR Vorlesung noch "else" bei Schleifen erwähnen
+\begin{frame}[noframenumbering]{Bedingungen in Python II}
+  Die wichtigsten, syntaktischen Eigenschaften sind wie folgt.
+  \begin{itemize}
+    \pause
+    \item Kontrollflusssteuerung durch \lpl{if cond:}, \lpl{elif cond:}, \lpl{else:}
+    \pause
+    \item Python bietet die klassischen Komparatoren: \lpl{==, !=, <, >, <=, >=}
+    \pause
+    \item \lpl{True}, \lpl{False}, \lpl{None} werden \tb{groß} geschrieben
+    \pause
+    \item \lpl{and} und \lpl{or} sind die Zeichen für \tb{und} und \tb{oder}
+    \pause
+    \item Negation wird durch das Keyword \lpl{not} realisiert
+    \pause
+    \item Klammerung ist nicht erzwungen, kann die Bedingung aber klarer machen
+    \pause
+    \item Python bietet die speziellen Keywords \lpl{is}\furl{https://www.geeksforgeeks.org/difference-between-and-is-operator-in-python/} sowie \lpl{in}
+
+  \end{itemize}
+\nsl{C: Sag ma ich hab da so n Problem. Wenn x geprüft ist, will ich noch y prüfen und das geht dann irgendwie nicht als ein Statement. Und eh ich mich versehe, hab ich so nen unlesbaren Trichter vor mir.\\
+A: Meinst du in etwa so? *click*}
+\end{frame}
+
+
+% TODO: geht das als eine Folie?
+\begin{frame}[fragile]{Guard Clauses}
+    Mithilfe von \tb{Guard Clauses} kann tiefe Einrückung verhindert werden.
+  
+    \medskip
+  
+    \begin{lstlisting}[language=pytiny]
+def get_secret_info(user: User) -> str:
+    if user != None:
+        if user.is_authenticated():
+            if user.is_admin():
+                return top_secret_secret
+            else:
+                return "Not Admin"
+        else:
+            return "Not autenticated"
+    else:
+        return "No User"
+    \end{lstlisting}
+    \nsl{C: Gibt es dafür eine Lösung??\\
+    A: Ja. Gibt es.}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Guard Clauses II}
+  
+    \begin{lstlisting}[language=pytiny]
+def get_secret_info(user: User) -> str:
+    if user == None:
+        return "No User"
+    if not user.is_authenticated():
+        return "Not autenticated"
+    if not user.is_admin():
+        return "Not Admin"
+
+    return top_secret_secret    
+    \end{lstlisting}
+\nsl{C: Gibt es das auch für schleifen?\\
+A: Ja, aber dafür müssen wir uns erstmal anschauen, wie Schleifen hier überhaupt funktionieren.}
+  \end{frame}
+
+
+
+\begin{frame}[fragile,noframenumbering]{Schleifen in Python}
+
+  \begin{lstlisting}[language=pytiny]
+mein_liste = ["Apfel", "Banane", "Milch"]
+for el in meine_liste:
+    print(f"In meiner Liste ist: {el}")
+
+for i in range(0,100):
+    print(f"Schritt: {i}")
+
+for index, el in enumerate(meine_liste);
+    print(f"In meiner Liste steht an stelle {index}: {el}")
+
+meine_abb = {
+  "sixtynine" : "1 nicer key!"
+  "foo" : ["deeper", 21],
+}
+
+for key, value in meine_abb.items():
+    print(f"{key} -> {value}")
+    \end{lstlisting}
+\nsl{A: Und jetzt schauen wir guards in in schleifen gehen}
+\end{frame}
+
+\begin{frame}[fragile]{Schleifen in Python II}
+  Mithilfe von \pp{break} und \pp{continue} kann das Verhalten von Schleifen gesteuert werden.
+
+  \begin{lstlisting}[language=pytiny]
+mylist = ['apple', 'banana', 'orange', 'peach', 'bread']
+
+for el in mylist:
+    if el == 'apple':
+        continue  # Skips current iteration of Loop
+    if el == 'peach':
+        break  # Stops the loop
+    print(el)
+  \end{lstlisting}
+
+\begin{lstlisting}[language=pytiny]
+Ausgabe:
+>> banana
+>> orange
+\end{lstlisting}
+
+  Python bietet ebenfalls \pp{while} Schleifen, diese sind allerdings langsamer als for-Schleifen da die Berechnung der Bedingung in Python geschieht.
+  \nll{Gibt es denn noch eine lustige Sache, die man mit for-Schleifen machen kann?\\
+  A -> C}
+\end{frame}
+
+
+% TODO: Erwähne Iterator wird leergesaugt
+\begin{frame}[fragile,noframenumbering]{Schleifen in Python III}
+  Python bietet die Möglichkeit, eine Sequenz von Elementen durch \tb{Generator Expressions}\furl{https://docs.python.org/3/reference/expressions.html\#generator-expressions} auszudrücken. Diese bestehen aus zwei Teilen:
+  \begin{itemize}
+    \item Eine \tb{Expression}, die den Wert der Liste bestimmt
+    \item Eine \pp{for}-Schleife mit optionalem \pp{if}, das Elemente filtert
+  \end{itemize}
+
+  Diese können genutzt werden, um Datenstrukturen wie Listen, Tupel und Sets zu initialisieren
+  \begin{lstlisting}[language=pytiny]
+# Generator Expression(Can only be used once)
+exp = (i for i in range(10) if i % 2 == 0)
+
+my_list = list(exp)  # >> [0,2,4,6,8]
+
+my_set = set(exp)    # >> {2,4,6,8}
+
+my_tuple = tuple(exp)  # >> (2,4,6,8)
+
+  \end{lstlisting}
+  \nsl{Generator Exp ist Möglichkeit innerhlab einer Zeile eine For-Schleife zum generieren von Daten zu definieren.\\
+  Syntax ähnlich zur Menge (exp, for, if)}
+\end{frame}
+
+\begin{frame}[fragile, noframenumbering]{Real life}
+  In der Realität werden \textsl{Generator Expressions} fast nie für sich benutzt, sondern immer im Kontext einer \tb{List Comprehension} oder \tb{Dict Comprehension}. Dabei muss die Expression bei \tb{Dict Comprehensions} aus \pp{key:value}-Paaren bestehen. 
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+# List Comprehension
+squares = [i**2 for i in range(1,5)]  # >> [1,4,9,16]
+
+# Dict Comprehension
+cubes_dict = {i : i**3 for i in range(1,5)}  # >> {1: 1, 2: 8, 3: 27, 4: 64}
+  \end{lstlisting}
+  \nll{C: Wie kann ich denn verhindern, dass ich alles droppelt und dreifach schreibe?\\
+  C -> A}
+\end{frame}
+
+\subsection{Funktionen}
+
+% TODO: Hier steht was von Union
+
+\begin{frame}[fragile]{Funktionen}
+  Funktionen werden wie folgt definiert:
+  \begin{lstlisting}[language=pytiny]
+def FUNCTIONAME(PARAMETER1: TYPE1, PARAMETER2: TYPE1, ...) -> RETURN_TYPE:
+    """Funtion documentation"""
+  \end{lstlisting}
+
+  Funktionen haben \tb{keinen festen} Rückgabetyp\footnote{
+    Mit dem Typehint \texttt{Union[TYP1, TYP2, ...]} können die erwarteten Rückgabetypen dokumentiert werden.
+  }. 
+  Es ist zwar möglich, verschiedene Rückgabetypen zu produzieren, das führt aber fast immer zu geringer Nachvollziehbarkeit.
+
+  \medskip
+
+  Mithilfe von \tb{Docstrings} können Funktionalität, Parameter und Rückgabetyp der Funktion dokumentiert werden. Sie werden mit \pp{\"\"\"} erzeugt.\footnote{Docstrings können ebenfalls an Variablen verwendet werden.}
+
+  \medskip
+
+  Mithilfe von \pp{pass} können leere Funktionen oder \pp{if}-Blöcke erzeugt werden.\footnote{
+    Mehr zu pass: \url{https://realpython.com/python-pass/}
+  }
+
+  
+\end{frame}
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile, noframenumbering]{Beispiel}
+  \begin{lstlisting}[language=pytiny]
+def str_to_bool_converter(word: str) -> bool:
+    """
+    Takes a word and converts it to a boolean
+
+    Args:
+      word: The word which should be converted
+    
+    Returns:
+      Converts 'yes' to True and 'no' to False
+    
+    Raises:
+      ValueError if the given word is neither 'yes' nor 'no'
+    """
+    if word == "yes":
+        return True
+    elif wort == "no":
+        return False
+    else:
+        raise ValueError(f"Valid inputs are 'yes' and 'no', got {word}!")
+  \end{lstlisting}
+
+  
+\end{frame}
+\fussy
+
+\begin{frame}[fragile]{Parameter \& Argumente}
+  Parametern können \tb{Standardwerte} erhalten, diese werden genutzt, falls kein Argument übergeben wird. 
+  \begin{itemize}
+    \item In der Parameterliste darf kein Parameter ohne Standardwert hinter einem Parameter mit Standardwert stehen. Dies gilt auch für den Aufruf.
+    \item Parameter können über ihren \textsl{Namen} zugewiesen werden, das wird dann \tb{keyword-Argument}\footnote{oder auch kwarg} genannt.
+  \end{itemize} 
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+def my_sum(val1: int, val2: int = 10):
+    return val1 + val2
+
+my_sum(2)      # >> 12
+my_sum(10, 5)  # >> 15
+my_sum(val1=20, val2=10)  # >> 30
+my_sum(val2=5, val1=10)   # >> 15
+  \end{lstlisting}
+  \nsl{C: Was ist wenn ich jetzt mehr als zwei Werte aufsummieren möchte? - Sollte ich dann auf Listen übergeben, oder für jede Anzahl eine Funktion schreiben?}
+\end{frame}
+
+% TODO : args und kwargs hinzufügen
+
+\begin{frame}[fragile]{Args \& Kwargs}
+  Mithilfe des \tb{unpacking-operators} \pp{*} können Funktionen geschrieben werden, die eine \tb{variable} Anzahl an Parametern annehmen.\footnote {
+    Eine gute Übersicht über (*) und (**) gibt es hier: \url{https://realpython.com/python-kwargs-and-args/}
+  }
+
+  \begin{lstlisting}[language=pytiny]
+def my_sum(*args: int) -> int:  # args: tuple[int]
+    result: int = 0
+    for i in args:
+        result += i
+    return result
+
+my_sum(1,2) # >> 3
+
+my_sum(10, 20, 30, 40) # >> 100
+  \end{lstlisting}
+\nsl{*args ist tuple\\
+das macht bei Decoratoren voll Sinn -> Tag 2}
+\end{frame}
+
+\begin{frame}[fragile]{Args \& Kwargs II}
+  Der Operator \pp{*} kann ebenfalls genutzt werden, um Werte \tb{innerhalb einer Datenstruktur} an eine Funktion zu übergeben, die mehrere Parameter annimmt.
+
+  \begin{lstlisting}[language=pytiny]
+import math
+  
+def vector_length(x: float, y :float, z: float) -> float:
+  return math.sqrt(x**2 + y**2 + z**2)
+
+vector_length(10, 2, 4)  # >> 10.954
+
+vec: tuple[float, float, float] = (13, 25, 11) 
+vector_length(*vec)  # >> 30.248
+
+vec2: list[float] = [1, 2, 3]
+vector_length(*vec2)  # >> 3.7416
+  \end{lstlisting}
+\nsl{*unpack geht auf Iterable}
+\end{frame}
+
+\begin{frame}[fragile]{Args \& Kwargs III}
+
+Mithilfe von \pp{*} kann das Bedienen durch \tb{keyword-Arguments} erzwungen werden.
+
+\medskip
+
+\begin{lstlisting}[language=pytiny]
+def operation_with_keywords(*, op1: str="Read", op2: str="Sum")
+    return f"{op1} : {op2}"
+
+operation_with_keywords(op1="Write") # >> "Write : Sum"
+
+operation_with_keywords("Write", op2="Filter") # >> Fehler
+\end{lstlisting}
+\nsl{unbenannt: erzwingt\\
+C: Und was ist mit Keyword arguments? können die das auch?}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Args \& Kwargs IV}
+  Äquivalent zu \pp{*} gibt es den \pp{**}\tb{-operator} für \tb{keyword-Arguments}
+
+  \medskip
+
+\begin{lstlisting}[language=pytiny] 
+def operation_with_options(values: list[int], **kwargs) -> int:  # kwargs: dict
+  print("You chose the following kwargs")
+  for op, v in kwargs.items():
+    print(f"{op} -> {v}")
+
+operation_with_options([1,2,3], op1="Read", op2="Sum", op3=10)
+\end{lstlisting}
+\nsl{Keys: str, Value: is halt was kwarg ist}
+\end{frame}
+
+\begin{frame}[fragile]{Args \& Kwargs V}
+  Ebenso kann auch der \pp{**}\tb{-operator} genutzt werden, um Werte eines \pp{dicts} als \tb{keyword-Argument} zu übergeben.
+
+  \begin{lstlisting}[language=pytiny]
+import math
+
+def vector_length(x: float = 0, y: float=0, z: float=0) -> float:
+  return math.sqrt(x**2 + y**2 + z**2)
+  
+vec = {
+    "x": 0,
+    "y": 10,
+    "z": 20
+}
+  
+print(vector_length(**vec)) # >> 22.360
+  \end{lstlisting}
+\nsl{A: Was haben Funktionen denn noch so für Eigenschaften?\\
+\LARGE A -> C}
+\end{frame}
+
+
+\begin{frame}[fragile]{Funktionen als Objekte}
+  Funktionen sind ebenfalls \tb{Objekte} und können an andere Funktionen übergeben werden. 
+  
+  \medskip
+
+  So kann eine beliebige Sammlung von Daten sortiert werden.
+  \begin{lstlisting}[language=pytiny]
+from typing import Tuple
+
+mylist = [("cyber", 6), ("Chrisch", 2), ("Adrian", 5), ("pythoooon", 0)]
+
+# Compare function defines how two elemnts are compared
+def get_second_idx(t: Tuple[str,int]) -> int:
+    return t[1]
+
+# Compare function is given to sorted as comparator
+sorted(mylist, key=get_second_idx) 
+# >> [('pythoooon', 0), ('Chrisch', 2), ('Adrian', 5), ('cyber', 6)]
+\end{lstlisting}
+
+\nsl{A: Dafpür eine eigene Funktion zu schreiben, klingt aber irgendwie umständlich...}
+
+\end{frame}
+
+% TODO:  Braucht man comp pare
+\begin{frame}[fragile]{Lambda Expressions}
+  Anonyme Funktionen sind Funktionen, denen \tb{kein Name} zugewiesen werden muss und die an beliebiger Stelle durch \pp{lambda} erstellt werden können.
+
+  \medskip
+
+  Dadurch können Funktionen, die nur an einer Stelle benötigt werden, vereinfacht werden.
+  \begin{lstlisting}[language=pytiny]
+mylist = [("cyber", 6), ("Chrisch", 2), ("Adrian",5), ("pythoooon", 0)]
+
+sorted(mylist, key=lambda x: x[1])
+# >> [('pythoooon', 0), ('Chrisch', 2), ('Adrian', 5), ('cyber', 6)]
+    \end{lstlisting}
+\nsl{A: Und woher kommt eig diese sorted Funktion?}
+\end{frame}
+
+\begin{frame}[fragile]{Standardfunktionen}
+  Python bietet verschiedene Standardfunktionen. \footnote{
+    Übersicht über alle build-ins \url{https://docs.python.org/3/library/functions.html}
+  }
+
+  \begin{itemize}
+    \item \pp{len} gibt die \tb{Länge} einer Datenstruktur zurück
+    \item \pp{int/str/float} können für \tb{Typkonvertierung} genutzt werden
+    \item \pp{sorted} kann eine Datenstruktur \tb{sortieren}
+    \item \pp{input}\furl{https://docs.python.org/3/library/functions.html\#input} nimmt eine \tb{Eingabe} von einem Nutzer entgegen
+  \end{itemize}
+  \nll{A: Mensch das klingt ja gut, aber irgendwie die Klasse.\\
+  C: Hm. Das Stimmt. Willst du was gegen tun?\\
+  A: Mit vergnügen\\
+  \LARGE C -> A}
+\end{frame}
+
+\subsection{Klassen}
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Klassen}
+  Klassen werden wie folgt definiert: 
+  Definition und Zugriff auf \tb{Membervariablen} geschehen mit der \tb{Instanzreferenz} \lpl{self}. 
+  Außerdem ist der \tb{erste} Parameter jeder Memberfunktion die Instanzreferenz \lpl{self}. 
+  \begin{lstlisting}[language=pytiny]
+class Cybernator:
+    """Beschreibung der Klasse"""
+    def __init__(self, personen_name: str):
+        """Beschreibung des Konstruktors"""
+        self.name = personen_name  # Definiert die Membervariable 'name'
+    
+    def tausche_namen_aus(self, personen_name: str):  # 'normale' Memberfunktion
+        """ Beschreibung der Memberfunktion"""
+        self.name = personen_name
+    
+    def __str__(self):  # 'spezielle' Memberfunktion; wird beim dynamischen str-Cast ausgeführt
+        return f"Cyber{self.name}!"
+    
+    def say_cyber(self):
+        print(str(self))  # str(self) ruft self.__str__(self) auf
+  \end{lstlisting}
+
+  
+\end{frame}
+\fussy
+
+
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Vererbung}
+  \begin{lstlisting}[language=pytiny]
+class A:
+  def __init__(self, name):
+      self.name = name
+
+  def foo(self):
+      print("Foo", self.name)
+
+# Class B inherits from Class A
+class B(A):
+  def __int__(self, name):
+      super.__init__(name)
+
+  def bar(self):
+      print("Bar", self.name)
+
+
+b = B("Test")
+b.bar()  # >> "Bar Test"
+b.foo()  # >> "Foo Test"
+  \end{lstlisting}
+  \nsl{Beerbte Klasse in Klammern, super is etwas komisch.\\
+  A: Aber Chris, was macht dieses \_\_init\_\_ da?\\
+  \LARGE A -> C}
+\end{frame}
+\fussy
+
+
+\begin{frame}[noframenumbering]{Special Methods}
+  Python nutzt \tb{Special Methods}, um das Konzept des \tb{Duck Typings} zu implementieren. 
+
+  \medskip
+
+  Interessante Special Methods sind unter anderem\footnote{
+    Eine volle Liste der special Methods ist unter \url{https://docs.python.org/3/reference/datamodel.html\#specialnames} zu finden.
+      }:
+  \begin{itemize}
+    \item \pp{__init__} wird bei der \tb{Initialisierung} aufgerufen
+    \item \pp{__len__} ermöglicht das Aufrufen der built-in Funktion \pp{len}
+    \item \pp{__getitem__} stellt den \pp{[]}-operator zur Verfügung
+    \item \pp{__add__}/\pp{__iadd__} ermöglichen das Überschreiben von \pp{+} out-of-place/in-place
+    \item \pp{__contains__} ermöglicht das Nutzen des \pp{in}-Keywords.
+  \end{itemize}
+\nsl{A: Was ist denn die funcigste?\\
+C: Ich hab da ne funcy special method für dich:}
+\end{frame}
+
+\begin{frame}[fragile, noframenumbering]{Special Methods II}
+  Mithilfe von \pp{__call__} kann ein Objekt wie eine Funktion \tb{aufgerufen} werden.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+class CyberChrisch:
+    # Object of Type CyberChrisch can be used like a function 
+    def __call__(self):
+        print("Eine Cyber Funktion!")
+  
+    # Returns String representation of Object and its contents
+    def __str__(self):
+      return "Ich bin CyberChrisch!"
+
+c = CyberChrisch()
+print(c) # >> outputs "Ich bin CyberChrisch"
+c()  # >> "Eine Cyber Funktion"
+      \end{lstlisting}
+\nsl{C: Was hast du da eigentlich für ein Besipiel geschrieben?\\
+A: Isch bin CyberChrisch.\\
+C: Du kannst uns doch nicht so *REPRäsentieren* - Thema Repräsentieren:}
+\end{frame}
+
+\begin{frame}[fragile]{Special Methods III}
+
+  Die Special Methods \pp{__str()__} und \pp{__repr()__} erzeugen eine \tb{Stringrepräsentation} des Objekts. Jedoch mit einem wichtigen Unterschied.\footnote{Mehr dazu \url{https://docs.python.org/3/reference/datamodel.html\#object.__repr__}}
+
+  \medskip
+
+  \begin{itemize}
+    \item \pp{__str()__} erzeugt eine \tb{informelle} Darstellung, die leicht ausgegeben werden kann. Wird von der build-in \pp{str()} Funktion aufgerufen.
+    % TODO pp
+    \item \pp{__repr()__} erzeugt eine \tb{offizielle} Darstellung, die im besten Fall eine valide Python Expression ist, die dieses Objekt erzeugt oder eine Darstellung der Form\pp{ <}Beschreibung ... \pp{>}. Falls nur \pp{__repr()__} definiert ist, wird dieses für die informelle Darstellung genutzt. Sie wird von der built-in \pp{repr()} Funktion  aufgerufen. 
+    \item Auf die \pp{repr}-Repräsentation kann innerhalb eines f-Strings mit \pp{f"\{var!r\}"} zugegriffen werden.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Static Methods}
+  Python erlaubt es, innerhalb von Klassen statische Methoden zu definieren, diese werden \tb{auf der Klasse} aufgerufen und erhalten daher kein \pp{self}. Sie werden mithilfe des \pp{@staticmethod}-Decorators erstellt.
+
+\medskip
+
+  \begin{lstlisting}[language=pytiny]
+class TemperatureConverter:
+    @staticmethod
+    def celsius_to_fahrenheit(c):
+        return 9*c/5 + 32
+
+    @staticmethod
+    def fahrenheit_to_celsius(f):
+        return 5*(f-32)/9
+
+TemperatureConverter.celsius_to_fahrenheit(30)  # >> 86.0
+TemperatureConverter.fahrenheit_to_celsius(100)  # >> 37.77777777777778
+  \end{lstlisting}
+  \nll{C: Weißt du was nicht so static ist?\\
+  Das Verhalten unseres Codes wenn Fehler auftreten.
+  A: Dann schauen wir uns das doch mal an:
+  \LARGE Chris -> Adrian}
+\end{frame}
+
+\subsection{Ausnahmebehandlung}
+
+\begin{frame}[fragile]{Ausnahmebehandlung}
+  Ausnahmen werden in Python mit \lpl{raise EXCEPTIONTYP(ARGS)} ausgelöst. 
+  \begin{lstlisting}[language=pytiny]
+def i_break():
+    raise NameError("Deinen Namen finde ich doof")
+  \end{lstlisting}
+
+  In Python werden Ausnahmen mit einer \lpl{try-except}-Konstruktion behandelt. 
+  \begin{lstlisting}[language=pytiny]
+def main():
+    try:
+        i_break()
+    except NameError as mein_error:
+        print(f"Handling naming error: {mein_error}")
+  \end{lstlisting}
+
+  
+\end{frame}
+
+
+\begin{frame}[fragile]{Ausnahmebehandlung II}
+  \tb{Eigene Ausnahmen} werden durch die Vererbung vom Typ \lpl{Exception} definiert.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+class MyException(Exception):
+    pass
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=pytiny]
+def i_break():
+    raise MyException("I dont like being called")
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=pytiny]
+def main():
+    try:
+        i_break()
+
+    except MyException as my_exception:
+        print(f"Handling my exception: {my_exception}")
+
+    finally:
+        print("I will be executed no matter what happend above!")
+  \end{lstlisting}
+\nsl{C: Fehlerbehandung passiert ja oft wenn man mit Dateien Arbeitet. Wie geht das eigentlich?\\}
+\end{frame}
+
+\subsection{Dateien}
+
+\begin{frame}[fragile]{Contextmanager: With}
+  In Python können mithilfe des \pp{with}-Keywords Objekte in einem \tb{Kontext} verwaltet werden, der \tb{automatisches} Aufräumen übernimmt. Dies kann unter anderem für Dateiverwaltung genutzt werden.\footnote{
+    Alle Datei Modi \url{https://docs.python.org/3/library/functions.html?highlight=open\#open}.
+  }
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+read_file = "read_file.txt"
+write_file = "write_file.txt"
+
+# File Handle f does not need to be closed since its managed by the context
+# Multiple Context-Managers can be used in the same context
+with open(read_file) as f_r, open(write_file, "w") as f_w:
+    text = f_r.read()
+    print(f"Writing copy of '{read_file}' to '{write_file}', text: {text}")
+    f_w.write(text)
+
+  \end{lstlisting}
+  \nsl{
+A: Jetzt haben wir so viel schönen Code gesehen. Folgt der eigentlich irgendwelchen Regeln?\\
+C: Ja, davon gibt es einige?\\
+A: Aber warum denn?
+\LARGE C -> A}
+\end{frame}
+
+\subsection{Ein einheitlicher Coding Style}
+\begin{frame}{Warum einen Coding Style nutzen?}
+ \begin{itemize}
+    \item Viele Programmiersprachen lassen viel Freiraum für das Formatieren des Codes.
+    \item Dieser kann zu sehr unterschiedlich aussehendem Code für das selbe Programm führen.
+    \item Um sich schneller \tb{in Projekten orientieren} zu können, und damit eine gemeinsame \tb{Codebase einheitlich} auftritt, werden \tb{Coding Styles} definiert.
+    \item Im Allgemeinen werden solche Styles von der Community als \tb{Konvention} angenommen, wobei große Projekte in der Regel einen Style erzwingen. 
+    \item Für die meisten Coding Styles existieren \tb{Code Formatter}, welche den Code automatisch in die gewünschte Form bringen.
+    \item Ein sehr bekannter Style-Guide ist der für den Linux Kernel\footnote{\url{https://www.kernel.org/doc/html/v4.10/process/coding-style}}.
+ \end{itemize}
+ \nsl{A: Linux ist ja nicht - Zum Glück - nicht in python geschrieben - Und was gibt's so konkret für python?}
+\end{frame}
+
+
+\begin{frame}{Ein einheitlicher Coding Style in Python}
+    \begin{itemize}
+       \item Eine in Python sehr weit verbreitete Konvention ist Pythons eigenes \tb{PEP8}\footnote{\url{https://peps.python.org/pep-0008/}}\footnote{\url{https://pypi.org/project/autopep8/}}.
+       \item Praktischerweise liefert Pycharm direkt einen PEP8 Formatter mit.
+       \item PEP8 lässt trotz Konventionen einiges an Freiraum. Ein weit verbreiteter, wesentlich strikterer Style für Python ist \tb{black}\footnote{\url{https://github.com/psf/black}}, welcher direkt einen Formatter mitliefert.
+       \item Der gesamte in diesem Kurs gezeigte Code ist PEP8 konform\footnote{An Stellen wurde die maximale Zeilenlänge oder die Regel von zwei freien Zeilen verletzt, um die Beispiele auf eine Folie zu bekommen.}.
+       \item Zudem wird aller \tb{Code auf Englisch} sein, da Programmcode immer möglichst universell verständlich sein sollte. 
+    \end{itemize}
+    \nsl{Bissl Dialog insb. über Englisch\\
+    C: Kommen wir zu so einer Glaubensfrage...}
+   \end{frame}
+
+
+\begin{frame}{PEP8 - Spaces vs. Tabs und Zeilenlänge}
+\begin{itemize}
+    \item PEP8 verwendet ausschließlich (vier) \tb{Spaces} für Einrückungen.
+    \item Viele IDES und Texteditioren bieten Tools, um Tabs (automatisch) in Spaces zu konvertieren\footnote{Wichtiges Kulturgut zum Thema Tabs vs. Spaces: \url{https://www.youtube.com/watch?v=SsoOG6ZeyUI}}.
+    \item[] Eine Mischung von Tabs und Spaces in Python Code kann zu sehr unverständlichen Fehlern bei vermeintlich korrektem Code führen!
+    \item Die Maximallänge einer Zeile in PEP8 ist auf 79 Zeichen limitiert.
+    \item[] Dies kann bei deskriptiven Variablennamen sehr schnell sehr eng werden.
+    \item[] Selbstverständlich soll dies nicht die Verständlichkeit des Codes beeinträchtigen!
+    \item[] Pycharms \glqq PEP8\grqq-Formatter setzt das Limit auf sinnvollere\footnote{Achtung: Meinung des Autors ;)} 120 Zeichen.
+\end{itemize}
+\nsl{A: Gnaz tool. Kannst du mal wenigstens bisschen Code zeigen?}
+\end{frame}
+
+
+\begin{frame}[fragile]{Wie sieht PEP8 aus I - Eine neue Variable}
+\begin{lstlisting}[language=pytiny]
+# python means in general: snake_case
+import my_package         # package names are lowercase
+a_variable = "text"       # a normal variable in snake_case
+res = my_func()           # functions are lowercase, their parameters also
+that_class = ThatClass()  # class names are CapitalizedCamelCalse
+PI_AS_AN_INT = 3          # a constant IN_ALL_CAPS_SNAKE_CASE
+\end{lstlisting}
+\nsl{alles so snake clase außer Klassen\\
+A: Das wird mir hier alles n bisschen zu spacy mein Freund.\\
+C: Keine sorge es geht noch weiter}
+    \end{frame}
+
+
+   \begin{frame}[fragile]{Wie sieht PEP8 aus II - Die Spaces schlagen zurück}
+\begin{lstlisting}[language=pytiny]
+# One space behind and in front of the equals ¿\pause¿
+num = 69  # inline comments: at least two whitespaces in front and one behind the # ¿\pause¿
+
+if type == 69:      # no parenthesis for simple if-statements ¿\pause¿
+    print("nice!")  # four spaces for an indeted code-block ¿\pause¿
+
+
+# two free lines before and after each function declaration
+# four additional spaces for the indentation of parameters (this may vary)
+def long_function_name(
+        var_one: int,  # one space between the colon and type of annotation
+) -> None:             # spaces between the arrow and returned type
+    print(var_one)¿\pause¿
+
+
+# no whitespaces between function name and parenthesis
+# hanging indents should add a level
+foo = long_function_name(
+    var_one, var_two)
+\end{lstlisting}
+   \end{frame}
+
+
+\begin{frame}[fragile]{Wie sieht PEP8 aus III - Die Rückkehr der Operatoren} 
+	\nsl{Generell ist es ratsam am Ende einer Datei immer eine Leerzeile zu haben -> git diffs}
+\begin{lstlisting}[language=pytiny]
+x = 2 + 3  # whitespaces in arithmetical operations¿\pause¿
+
+# operators in front of the variable in case of linebreaks
+# note that we can do statements over multiple lines using  parenthesis!
+income = (gross_wages
+          + taxable_interest
+          + (dividends - qualified_dividends)
+          - ira_deduction
+          - student_loan_interest)¿\pause¿
+
+# operators in slices should have equal amounts of spaces on both sides
+ham[lower+offset : upper+offset]
+ham[lower + offset : upper + offset]
+ham[: upper_fn(x) : step_fn(x)], ham[:: step_fn(x)]
+
+\end{lstlisting}
+    \end{frame}
+
+
+\begin{frame}[fragile]{Wie sieht PEP8 aus IV - Hier hätte man aufhörn sollen.}
+    \begin{lstlisting}[language=pytiny]
+# don't use whitespaces around the = sign on keword arguments ¿\pause¿
+# except they're annotated
+def complex(real=0, imag: float = 0.0):
+    return magic(r=real, i=imag) ¿\pause¿
+
+# dont't compare againt True, False, None with equals!
+y = False
+if not y:
+    print("y, y did u do that? :(")
+
+x = "hello."
+if x is not None:  # put is and not together to negate the statement
+    print("x is not None") ¿\pause¿
+
+
+# use whitespaces when initializing dicts, lists etc
+my_dict = {1: 2, 3: 4}
+my_list = [1, 2, 3, 4]
+    
+
+    
+    \end{lstlisting}
+        \end{frame}
+
+\begin{frame}{PEP8 - Imports}
+    \begin{itemize}
+        \item Imports sollen \tb{ganz oben} in der Datei stehen.
+        \item Sie werden \tb{geordnet} nach:
+        \item[] \begin{itemize}
+            \item Built-In Module
+            \item Über PIP bezogene Module
+            \item Import eigenen Codes
+        \end{itemize}
+        \item Jedes benutzte Module steht in einer \tb{eigenen Zeile}.
+        \item Jeder dieser Blöcke soll durch eine freie Zeile\footnote{Allgemeine Faustformel für PEP8: Lass einfach mal etwas Platz (Spaces oder Linebreaks)!} voneinander getrennt werden.
+
+\end{itemize}
+\nsl{C: Was ist das mit den Imports eigenlich?\\
+A: Gut, dass du fragst.\\
+\LARGE C -> A}
+\end{frame}
+
+
+\subsection{Externe Bibliotheken}
+
+\begin{frame}[fragile]{Module einbinden}
+  In Python gibt es zwei Möglichkeiten, fremde Module (externe Bibliotheken) einzubinden. 
+  \begin{lstlisting}[language=pytiny]
+import numpy as np  # Importiert das gemsate Modul 'numpy' und bennent es in 'np' um.
+array = np.array()  # Zugriff über Modulname.Funktionalität
+
+from random import randrange  # Die Funktion 'randrange' wird in den eigenen Namespace importiert
+print(f"Dieser Code ist eine {1+randrange(10)} von 10")
+  \end{lstlisting}
+
+  Das Einbinden von fremder Funktionalität via \lpl{from module import *} 
+  widerspricht dem Konzept der Namespaceunterteilung und soll nicht verwendet werden.
+
+  \nsl{
+    C: Woher bezieh ich die Module wie Numpy eigenltich?}
+  
+\end{frame}
+
+\begin{frame}[fragile]{Module beziehen}
+  Üblicherweise werden Pythonmodule auf dem \tb{Python Package Index}, kurz \tb{PyPI}, veröffentlicht. 
+  Das Veröffentlichen von Modulen auf PyPI ist vergleichsweise einfach,
+  denn der Modulcode wird nicht inhaltlich geprüft. 
+  Das ist auch für bösartige Softwareentwickler:innen sehr praktisch. 
+
+  \medskip
+
+  Um ein ausgewähltes Modul von PyPI zu beziehen, verwendet man \lpl{pip}. 
+  \begin{lstlisting}[language=pltiny]
+python3 -m pip install --user MODULNAME
+  \end{lstlisting}
+
+  Optional erzeugt man zuerst ein zugehöriges \tb{Virtual Environment}\furl{https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/}
+  und bezieht darin die gewünschten Module mithilfe von \lpl{pip}. 
+\nsl{
+C: Wofür steht eigentlich PIP?\\
+A: Pip installs Packages\\
+Das so lange treiben, wie es annähernd witzig ist.\\
+A: Wir haben jetzt viel über Code und vor allem guten Code geredet, wo schreibe ich den denn jetzt eigentlich?\\
+C: Pycharm. Aber bevor wir dazu kommen - gibt es Fragen bis hier hin?
+\LARGE A -> C
+}
+\end{frame}
+
+
+\framecardfragen
+
+\section{Pycharm}
+\subsection{Live Demo}
+
+\end{document}
+

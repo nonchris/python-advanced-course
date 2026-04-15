@@ -1,0 +1,241 @@
+\documentclass{config/minimal_uebungszettel}
+\input{config/config.tex}
+
+\title{Exercise 04}
+\ausgabe{September 11, 2025}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Note}: \quad
+This sheet contains more exercises than can probably be solved during the tutorial session.\\
+Look through the exercises and start with the ones that interest you.\\
+Feel free to extend or modify the given tasks with any functionality you like.
+
+\medskip
+
+\noindent In some tasks you will find references to pre-prepared programs. You can find and download these from this Sciebo share\furl{https://uni-bonn.sciebo.de/s/f3yJSCBKiDLHzHS} in the folder for the respective day.
+
+\medskip
+
+
+\noindent \tb{Set up Development Environment} \quad
+
+    \begin{enumerate}
+        \item If this has not already been done on a previous day, set up a virtual environment and a development environment.\\
+        More details can be found on Sheet 1.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+	\noindent \tb{Busy Counting} \quad
+
+\noindent This task compares threads and processes.\\
+
+Hints:
+\begin{enumerate}
+	\item Manually create an arbitrary but fixed number $n$ of \tb{threads}. The number should be less than or equal to your processor cores.
+	
+	\item Each thread should increment its own variable as fast as possible for a configurable time $t$.
+	
+	\item Afterwards, the main thread collects the results.
+	
+	\item Repeat the same procedure, but this time with \tb{processes}.
+	
+	\item Compare the results. Did threads or processes achieve higher counts on average?
+	
+	\item Repeat the experiment and observe the CPU usage in the Task Manager. Do you notice differences in utilization?
+	
+\end{enumerate}
+
+
+	\medskip
+
+
+\noindent \tb{Pipe-Ping-Pong} \quad
+
+\noindent This task is designed to familiarize you with the use of \pp{Pipes}.
+Hints:
+\begin{enumerate}
+	\item Create a pipe and another process that receives one end of the pipe.
+	
+	\item Structure the code so that both in the main process and the child process a while loop constantly reads from or waits on the pipe.
+	
+	\item Each time the main process sends \pp{ping}, the child should respond with \pp{pong}.
+	
+	\item If the message sent to the child is \pp{None}, the child process should terminate.
+	
+\end{enumerate}
+
+\medskip
+
+
+   \noindent \tb{Threadsafety Decorator} \quad
+
+\noindent Write a decorator \pp{@with_lock} that can make a class method thread-safe.\\
+What potential disadvantages does the use of such a decorator have?
+Hints:
+\begin{itemize}
+	\item Assume your class holds an internal lock with a fixed name, e.g. \pp{self.lock}.
+	\item Think about how to ensure that the \pp{Lock} is always acquired before the method call and released again afterwards.
+	
+\end{itemize}
+
+
+
+
+\medskip
+
+
+
+\medskip
+\noindent \tb{Read-Write Lock} \quad
+
+	The goal of this task is to implement your own version of a \pp{Read-Write Lock}\furl{https://en.wikipedia.org/wiki/Readers\%E2\%80\%93writer\_lock}, which is missing in the standard library.
+  
+    \noindent
+    \begin{enumerate}
+    	\item Familiarize yourself with \pp{Condition} variables\furl{https://docs.python.org/3/library/threading.html\#threading.Condition}.\\
+    	Essentially, these provide a way to make a number of threads block at a certain point. Once the condition is signaled, all threads waiting on it are notified and may continue.
+    	
+    	\item Consider what information you need to keep track of the lock’s state.
+    	
+    	\item Which methods must the lock provide to be usable?
+    	
+    	\item In which cases can you switch between \pp{Read} and \pp{Write} mode?
+    	
+    	\item Write a decorator implementing the \pp{Context Protocol}, so that you can acquire the \pp{Lock} in write mode with, for example, \pp{with lock.write}.
+    	
+    	\item[] Hint: This step can be a bit tricky, as you may need a helper class that implements the actual \pp{\_\_enter\_\_()} and \pp{\_\_exit()\_\_} functions.\\
+    	Background: \pp{enter} does not take parameters, so you need to decide which mode to use before calling the actual context method. Then return an object with the properly configured “context environment,” on which \pp{__enter__()} will be invoked. 
+    	
+    \end{enumerate}
+    
+    \pagebreak
+    
+    
+    \noindent \tb{Fast-Bogo-Sort} \quad
+ 
+ \noindent Bogosort\furl{https://en.wikipedia.org/wiki/Bogosort} is a sorting algorithm based on randomly shuffling the input. Shuffling continues until the array happens to be sorted.\\
+ Now we want to make this algorithm “efficient.”
+ 
+\begin{enumerate}
+	\item Create an array or list with $n$ values.
+	\item Split the array into smaller subarrays of fixed size (e.g. 3 elements).
+	\item Each of these subarrays should now be sorted via Bogo-Sort in its own process.
+	\item[] Hint: Use a \pp{Pool} method\furl{https://docs.python.org/3/library/multiprocessing.html\#module-multiprocessing.pool} of your choice from multiprocessing to distribute the tasks.
+	\item Combine the (sorted) results of the processes into one sorted array of the original size, analogous to mergesort.
+	
+\end{enumerate}
+ 
+ 
+     \noindent \tb{Sleepy-Queue} \quad
+ 
+ \begin{enumerate}
+ 	\item Create a \pp{Queue} and start $n$ processes.
+ 	
+ 	\item The processes should store the current timestamp\furl{https://docs.python.org/3/library/time.html\#time.time}, then sleep for a random time, and after waking up, send a tuple of \pp{(time before sleep, time after sleep, intended sleep time)} to the main process via the \pp{Queue}.
+ 	
+ 	\item The main process should compute how long the \tb{actual} sleep duration of the child was and how much it deviated from the target sleep time.
+ 	
+ 	\item How do you explain possible differences where the process slept longer than intended?
+ 	
+ 	\end{enumerate}
+ 	
+ 	
+      \noindent \tb{Brute-Forcing a Password} \quad
+      
+      \noindent In this task you will look at how a very simple brute-force attack on a password could work.
+ 
+ \begin{enumerate}
+ 	\item Use the Itertools functions to create all \tb{permutations} and \tb{combinations} from the values of a list.
+ 	
+ 	\item Write a very simple “password checker” that just compares two lists of characters for equality.
+ 	
+ 	\item Define a password of \textsf{short} length (start with 4 characters).
+ 	
+ 	\item Assume the characters contained in the password are known.\\
+ 	To simplify, you can shuffle the list representing the password with the \pp{random} module.
+ 	
+ 	\item Use the methods from \pp{Itertools} to brute-force guess the password.
+ 	
+ 	\item What do you observe about runtime when you increase the password length?
+ 	
+ \end{enumerate}	
+ 
+ 
+\pagebreak
+
+     \noindent \tb{Sorting by a Second Condition} \quad
+     The goal of this task is to sort a list while also “passively” sorting a second one along with it. One use case could be having point pairs that should be sorted by their $Y$-coordinate.
+     
+\begin{enumerate}
+	\item Create two lists or arrays of the same length with random values.
+	
+	\item Pair the two objects element-wise using the \pp{zip} function.
+	
+	\item Use the \pp{sorted} function to sort the elements by their second entry.
+	
+	\item Verify the correctness of the result.
+	
+	\item Unpack the combined elements again.
+	
+\end{enumerate}
+
+     \noindent \tb{The filter Function} \quad
+     
+\noindent The goal of this task is to familiarize you with simple applications of the \pp{filter()} function.
+
+\begin{enumerate}
+	\item Create a \pp{dict} in which each key maps to either an \pp{int} or \pp{None}.
+	
+	\item Filter your dict for entries whose values are not \pp{None}.
+	
+	\item Sum up these values.
+	
+	\item How many lines can you compress your solution into?
+	
+\end{enumerate}
+
+
+     \noindent \tb{Logging} \quad
+
+\noindent The goal of this task is to get you familiar with simple applications of the \pp{logging} module.
+
+\begin{enumerate}
+	\item Solve the \pp{logging} task from yesterday.
+	
+\end{enumerate}
+
+\end{document}
+
+
+ 
+ 
+ \medskip
+ 
+    
+
+    
+    
+
+	
+
+	
+	
+
+
+
+
+\end{document}

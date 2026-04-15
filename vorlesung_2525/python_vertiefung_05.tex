@@ -1,0 +1,1277 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\input{config/minimal_beamer_style}
+\input{config/listings_theme}
+\input{config/global_config}
+\input{config/custom-command}
+
+\AuthorName{Chris Geron}
+\AuthorEmail{s6chgero@uni-bonn.de}
+
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Organizational Information \& Learning Goals}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+\newcommand{\ms}[0]{\medskip}
+
+% \setbeameroption{show notes}
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+\titlepage
+
+
+\input{config/orga.tex}
+
+\section{LLM-Agents}
+
+\subsection{Brief Rundown of AsyncIO}
+\begin{frame}{Async: Informal in Four Points + Conclusion}
+	\begin{itemize}
+		\item \tb{Asynchronous} programs can \tb{switch} between the \tb{execution} of different functions when one function is \tb{blocking} while waiting for (usually) I/O.
+		
+		\pause
+		
+		\item[] The entire program still runs in \tb{one} thread\footnote{Nevertheless, the execution of the program is unpredictable, so it may be necessary to protect resources!}.
+		
+		\pause
+		
+		\item A \tb{function} marked as \pp{async}, means that it will \tb{wait} for something (usually) I/O.
+		
+		\pause
+		
+		\item Such methods are called \tb{coroutines}.
+		
+		\pause
+		
+		\item Coroutines \tb{must}, in the context of Discord.py, be directly \tb{awaited} with \pp{await}.
+		
+		\pause
+		
+		\item[] \tb{As soon as} the program encounters \pp{await}, it can continue working at \tb{another} place and \tb{return} to this call once the coroutine has completed.
+		
+		\item \tb{Conclusion}: With \pp{asyncIO}, \tb{no time} is \tb{wasted} waiting for I/O.
+		\nll{More later or in apendix}
+	\end{itemize}
+\end{frame}
+
+
+\subsection{Concept}
+
+\begin{frame}{Outline}
+	We will introduce the \tb{concept} of LLM-Agents and their components.
+	
+	\ms
+	
+	The implementation examples will use the framework \tb{Pydantic AI}\footnote{Sources to all mentioned projects are on the next slide.} and are inspired by their provided examples.
+	
+	\ms
+	
+	Other Options would be \tb{LangChain} and its extension \tb{LangGraph} or \tb{AutoGPT}.
+	
+	\ms
+	
+	Or with less abstraction Layers e.g.: \tb{OpenAI}, \tb{Anthropic} or with a unified interface using \tb{LiteLLM}.
+	
+	\ms
+	
+	You can host local models using \tb{Ollama} or \tb{vLLM}.
+	
+	\ms
+	
+	This list is \tb{not complete}. It's just a brief overview to get you started.
+\end{frame}
+
+\begin{frame}{Sources}
+In mentioning order from the last slide.:
+
+\ms
+
+
+\url{https://github.com/pydantic/pydantic-ai}
+
+\medskip
+
+\url{https://github.com/langchain-ai/langchain}\\ \url{https://github.com/langchain-ai/langgraph} \\ \url{https://github.com/Significant-Gravitas/AutoGPT}
+
+\medskip
+
+\url{https://github.com/openai/openai-python}\\ \url{https://github.com/anthropics/anthropic-sdk-python}\\ \url{https://github.com/BerriAI/litellm}\\
+
+\ms
+
+\url{https://github.com/ollama/ollama}\\
+\url{https://github.com/vllm-project/vllm}
+\end{frame}
+
+
+
+\begin{frame}{Agent - Definition}
+An \tb{Agent} is an LLM instance prompted to \tb{autonomously complete} a specific {task}.
+
+\medskip
+
+To complete that task, the LLM can \tb{invoke} provided \tb{tools} to gather further information or interact with certain parts of the real world, e.g., a file system.
+
+\medskip
+
+An agent is invoked on an \tb{initial} set of \tb{messages}, providing the base context and goal to achieve.
+
+\medskip
+
+Each LLM and tool \tb{output} is \tb{appended} to the message context, furthering the reasoning of the Agent.
+\end{frame}
+
+\begin{frame}{Tools - Definition}
+	\tb{Tools} are the Agent's main \tb{interface} for completing the provided task.
+	
+	\ms
+	
+	\medskip
+	
+	The tool's functionality is \tb{implemented} and \tb{executed} on the \tb{application side}.
+	The LLM and LLM provider do not receive or execute the tool's code.
+	
+	\ms
+	
+	The only information the LLM receives are the \tb{signature} and \tb{description} of the tool, which are provided by the application.
+	
+	\ms
+	
+	To use a tool the LLM must \tb{explicitly} generate a call of the tool in its response.\newline
+	The LLM response can contain \tb{multiple} tool calls.
+	
+	\ms
+	
+	After a tool was executed the Agent requires some kind of \tb{response} from the tool in form of a new message.
+	\nsl{You can ob just terminate the agent or delete the last message from the chat...}
+	
+\nll{Tool Calling must be supported by LLM\\id linking}
+\end{frame}
+
+\begin{frame}{Message Types}
+	There are numerous guidelines for prompting an LLM, the following descriptions and prompting examples aim to show commonly used best practices and standards \furl{https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/keep-claude-in-character\#example-enterprise-chatbot-for-role-prompting} \furl{https://platform.openai.com/docs/guides/prompt-engineering} \furl{https://services.google.com/fh/files/misc/gemini-for-google-workspace-prompting-guide-101.pdf}.
+	
+	\ms
+	
+	\begin{description}
+		\item[System\footnote{OpenAI recently introduced new levels for Chain of Command. According to their new definition System Messages are now called Developer Message: \url{https://model-spec.openai.com/2025-02-12.html\#chain_of_command}}] Used to initiallize Agents LLMs general behaviour and persona.\\
+		As well as to define the general task and specific goal.
+		
+		\item[Human / User] Case specific task and information to get started.
+		
+		\item[Assistant] Generated answers by the LLM. Can include tool calls.
+		
+		\item[Tool] Responses from a tool, must be mapped to a previous tool calls. 
+	\end{description}
+\end{frame}
+
+
+\begin{frame}{Prompting - Things to include in a System Prompt}
+	\begin{itemize}
+		\item You are an expert in ...
+		\item Your [general] task is ...
+		\item Follow the user's instructions.
+		\item Respond using markdown/ XML/ ...
+		\item You will ONLY do...
+		\nsl{Feel free to try again / overcommit}
+	\end{itemize}
+	
+	\pause
+	\nll{Dont think elephants}
+	More inspiration: \url{https://github.com/jujumilk3/leaked-system-prompts}
+\end{frame}
+
+
+
+\begin{frame}{Abstractions}
+	
+	Before starting to design an agent and building its tools it's helpful to think about possible \tb{abstractions}.
+	
+	\pause
+	
+	Some of these thoughts are:
+	\begin{itemize}
+		\item What's the \tb{minimal} context the agent needs to start with the task and know the goal?
+		\pause
+		\item What \tb{tools} does the agent need to process the task? How can you make the tool interface as easy as possible?
+
+	   \pause
+	
+       \item What implementation details can you \tb{hide} from the agent?
+       
+       \pause
+       
+       \begin{itemize}
+       	    \item What implementation details of a tool are important and when can you just state what result to expect from it?
+       		\item Can you provide the agent with a better, easier situation to enhance its focus? 
+       \end{itemize}
+	\end{itemize}
+	\nll{Can you abstract the shell command to just fill in parameters}
+\end{frame}
+
+\framecardyellow{
+	\Utext{Any Questions?}
+}
+
+\subsection{Pydantic AI}
+
+\begin{frame}[fragile]{Defining an Agent}
+	\begin{figure}
+		\includegraphics[height=.7\textheight]{images/05-agent-graph.pdf}
+		\caption{Graph of an Agent in Pydantic AI if no other graph was defined.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Agent with Tool Calls Example}
+	\begin{figure}
+		\includegraphics[height=.7\textheight]{images/05-reasoning-graph-sideways.png}
+		\caption{Source (modified to fit slide): \url{https://ai.pydantic.dev/tools/}.}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Message types in Pydantic AI}
+	\begin{figure}
+		\includegraphics[height=.7\textheight]{images/05-messages.png}
+		\caption{\url{https://ai.pydantic.dev/api/messages}.}
+	\end{figure}
+	\nll{View Point: We REQUEST the LLM responds\\It's quite tricky to get the individual parts of a message...}
+\end{frame}
+
+%\begin{frame}{Structure of an Agent}
+%	\begin{itemize}
+%		\item Dataclasses the Agent works with
+%		\item Tool Functions
+%		\item Agent initialization
+%		\item main-function invoking the agent
+%	\end{rame}[fragile]{Mes
+%\end{frame}
+
+
+\begin{frame}[fragile]{Basic Agent}
+	\begin{lstlisting}[language=pytiny]
+from pydantic_ai import Agent
+
+agent = Agent('openai:gpt-4.1-mini', system_prompt='Be a helpful assistant.')
+
+result = agent.run_sync('Tell me a joke.')
+print(result.output)
+#> Why don't scientists trust atoms? - Because they make up everything!
+
+print(result.all_messages())
+#> [ModelRequest(parts=[
+#> SystemPromptPart(content='Be a helpful assistant.', timestamp=...), UserPromptPart(content='Tell me a joke.', timestamp=...)]),
+#> ModelResponse(
+#> parts=[TextPart(content="Why don't scientists...")], 
+#> usage=RequestUsage(input_tokens=21, output_tokens=13, details=...), timestamp=..., model_name='gpt-4.1-mini-...',  provider_name='openai', provider_response_id=...)]
+
+	\end{lstlisting}
+	Source: \url{https://ai.pydantic.dev/message-history/}
+	\nll{SystemPrompt (permanent in the chat history) vs Instructions (run invocation only)\\all\_messages()}
+\end{frame}
+
+
+\begin{frame}[fragile]{More Complex Agent Declaration \\The Most Inefficient Die Roll in History}
+	\begin{lstlisting}[language=pytiny]
+class DiceResult(BaseModel):
+    result: int
+
+def throw_a_dice(ctx: RunContext, lower_limit: int, upper_limit: int) -> int:
+    """throw a dice with a certain interval of numbers, limits are included"""
+    r = random.randint(lower_limit, upper_limit)
+    print(f"Dice called using {lower_limit=}, {upper_limit=} and got {r} as result")
+    return r
+
+dice_agent = Agent(
+    "openai:gpt-4.1",
+    instructions="You're Dice-GPT. You handle fair dice rolls.",
+    output_type=[DiceResult, str],  #  Requires agent to terminate using DiceResult or str
+    tools=[Tool(throw_a_dice)]       # There is also a decorator, but we use the constructor
+)
+
+res = dice_agent.run_sync("throw a dice between 10 and 20")
+
+print(res.output)  #> DiceResult(result=15)
+print(res.all_messages()
+	\end{lstlisting}
+	\nll{Tools have to take the context\\Expect at least one Tool call and check for it...}
+\end{frame}
+
+
+\begin{frame}[fragile]{Tools - Dependency Injection}
+	Tools don't live in a vacuum. Many tools require \tb{more context}. This can range from simple state to access to the full message history.
+	
+	\ms
+	
+	Pydantic AI has \tb{Dependency Injection} as one of its core features.
+	
+	\ms
+	
+	Each tool may receive a \pp{RunContext} as its first \tb{argument} if declared as such. 
+	This object provides access to the full context of the agent execution the tool call is a part of. 
+	Including the \tb{message history}.
+	
+	\ms
+	
+	Additionally it can provide \tb{access} to an arbitrary, \tb{predefined} context object accessible using \pp{.deps}. Its type can be defined on agent definition.
+	This object can be used to \tb{carry} further \tb{state} through the agent execution.
+	
+	\nll{Tools dont live in a vacuum\\We can track state in the tools.\\t is typed and intellisense gets it\\this example is stripped down and not functional}
+\end{frame}
+
+
+\begin{frame}[fragile]{Tools - Dependency Injection}
+	\begin{lstlisting}[language=pytiny]
+class WikiRaceTask(BaseModel):
+    current_pool: list[str] | None
+    chosen_words: list[str] = Field(exclude=True, default_factory=list)
+
+# SPECIFY which type of context the tool expects
+def choose_word(ctx: RunContext[WikiRaceTask], word: str) -> str:
+    if word not in ctx.deps.current_pool:
+        return f"The word '{word}' is not in the available pool."
+
+    ctx.deps.current_pool  = WikiRaceTask.get_word_pool(word)
+    ctx.deps.chosen_words.append(word)
+    return "The available words are: " + " ".join(ctx.deps.current_pool)
+    
+wiki_agent = Agent("openai:gpt-4o", deps_type=WikiRaceTask,  # SPECIFY agents type of dependency
+    output_type=[WikiRaceResult, str], instructions=system_prompt, tools=[Tool(choose_word)])
+    
+res = wiki_agent.run_sync(
+    f"Your target is: '{target}'. Your current pool is: {init.get_formatted_words()}.",
+    deps=WikiRaceTask(current_pool=None),  # PASS object instance (type must match set deps_type)
+)
+	\end{lstlisting}
+		\nll{Tools dont live in a vacuum\\We can track state in the tools.\\t is typed and intellisense gets it\\this example is stripped down and not functional}
+\end{frame}
+
+
+\begin{frame}[fragile]{Agent Run Methods}
+	An Agent can be run in full \tb{until} it \tb{terminates} using \pp{.run_sync()} and \pp{async .run()}.
+	
+		\begin{lstlisting}[language=pytiny]
+res = wiki_agent.run_sync(
+    f"Your target is: '{target}'. Your current pool is: {init.get_formatted_words()}.",
+    deps=init,
+)
+			\end{lstlisting}
+	
+	\ms
+	
+	Alternatively it can be run\tb{ step by step} using \pp{.iter()}, which traverses the agents graph node by node.
+			\begin{lstlisting}[language=pytiny]
+nodes = []
+init_prompt = f"Your target is: '{target}'. Your current pool is: {init.get_formatted_words()}."
+async with wiki_agent.iter(init_prompt, deps=init) as agent_run:
+    async for node in agent_run:
+        # Each node represents a step in the agent's execution
+        nodes.append(node)
+	\end{lstlisting}
+The latter makes \tb{state} management more \tb{complex}. E.g. no direct access to all messages at the end.
+	\nll{Iter makes it easier to 'interactively' print/log the chat as it advances.\\Else.: Do it in the TCs I guess...}
+\end{frame}
+
+
+\begin{frame}{Agent Termination / Output Functions}
+An agent has to terminate with the call to one of the \tb{Output Functions}\furl{https://ai.pydantic.dev/output/} \footnote{Pydantic AI does not distinguish between 'tool calling' and 'function calling'.}.%\newline
+% TODO
+%Alternatively a \tb{tool} can \tb{return} the required output \tb{type}, thereby terminating the agent.
+
+\ms
+
+If not defined otherwise these \tb{tools} are \tb{generated} from the types defined as \pp{output_type} in the agent initialization.
+The tool \tb{descriptions} are fetched from the \tb{docstring} of the class if not defined otherwise.
+They can also be defined using the class \pp{ToolOutput}\furl{https://ai.pydantic.dev/api/output/\#pydantic_ai.output.ToolOutput}.
+
+\ms
+
+It is possible to \tb{apply} further output \tb{validators} beside the potential type validation by Pydantic.
+
+\ms
+
+If the output validator classifies the \tb{output} as \tb{insufficient} or in general a tool \tb{call} is \tb{not satisfying} it's possible to raise a \pp{ModelRetry}\furl{https://ai.pydantic.dev/api/exceptions/?query=ModelRetry\#pydantic_ai.exceptions.ModelRetry}, which asks the LLM to try again.
+\end{frame}
+
+
+\begin{frame}[fragile]{Output / Context Types}
+On \tb{tool} execution you can opt to \tb{receive} the \pp{RunContext[<YourType>]}\furl{https://ai.pydantic.dev/api/tools/\#pydantic_ai.tools.RunContext} which provides \tb{context} of the current agents execution (messages, other metadata) and - if set - your \tb{injected dependency}.
+
+\ms
+
+After a graceful \tb{termination} of the agent (using the run methods) you receive a\newline \pp{AgentRunResult}\furl{https://ai.pydantic.dev/api/agent/\#pydantic_ai.agent.AgentRunResult} as output.
+This object provides you with all \tb{context} of the execution, as well as well as the \tb{output} of the agent (\pp{<AgentRunResult>.output}).
+\end{frame}
+
+
+\begin{frame}[fragile]{Output Mode Considerations}
+When \tb{requiring} a \tb{structured} output at the end most LLMs will \tb{stop} to do produce any \tb{text} content\furl{https://github.com/pydantic/pydantic-ai/issues/2158} and only produce tool calls\footnote{This does not apply to reasoining models}.
+
+\ms
+
+If text content is wanted \pp{str} must be also a \tb{valid output} format, resulting in at least two possible return types to account for when handling the agent's result.
+
+\ms
+
+Alternatively it's possible to explicitly provide the LLM with a \tb{Think Tool}\furl{https://www.anthropic.com/engineering/claude-think-tool}.
+
+\ms 
+
+It might be also possible to circumvent this limitation in PydanticAI using an output validator and the \pp{ModelRetry} feature\furl{https://github.com/pydantic/pydantic-ai/issues/2793}.
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Processing the Message History}
+\tb{History Processors} are functions registered in the Agent and called before every request to the LLM.
+They allow \tb{processing} and \tb{altering} the history before the call.
+
+\ms
+
+Using processors the agents history can be kept more concise, by simply dropping old messages or more advanced summarization approaches\furl{https://ai.pydantic.dev/message-history/\#summarize-old-messages}.
+
+\ms
+
+Since these processors are integrated in the graph of the agent, they can be used for logging purposes too, e.g. dumping the current conversation in case the next LLM call exceeds the set UsageLimits.
+
+\begin{lstlisting}[language=pytiny]
+from pydantic_core import to_jsonable_python
+def log_msgs(hist: list[ModelMessage]) -> list[ModelMessage]:
+    Path(f"log-file.json").write_text(json.dumps(to_jsonable_python(hist), indent=4))
+    return hist
+    
+Agent(..., history_processors=[log_msgs])
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Usage Limits}
+	To \tb{safeguard} against excessive LLM calls, rapidly depleeting your wallet, you can \tb{specify} \pp{UsageLimits}\furl{https://ai.pydantic.dev/api/usage/\#pydantic_ai.usage.UsageLimits}.
+	
+	\ms
+	
+	Limits can be the number of agent requests, the number of tokens, etc.
+	
+	\ms
+	
+	If a \tb{limit} is reached a \pp{UsageLimitExceeded} is \tb{raised}. Discarding the full agent's conversation.
+	\nll{Chat has to be logged or smthng to keep it after an exception happend.}
+	
+	\ms
+	
+	There might be cases where using \pp{Agent.iter()} is the better option than \pp{.run()}, since it gives more control over the processing of a failed chat. Or logging it using a History Processor.
+\end{frame}
+
+
+\begin{frame}[fragile]{Agent Interaction}
+	It's possible to have \tb{multiple agents} do certain sub-tasks.
+	
+	\ms
+	
+	New agents can be \tb{started} at all points where you have \tb{access} to the code execution. E.g. in a tool, in the history processors, after an agent has terminated.
+	
+	\ms
+	
+	For agents \tb{reacting} to each other the simplest approach is building a \tb{loop} which alternately calls the agents with each other's results.
+	
+	\nll{Example: Guess series}
+\end{frame}
+
+
+
+
+\begin{frame}{Complex Agent Behavior}
+PydanticAI comes with the option to define a \tb{custom} state \tb{graph}\furl{https://ai.pydantic.dev/graph/}.
+
+\ms
+
+\pause
+\only<3|handout:3>{
+	\begin{textblock}{12.3}(0.755, 1.65)
+		\centering
+		\begin{figure}
+			\includegraphics[height=.65\textheight]{images/05-custom-graph.png}
+			\vspace{-.3cm}
+			\caption{A stateful Graph for a vending machine, taken from the docs.}
+		\end{figure}
+	\end{textblock}
+}
+
+\pause
+
+\only<2|handout:2>{
+	\begin{textblock}{12.3}(0.755, 1.65)
+		\centering
+		\begin{figure}
+			\includegraphics[height=.65\textheight]{images/05-nailgun.png}
+			\vspace{-.3cm}
+			\caption{From the PydanticAI guides about using the graph features.}
+		\end{figure}
+	\end{textblock}
+}
+
+\pause
+These features are \tb{beyond the scope} of course, so you'll be on your own endevors. \pause Good luck and have fun!
+
+
+\end{frame}
+
+\begin{frame}{Limitations of Agents}
+	LLMs are \tb{non-deterministic}, hence you can't rely on getting the same output for the same input.
+	
+	\pause
+	\ms
+	
+	LLMs have only a \tb{limited context} length.
+	Requests to commercial LLMs are billed by used tokens, so larger context sizes result in more expesnive requests.
+	
+	\pause
+	\ms
+	
+	LLMs are not good for keeping secrets or follow strict orders. With enough \tb{gaslighting} it's 'easily' possible to get the LLM to disobey its initial prompting.
+	
+	\pause
+	\ms
+	
+	Just because you \textsl{\tb{could}} do it with an agent doesn't mean you \textsl{\tb{should}}.
+	\nll{Google translate}
+	
+\end{frame}
+
+
+%\framecardfragen
+\framecardyellow{
+	\Utext{Any Questions?}
+}
+
+
+\section{Rich}
+\subsection{Simple Terminal Interfaces}
+
+\begin{frame}{Rich}
+	\begin{quotation}
+		Rich is a Python library for Rich text and beautiful formatting in the terminal.\furl{https://github.com/Textualize/rich}
+	\end{quotation}
+	
+	
+	\nsl{Wanted to rant about Google searchability, but it has become really good now}
+\end{frame}
+
+
+\begin{frame}{Rich}
+	Rich provides options to easily extend terminal output with \tb{colors} and styling.\pause\newline
+	This ranges from simple colored text to complete \tb{dashboards}.\pause\newline
+	
+	\medskip
+	
+	Rich is part of Textual\furl{https://github.com/Textualize/textual}, a framework for developing apps for terminal and web browsers.\pause
+	
+	\medspace
+	
+	Unlike Textual, Rich does not natively support user input. Inputs via stdin can of course still be processed. 
+\end{frame}
+
+
+\begin{frame}{Rich - Example Dashboard}
+	\only<1|handout:1>{
+		\begin{textblock}{12.3}(0.755, 1.65)
+			\includegraphics[width=\columnwidth]{images/wachmann_ui.png}
+			\tiny Dashboard of the router from the Wachmann project (Dept. IV)
+		\end{textblock}
+	}
+	
+	\pause
+	
+	\only<2|handout:2>{
+		\begin{textblock}{12.3}(0.755, 1.65)
+			\includegraphics[width=\columnwidth]{images/wachmann_startup.png}
+			\tiny Startup screen of the router from the Wachmann project (Dept. IV)
+		\end{textblock}
+	}
+\end{frame}
+
+
+
+\begin{frame}{Rich - Renderable}
+	Rich is built around \tb{renderable} objects. The three main categories are:\pause 
+	\begin{itemize}
+		\item Strings
+		\pause
+		\item Instances of Rich's predefined classes like \pp{Panel}, \pp{Table}, \pp{Text}, \pp{Layout}, ...
+		\pause
+		\item Any objects implementing a \pp{__rich__(self) -> str}\furl{https://rich.readthedocs.io/en/stable/protocol.html\#console-customization} method
+	\end{itemize}
+	\nsl{There is also rich\_console}
+	
+	\pause
+	\medskip
+	
+	Renderable objects can be printed using Rich's \pp{print} function, which acts as a drop-in replacement for the built-in \pp{print}.
+	
+	\pause
+	\medskip
+	
+	Renderable objects can contain other renderable objects.
+	\nsl{e.g., a Table inside a Panel, or a Panel inside a Layout}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Text Styling}
+	
+	Text displayed with Rich can be \tb{styled}%
+	\\
+	
+	\furl{https://rich.readthedocs.io/en/stable/style.html}
+	\footnote{Not all styles are supported by every terminal. The terminal emulator settings may affect color interpretation.} 
+	using \tb{tags} and the \tb{Style} class. 
+	\pause
+	
+	\begin{lstlisting}[language=pytiny]
+from rich.style import Style;from rich.text import Text
+print("[#ffc000]Seeing [bold italic red]Red[/bold italic red]!")
+style = Style(color="magenta2", bgcolor="bright_cyan", underline=True)
+print(Text("Eternal Blue", style=style))
+print(f"[{style}]Eternal Blue")  # equivalent to the line above
+	\end{lstlisting}
+	\begin{textblock}{4.30}(10.945, 3.46)
+		\includegraphics[width=\columnwidth]{images/rich_color_merged.png}
+		
+	\end{textblock}
+	% \includegraphics[height=.15\textheight]{images/rich_color_merged.png}\newline
+	\pause
+	It is highly recommended to collect styles in a \tb{central location} and build them incrementally if needed. This allows a \tb{consistent} and quickly adjustable style for the application.
+	
+	%- use square brackets
+	%- collect colors in central variables
+	%- https://rich.readthedocs.io/en/stable/appendix/colors.html
+	%- code
+\end{frame}
+
+\subsection{Dashboards}
+
+
+\begin{frame}[fragile]{rich - Layout I}
+	To divide the display into multiple parts, there is the \tb{Layout} class\furl{https://rich.readthedocs.io/en/stable/layout.html}.
+	\pause
+	
+	\begin{itemize}
+		\item A Layout object can contain content independent of the rest.
+		\pause
+		\item A Layout object can be \tb{split} horizontally and vertically.
+		\pause
+		\item The split layout behaves similar to a \tb{dictionary}.
+	\end{itemize}
+	\nsl{Nesting Layouts is the same as nesting Panels or Tables. Layout is also "just" a renderable.}
+	\pause
+	
+	\begin{lstlisting}[language=pytiny]
+from rich.layout import Layout
+layout = Layout()¿\pause¿
+layout.split_column(
+Layout(name="upper", size=3),
+Layout(name="lower")
+)¿\pause¿
+layout["lower"].split_row(
+    Layout(name="left", ratio=25),
+    Layout(name="right", ratio=75),
+)
+	\end{lstlisting}
+	
+\end{frame}
+
+\begin{frame}[noframenumbering]{Rich - Layout I}
+	
+	\begin{textblock}{6.8}(0.755, 1.65)
+		\includegraphics[width=\columnwidth]{images/rich_layout.png}
+		\tiny Example output of the layout without content using the print function
+		\footnote{To render correctly in PyCharm, the "Emulate terminal in output console" option in the Run configuration must be enabled: \url{https://github.com/Textualize/rich/issues/206\#issuecomment-1858786667}}
+	\end{textblock}
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Layout II}
+	A \tb{Layout} object can contain a \tb{renderable} object. This can be set using \pp{.update()}.
+	\nsl{This only makes sense for the "leaves" of the layout tree}
+	
+	\begin{lstlisting}[language=pytiny]
+# Add simple content to upper and left pannel
+layout["upper"].update(Panel("[bold red]Title: My Project[/bold red]", border_style="red"))
+layout["left"].update(Panel("[green]Whats next[/green]", border_style="green"))
+
+# Create a table for the right layout
+table = Table(title="Some Data", expand=True)  # expand: use all space in panel
+table.add_column("Header 1", justify="left", style="cyan")
+table.add_column("Header 2", justify="left", style="magenta")
+
+# Add rows to the table
+table.add_row("Row 1 Col 1", "Row 1 Col 2")
+table.add_row("Row 2 Col 1", "Row 2 Col 2")
+
+# Add the table to panel (nested renderables) and to layout
+table_panel = Panel(table, border_style="blue", title="Data")
+layout["right"].update(table_panel)
+		
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[noframenumbering]{Rich - Layout II}
+	
+	\begin{textblock}{6.8}(0.755, 1.65)
+		\includegraphics[width=\columnwidth]{images/rich_layout.png}
+		\tiny Example output of the layout without content using the print function
+		\footnote{To render correctly in PyCharm, the "Emulate terminal in output console" option in the Run configuration must be enabled: \url{https://github.com/Textualize/rich/issues/206\#issuecomment-1858786667}}
+	\end{textblock}
+	
+	\begin{textblock}{6.8}(8., 1.65)
+		\includegraphics[width=\columnwidth]{images/rich_filled.png}
+		\tiny Example output of the layout with content using the print function
+	\end{textblock}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Live Displays}
+	To have a \tb{dynamic} display, Rich provides the \tb{Live} context manager\furl{https://rich.readthedocs.io/en/stable/live.html}.
+	
+	\begin{lstlisting}[language=pytiny]
+import itertools
+from rich.live import Live
+from rich.layout import Layout
+
+# screen True: display goes to full screen and restore cli afterwards
+with Live(layout := Layout(name="root")¿\furl{https://docs.python.org/3/whatsnew/3.8.html\#assignment-expression}¿, refresh_per_second=1, screen=True):
+    for i in itertools.count(1):
+        layout.update(f"{i} iters")
+	\end{lstlisting}
+	\nll{Walruss Operator}
+	
+	\pause
+	Each part of the layout can be \tb{manually} updated via the \pp{.update()} function.\newline
+	\pause
+	Objects with a \pp{__rich__} method are \tb{automatically} updated on every refresh.
+	
+	\medskip
+	
+	\pause
+	The \tb{iteration} is completely \tb{independent} of display updates!\footnote{To save resources, it is highly recommended to add a sleep statement in the loop.}
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars I}
+	One of the advanced features are progress bars. Rich provides various ways to create them. \pause
+	We will look at the \tb{Progress} class\furl{https://rich.readthedocs.io/en/stable/progress.html\#advanced-usage}.
+	\pause
+	\begin{textblock}{14.53}(0.755, 5.0)
+		\includegraphics[width=\columnwidth]{images/rich_progress.png}
+		\tiny Example progress bar with SpinnerColumn, TextColumns for description and percentage, and TimeRemainingColumn for estimated completion time.
+	\end{textblock}
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars II}
+	The \tb{Progress} object is an \tb{aggregation} of multiple objects\furl{https://rich.readthedocs.io/en/stable/progress.html\#columns}. 
+	It defines the appearance of the progress bars. Some examples:
+	\pause
+	\begin{itemize}
+		\item \pp{BarColumn} the actual progress bar
+		\pause
+		\item \pp{SpinnerColumn} a kind of rotating indicator
+		\pause
+		\item \pp{TimeRemainingColumn} automatic estimation of remaining time
+		\pause
+	\end{itemize}
+	
+	\nll{Components can exist outside of the composite object.\\
+		Lifecycle of component objects is independent.\\}
+	
+	\nsl{A "has-a" relationship, where the composite object references existing objects\\
+		A Progress object contains references to various column objects (TextColumn, SpinnerColumn, etc.), but these columns can also exist outside the Progress object and be reused.}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Rich - Progress Bars III}
+	
+	Tasks can be \tb{registered}%
+	\footnote{https://rich.readthedocs.io/en/stable/reference/progress.html\#rich.progress.Task}
+	to a Progress object using \pp{.add_task()}.
+	
+	\medskip
+	
+	The function returns a \tb{TaskID}, which is used to \tb{update} the progress via the Progress object.
+	\pause
+	
+	\medskip
+	
+	The \tb{update} function provides \pp{completed} for absolute steps and \pp{advance} for incremental steps.\furl{https://rich.readthedocs.io/en/stable/reference/progress.html\#rich.progress.Progress.update}
+	\pause
+	
+	\medskip
+	
+	\tb{Strings} defined in Progress have read \tb{access} to attributes of the created tasks.
+	\pause
+\end{frame}
+
+
+\begin{frame}[fragile]{Rich - Progress Bars IV}
+	\begin{lstlisting}[language=pytiny]
+# imports missing
+# note: using some of rich's built-in color styles like 'bar.complete', don't get confused by that
+progress = Progress(
+    TextColumn("[task.description]{task.description}"),
+    SpinnerColumn(style="bar.complete"),
+    BarColumn(),
+    TextColumn("[bright_green]{task.completed:>.1f}/{task.total} ({task.percentage:>3.0f}\%)", style="bright_green"),
+    TimeRemainingColumn(),
+)
+# register task
+task1 = progress.add_task("[bar.complete]Downloading", total=100)
+
+layout = Layout(progress)
+with Live(layout, refresh_per_second=10, screen=True):
+    while not progress.finished:
+        progress.update(task1, advance=random.random())
+        time.sleep(0.6)
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Rich - Final Notes}
+	Background \tb{errors} can occur (e.g., threads dying) and the traceback might \tb{not be visible} due to Live displays\furl{https://rich.readthedocs.io/en/stable/live.html\#redirecting-stdout-stderr}.
+	\newline 
+	Therefore, good \tb{logging} and possibly health indicators in the live view are important.
+	
+	\medskip
+	
+	Topics not covered in detail:
+	\begin{itemize}
+		\item Markdown formatting
+		\item Code highlighting and traceback formatting
+		\item Line wrapping
+		\item Various designs for Panels and Tables\furl{https://rich.readthedocs.io/en/stable/appendix/box.html}
+	\end{itemize}
+	\tb{Pycharm}: You need to \tb{enable} 'Modify Options -> Emulate Terminal in Output Console' in the run configuration to \tb{render} rich in Pycharm's run window.
+	\nll{Watch out for deadlocks!}
+	
+\end{frame}
+
+
+%\framecardfragen
+\framecardyellow{
+	\Utext{Any Questions?}
+}
+
+
+\section{asyncIO}
+
+\begin{frame}{Motivation}
+	\tb{IO operations} are by default \tb{synchronous} and therefore blocking.
+	\newline
+	Simple examples: reading from a file, \pp{time.sleep()}
+	
+	\medskip
+	
+	Useful work could be done elsewhere during this \tb{waiting time}.
+	
+	\medskip
+	
+	This is especially desirable in programs that should \tb{respond} to \tb{requests} or events in general. 
+	
+\end{frame}
+
+
+\begin{frame}{What is asyncIO?}
+	\pp{asyncio} is a \tb{built-in} Python library.
+	\newline
+	It introduces two new \tb{keywords}: \pp{async} \& \pp{await}.
+	
+	\medskip
+	
+	It provides an \tb{asynchronous} program loop running in \tb{a single thread}.
+	
+	\medskip
+	
+	Using \pp{asyncio} allows the currently executing function to \tb{pause} at certain points, letting another function continue that is not waiting on IO.
+	
+\end{frame}
+
+
+\begin{frame}{What does async do?}
+	Functions intended to run asynchronously are \tb{marked} with \pp{async def(...):}.
+	\newline
+	Within these functions, other asynchronous functions can be called and awaited.
+	
+	\medskip
+	
+	Calling an \pp{async} function returns a \tb{Coroutine} object instead of executing the function immediately. 
+	
+	\medskip
+	
+	The keyword \pp{await} \tb{blocks} the program flow of the function until the \pp{awaitable}\footnote{Async tasks are also awaitable: \url{https://docs.python.org/3/library/asyncio-task.html\#awaitables}} completes. The result is then returned.
+	
+	\medskip
+	
+	Async-\tb{tasks} are interesting because they allow multiple coroutines to run \tb{quasi-concurrently}.
+	
+\end{frame}
+
+
+
+\begin{frame}{Awaitable}
+	
+	An \pp{awaitable}\furl{https://docs.python.org/3/library/asyncio-task.html\#awaitables} is defined by implementing \pp{\_\_await\_\_()}\footnote{There are also \_\_aiter\_\_(), \_\_aenter\_\_() and more}. \newline
+	It can therefore be awaited using \pp{await}.
+	
+	\medskip
+	
+	The three built-in types of \pp{awaitables} are \tb{Coroutine}, \tb{Task} and \tb{Future}\footnote{Not discussed further here.}.
+	
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Starting an Async Loop}
+	The asynchronous program flow is started by \tb{calling} \pp{asyncio.run()}.
+	
+	\medskip
+	
+	The function takes a \tb{Coroutine} as argument.
+	\begin{lstlisting}[language=pytiny]
+		asyncio.run(main())
+	\end{lstlisting}
+	$\rightarrow$ The \tb{passed} function is unintuitively \tb{"executed"} when passed.
+	
+	\medskip
+	
+	The \tb{start} of the loop is \tb{blocking}.
+	
+\end{frame}
+
+
+\begin{frame}{Async-Coroutine}
+	A \tb{Coroutine} object\furl{https://docs.python.org/3/library/asyncio-task.html\#coroutines} is \tb{created} by \tb{"calling"} an \pp{async} function.
+	
+	\medskip
+	
+	The actual function is \tb{not executed} until it is \tb{passed to a Task} or \tb{awaited}.
+	
+	\medskip
+	
+	A \pp{coroutine} must be awaited before the end of the creating function.
+	
+	\medskip
+	
+	It is not possible to return an un-awaited \pp{coroutine}.
+\end{frame}
+
+
+% TODO: SleepToken Meme :P
+\begin{frame}[fragile]{Async-Coroutine Example}
+	\begin{lstlisting}[language=pytiny]
+import asyncio
+
+async def sleep(name: str, st=1):
+    """ helper to execute an 'IO-heavy' task (sleeping) """
+    print(f"[{name}] Before await")
+    await asyncio.sleep(st)
+    print(f"[{name}] After await")
+    return name
+
+async def main():
+    """ create and wait coroutines (synchronous behaviour) """
+    coro1 = sleep_token("call1")
+    coro2 = sleep_token("call2", st=2)
+
+    # note coro2 will be executed completely before coro1
+    await coro2
+    await coro1
+
+# start main async-loop
+asyncio.run(main())
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}{Async-Tasks}
+	An async-\tb{Task}\furl{https://docs.python.org/3/library/asyncio-task.html\#task-object} is scheduled for execution using \pp{asyncio.create_task()}.
+	\newline
+	This allows \tb{concurrent behavior}.
+	
+	\medskip
+	
+	The completion and \tb{result} can be \pp{awaited}.
+	\newline 
+	The \tb{task state} can be checked using \pp{.done()}.
+	\newline
+	The result of a completed task can be retrieved with \pp{.result()}.
+	
+	\medskip
+	
+	\pp{asyncio.gather()} waits for all passed tasks to finish and returns the results in the same order as passed.
+	
+	\medskip
+	
+	A task does not necessarily have to be awaited.
+	
+\end{frame}
+
+
+% TODO: SleepToken Meme :P
+\begin{frame}[fragile]{Async-Tasks Example}
+	\begin{lstlisting}[language=pytiny]
+import asyncio
+
+async def sleep(name: str, st=1):
+    """ helper to execute an 'IO-heavy' task (sleeping) """
+    print(f"[{name}] Before await")
+    await asyncio.sleep(st)
+    print(f"[{name}] After await")
+    return name
+
+async def main():
+    task1 = asyncio.create_task(sleep("call1"))  # create task
+    task2 = asyncio.create_task(sleep("call2"))
+    print(type(task1))  # >> <class '_asyncio.Task'>
+
+    res1, res2 = await asyncio.gather(task1, task2)  # wait for tasks to finish
+    print(res1, res2)  # >> call1, call2
+
+# start main async-loop
+asyncio.run(main())
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Async-Taskgroup}
+	Same example as above using a \tb{TaskGroup}\furl{https://docs.python.org/3/library/asyncio-task.html\#task-groups}.
+	
+	\medskip
+	
+	Multiple tasks can be easily scheduled in it.
+	
+	\medskip
+	
+	Leaving the \tb{context block} ensures all tasks are \tb{completed}.
+	
+	\begin{lstlisting}[language=pytiny]
+async def main():
+    print(f"started at {time.strftime('%X')}")  # %X -> hh:mm:ss
+    async with asyncio.TaskGroup() as tg:
+        task1 = tg.create_task(sleep('call1'))
+
+        task2 = tg.create_task(sleep("call2"))
+
+    print(f"ended at {time.strftime('%X')}")
+
+    print(task1.result())
+
+asyncio.run(main())
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}{Where can Async functions be interrupted?}
+	
+	In short: Anywhere an \tb{interaction} with \pp{asyncio} happens.
+	
+	\medskip
+	
+	Program flow can pause when calling \pp{async} functions and using \pp{await}, and continue elsewhere.
+	
+\end{frame}
+
+
+
+\begin{frame}{Protecting Resources}
+	When multiple functions can run \tb{'simultaneously'}, shared \tb{resources} may need to be \tb{protected}\footnote{\url{https://docs.python.org/3/library/asyncio-sync.html\#synchronization-primitives}}.
+	
+	\medskip
+	
+	Unlike multithreading, not all accesses need protection.
+	
+	\medskip
+	
+	A resource should be \tb{protected} if its consistency is required across multiple \tb{async calls}.
+	
+	\medskip
+	
+	Also, libraries may \tb{'internally'} use \pp{asyncio}, transferring control back to the library.
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Timeout}
+	With \pp{asyncio.timeout()}\footnote{\url{https://docs.python.org/3/library/asyncio-task.html\#timeouts}} a \pp{Task} can be terminated after a set duration.
+	
+	\medskip
+	
+	Timeouts can be set and rescheduled with \pp{asyncio.Timeout}.
+	\newline
+	It can also be queried whether the timeout was reached.
+	
+	\begin{lstlisting}[language=pytiny]
+async def main():
+    try:
+        async with asyncio.timeout(10):
+        await long_running_task()
+    except TimeoutError:
+        print("The long operation timed out, but we've handled it.")
+	\end{lstlisting}
+	
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Async-Subprocess}
+	\pp{asyncio} provides an interface to run subprocesses\footnote{Better known as shell commands}.
+	
+	\medskip
+	
+	More information here:\newline \url{https://docs.python.org/3/library/asyncio-subprocess.html}
+	
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+	\Utext{Any Questions?}
+}
+
+
+
+%\begin{frame}[fragile]{Final Response}
+%	\begin{lstlisting}[language=pytiny]
+%		
+%	\end{lstlisting}
+%\end{frame}
+
+
+\silentsection{Honorable Mentions}
+
+\subsection{Contents for another week}
+
+
+\begin{frame}[fragile]{Honorable Mentions I}
+	\begin{itemize}
+		\item Abstract Baseclasses\furl{https://docs.python.org/3/library/collections.abc.html\#collections-abstract-base-classes}: Create your own typehint-able \tb{types}.
+		
+		\item Beautiful Soup\furl{https://www.crummy.com/software/BeautifulSoup/bs4/doc/}: Parse \tb{HTML} and XML.
+		
+		\item Collections\furl{https://docs.python.org/3/library/collections.html} and especially the \tb{defaultdict}.
+		
+		\item deepcopy\furl{https://docs.python.org/3/library/copy.html\#copy.deepcopy}: Create \tb{complete} copies of an object.
+		
+		\item discord.py\furl{https://discordpy.readthedocs.io/en/stable/}: Interact with \tb{Discord} and provide bots.
+		
+		\item inspect\furl{https://docs.python.org/3/library/inspect.html\#module-inspect}: Analyze \tb{function signatures} and other things at runtime.
+		
+		\item langgraph\furl{https://langchain-ai.github.io/langgraph/}: \tb{Autonomous LLM agents} with tools and control flow in Python.
+		
+		\item os\furl{https://docs.python.org/3/library/os.html\#module-os}: Interaction with the file system and \tb{operating system}.
+		
+	\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Honorable Mentions II - Libraries with P}
+	\begin{itemize}
+		
+		\item Pillow\furl{https://pypi.org/project/Pillow/}: Read and process \tb{images}.
+		
+		\item pynput\furl{https://pypi.org/project/pynput/}: Simulate \tb{keyboard} and mouse.
+		
+		\item PyPDF2\furl{https://pypi.org/project/PyPDF2/}: Read and edit \tb{PDFs}.
+		
+		\item python-telegram-bot\furl{https://pypi.org/project/python-telegram-bot/}: \tb{Telegram} bots
+		
+	\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Honorable Mentions III}
+	\begin{itemize}
+		
+		\item qrcode\furl{https://pypi.org/project/qrcode/}: Create \tb{QR codes}.
+		
+		\item re\furl{https://docs.python.org/3/library/re.html}: \tb{RegEx} in Python.
+		
+		\item Selenium\furl{https://pypi.org/project/selenium/}: Control a \tb{browser} with Python.
+		
+		\item subprocess\furl{https://docs.python.org/3/library/subprocess.html}: Execute \tb{command line} commands from within Python.
+		
+		\item tempfile\furl{https://docs.python.org/3/library/tempfile.html}: Create \tb{temporary} (named) files.
+	\end{itemize}
+\end{frame}
+
+
+
+
+
+\begin{frame}{Evaluation}
+	\begin{figure}
+		\begin{center}
+			\includegraphics[height=.66\textheight]{survey.png}
+			\caption{\url{https://limesurvey.informatik.uni-bonn.de/index.php/395267?lang=en}}
+		\end{center}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}{Credits}
+	This course wouldn't have been possible without:
+	\begin{itemize}
+		\item My Parents
+		\item Felix Boes
+		\item Adrian Oeyen
+		\item Sophia Sirtl
+		\item My amazing tutors
+		\item Die Anatomie
+		\item Das HISKP
+	\end{itemize}
+	\nll{Probably my last time holding that course}
+\end{frame}
+
+
+
+\framecardblue{
+	\Utext{
+	Thanks for attending!\\ -Chris}
+}
+
+
+\end{document}

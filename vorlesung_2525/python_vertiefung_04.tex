@@ -1,0 +1,1363 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+%\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+\documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\input{config/minimal_beamer_style}
+\input{config/listings_theme}
+\input{config/global_config}
+\input{config/custom-command}
+
+
+\AuthorName{Chris Geron \& Adrian Oeyen}
+\AuthorEmail{\{s6chgero, s6adoeye\}@uni-bonn.de}
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Threading, Multiprocessing, Functools, Itertools, Logging}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+\begin{document}
+
+\titlepage
+
+
+\input{config/orga.tex}
+
+
+
+\silentsection{Prozesse vs Threading}
+
+\subsection{Ein genereller Überblick}
+
+\begin{frame}[fragile]{Disclaimer}
+        The following overview of processes and threads is extremely \tb{condensed}. 
+	\pause
+	
+	\medskip
+	
+	\begin{itemize}
+		\item It is necessary to understand the \tb{differences} and the resulting issues.
+		\pause
+		\item Content-wise it is based on the lecture \tb{Systemnahe Programmierung} by\newline
+		 Dr. Matthias Frank and Dr. Matthias Wübbeling.
+	\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Motivation}
+    	 A simple program runs \tb{sequentially}.
+	
+		\medskip
+		
+		If an operation takes longer (e.g., waiting for I/O), the program \tb{blocks} at that point.
+		
+		\medskip
+		
+		This can happen, among other things, by \tb{waiting} for user input or for network traffic.
+		
+		\medskip
+		
+		Through threads and processes, it is possible to execute multiple operations \tb{in parallel}.
+		
+		\medskip
+		
+		Thus, a program (e.g., the UI) can continue to \tb{respond} while a more complex operation is running in the \tb{background}.
+		
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Process}
+	    By itself, a processor\footnote{Assuming a simple one-core processor without hyperthreading} can only execute \tb{one} program at a time.
+		\pause
+		
+		\medskip
+		
+		A process is an \tb{abstraction} that allows multiple programs to run \tb{concurrently} on a processor.
+		\pause
+		
+		\medskip
+		
+		It runs \tb{independently} of other processes in its \tb{own} address space.
+		\pause
+		
+		\medskip
+		
+		The \tb{operating system} decides when and for how long the next process will run.
+
+\end{frame}
+% TODO: Threads vs Async:
+% - async only breaks on IO, threads at any time
+
+\begin{frame}[fragile]{Threads}
+        Threads work \tb{within} a process and \tb{share} its compute time.
+		\pause
+		
+		\medskip
+		
+		Threads are executed \tb{independently} of the other threads of the process.
+		\pause
+		
+		\medskip
+		
+		They share the same \tb{global} variables.
+		\pause
+		
+		\medskip
+		
+		There is no built-in \tb{thread safety}.
+		
+		\medskip
+		
+		$\rightarrow$ Read \& write conflicts between threads may occur!
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Kernel Threads vs User Threads}
+        \pause
+		\tb{Kernel} Threads:
+		\pause
+		\begin{itemize}
+			\item They are created and managed by the \tb{operating system}.
+			\pause
+			\item They can truly make use of \tb{multiple} processor cores.
+			\pause
+			\item The operating system is involved in the \tb{management} of these threads.
+		\end{itemize}
+		\pause
+		\medskip
+		\pause
+		\tb{User} Threads:  
+		\begin{itemize}
+			\pause
+			\item Implemented at the level of a \tb{program} / a library.
+			\pause
+			\item The operating system only sees one stream of instructions (the process). 
+			\item[] Because of this, no use can be made of multiple kernel threads.
+			\pause
+			\item[] $\rightarrow$ The program can only \tb{simulate} concurrency!
+			\pause
+			\item This creates more \tb{management overhead} at the program level, which reduces performance.
+		\end{itemize}
+\nll{Now we've got a CPU with multiple cores etc.}
+\end{frame}
+
+
+\begin{frame}[fragile]{Wishes for concurrent program flow}
+        \tb{Communication} of data between concurrent program sections,\newline
+		communicating tasks and results, managing \tb{shared} variables (e.g., counters), \tb{reacting} to changes, etc.
+		
+		\medskip
+		
+		\tb{Protection} of shared resources\newline
+		%
+		e.g., no one should read while another instance is writing.
+		
+		\medskip
+		
+		\tb{Synchronization}
+		\newline
+		At certain points, a process / thread should be able to wait until a condition is met.
+		\newline
+		$\rightarrow$ Both threads and processes (and their libraries) provide appropriate functionality.
+
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+\subsection{Threading in Python}
+\begin{frame}[fragile]{Bad News}
+	\pause
+	\centering
+
+		The standard implementation\footnote{\url{https://github.com/python/cpython}} of Python3 supports \tb{only user threads}.
+
+		
+		\medskip
+		
+		\pause
+
+		Python3.12 introduces options to have true threading.
+
+	% TODO: insert this "directed by robert d. weide" outro meme
+\end{frame}
+
+\begin{frame}[fragile]{User Threads in Python}
+        Python provides the \pp{threading} library.
+
+		\medskip
+		
+		With it, it is possible to create \tb{concurrent behavior} in Python.
+		
+		\medskip
+		
+		The library provides tools to create and synchronize \tb{user} threads.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Starting a Thread}
+        Create a \tb{Thread} object with \pp{threading.Thread()} using
+
+		\begin{itemize}
+			\item a \tb{target} function to be executed in the thread
+			\pause
+			\item optional \tb{arguments} required by the target function (\pp{args=}, \pp{kwargs=})
+			\pause
+			\item an optional \tb{name} for the thread
+			\item a flag indicating whether the thread should be a daemon thread (\pp{daemon=}).
+		\end{itemize}
+		
+		\medskip
+		
+		The options \pp{daemon} and \pp{name} can still be adjusted after construction.
+		
+		\medskip
+		
+		\tb{Start} the thread by calling \pp{<thread>.start()} on the thread object.
+
+\end{frame}
+
+\begin{frame}[fragile]{Ending Threads}
+	\begin{itemize}
+		\item Once a thread is started, it must \tb{terminate} before the program ends.
+		\pause
+		
+		\item To avoid having to \tb{wait} for threads before program termination, there are \tb{daemon} threads.
+		
+		\item[] As soon as the main thread and all normal threads have reached the \tb{end}, the daemons and the program terminate.
+		
+		\pause
+		\item A thread becomes a daemon by being defined as such before starting.
+		\item[]\begin{lstlisting}[language=pytiny]
+  thread = threading.Thread(target=say_hello)
+  thread.daemon = True
+  thread.start()
+		\end{lstlisting}
+		
+		\pause
+		\item With \pp{thread.join()} you can \tb{wait} for the thread blockingly.
+		\item[] \pp{.join()} provides an optional \tb{timeout} after which the program continues.
+		\item[] $\rightarrow$ The timeout does not terminate the thread!
+		\pause
+		\item With \pp{thread.is_alive()} you can check whether it is still running.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Threads minimal Example}
+	\begin{lstlisting}[language=pytiny]
+import threading
+import time
+
+def say_a_word(word: str):
+    print(f"[{threading.current_thread().name: <16}] '{word}'")
+
+if __name__ == '__main__':
+
+    # Create thread that shall execute say_a_word(), with optional name
+    say_hello_thread = threading.Thread(target=say_a_word, args=("Hello",), name="hello_thread")
+
+    say_hello_thread.daemon = True  # Decided to make it a daemon afterwards
+
+    say_hello_thread.start()  # Start the thread
+
+    # This print may appear in the same line as the first thread print
+    print(f"[{threading.current_thread().name: <16}] This is '__main__'")
+
+    say_hello_thread.join()  # Wait for threads to finish
+		
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Thread Synchronization - Locks}
+        Sometimes it is necessary to \tb{protect} a \tb{resource} while it is being used.
+        
+        \pause
+        
+        \pause
+
+		\medskip
+		
+		$\rightarrow$ If a list is being modified, no one else should be reading it at the same time.
+		
+		\medskip
+		
+		For this, Python provides the \tb{Lock}\footnote{A lock gets its semantic meaning \glqq protects resource \texttt{x}\grqq~solely through its usage around resource \texttt{x}! Meaningful naming is therefore important.} and \tb{Condition Objects}\furl{https://docs.python.org/3.10/library/threading.html\#condition-objects}.
+		
+		\medskip
+		
+		A \tb{Lock} can only be \tb{held} by \tb{one} thread at any given time.
+		
+		\medskip
+		
+		Natively, \pp{Lock} and \pp{RLock} are available; a Read-Write Lock\footnote{RW-Lock: Allows any number of read allocations simultaneously, but only one write allocation. Read and write allocations are mutually exclusive.} is not implemented.
+		
+		\medskip
+		
+		Locks can be allocated using \pp{.acquire()} or the \pp{with} \tb{context manager}.
+		
+		\medskip
+		
+		A thread must \tb{release} the lock again at the \tb{end} of its work!
+		
+		\medskip
+		
+		With \pp{.acquire()}, you must call \pp{.release()} at the end.
+		
+		\medskip
+		
+		The \pp{with} context manager does this automatically at the end of the context block.
+		
+			\only<2|handout:2>{
+			\begin{textblock}{12.3}(0.755, 1.65)
+				\includegraphics[height=.805\textheight]{images/04-thread-joke.jpeg}
+				\newline
+				\tiny Original: https://x.com/ashevat/status/1350548449364623361?lang=en\newline
+				This screenshot: https://www.reddit.com/r/ProgrammerHumor/comments/1fbsnd8/humorprogrammingadvancethisis/
+			\end{textblock}
+		}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Locking - An Example}
+	\begin{lstlisting}[language=pytiny]
+important_lock = threading.Lock()
+
+def get_lock_and_print():
+    time.sleep(1)
+    while True:
+        if important_lock.acquire(blocking=True, timeout=1.0):
+            print(f"[{threading.current_thread().name: <4}] Got the Lock!")
+            lock.release()
+            break
+        print(f"[{threading.current_thread().name: <4}] Waiting...")
+
+
+thread_1 = threading.Thread(target=get_lock_and_print, name="T1")
+thread_1.start()  # Start the thread
+
+with important_lock:
+    print(f"[{'Main': <4}] Got the Lock!")
+    time.sleep(5)
+    print(f"[{'Main': <4}] Operation is over!")
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{When do I need to lock?}
+	\begin{itemize}
+
+		\item When a resource is being used by \tb{multiple} threads in parallel not only for reading...
+		\item[] ...and these operations are non-atomic.
+		\footnote{Atomic operation: An operation that is processed as a single, indivisible unit (and cannot be interrupted by other threads).}.
+		\pause
+		
+		\item Unfortunately, Python’s definition of atomic operations is somewhat vague:
+		\item[] \glqq In practice, it means that operations on shared variables of \tb{built-in} data types (ints, lists, dicts etc.) that \tb{\glqq look atomic\grqq~really are}.\grqq\footnote{\url{https://docs.python.org/3/faq/library.html\#what-kinds-of-global-value-mutation-are-thread-safe}}
+		\item[] $\rightarrow$ What is written as a one-liner operation will already be atomic.
+		
+		\pause
+		\item As a general rule: For \tb{safety}, use a \tb{Lock}.
+		\item[] This definition only applies to Python3 with the \pp{global interpreter lock}.
+		\item[] \tb{Other} Python implementations may handle this differently!\footnote{Starting with Python 3.12, there are official Python versions without the Global Interpreter Lock}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Reminder: Deadlocks}
+        Deadlocks occur when multiple threads \tb{mutually} wait on resources\newline
+         that are already \tb{held} by another (waiting) thread.
+	\pause
+	
+	\medskip
+	
+	Reminder: The spaghetti philosophers from 'Systemnahe Infromatik'.
+	\pause
+	
+	\medskip
+	
+	Caution: A \pp{Lock} can only be locked \tb{once} by the \tb{same} thread!
+	If it tries to lock it again, a deadlock situation occurs.
+	\pause
+	
+	\medskip
+	
+	If the same thread should be able to lock \tb{multiple times}, \pp{RLock} can be used.\newline
+	The \pp{RLock} must then be released as many times as it was locked.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Thread Synchronization - Barrier}
+        There are situations where multiple threads need to \tb{wait} for each other.
+
+		\medskip
+		
+		For this, threads offer the concept of a \tb{Barrier}.
+		
+		\pause
+		\medskip
+		
+		A \pp{Barrier} \tb{blocks} a thread until the required \tb{number} of threads has arrived at it.
+		
+		\pause
+		\medskip
+		
+		Once enough threads have arrived, the block is lifted for \tb{all} waiting threads.
+		\begin{itemize}
+			\item The \pp{.wait()} function provides an optional timeout.
+			\item The return of \pp{.wait()} is the number of waiting threads, not a Boolean!
+		\end{itemize}
+		
+		\pause
+		
+		Again, the \tb{order} in which the threads proceed after the barrier is \tb{unknown}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Barrier - An Example}
+	\begin{lstlisting}[language=pytiny]
+barrier = threading.Barrier(parties=3)
+
+def wait_at_barrier():
+    time.sleep(1)
+    print(f"[{threading.current_thread().name: <4}] Reached barrier - waiting...")
+    barrier.wait()
+    print(f"[{threading.current_thread().name: <4}] Passed the barrier!")
+
+threading.Thread(target=wait_at_barrier, name="T1").start()
+
+threading.Thread(target=wait_at_barrier, name="T2").start()
+
+print(f"[{'Main': <4}] Preparing something....!")
+time.sleep(3)
+print(f"[{'Main': <4}] Done.")
+barrier.wait()
+print(f"[{'Main': <4}] Passed the barrier!")
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Synchronization via Status Variables}
+        Threads can communicate by setting (global) status variables.
+
+		\medskip
+		
+		This can quickly become very \tb{confusing}!
+		
+		\medskip
+		
+		Constantly checking status variables can easily lead to \tb{busy waiting}\footnote{When the consumed CPU time is spent only on waiting for a change instead of performing useful computations.}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Synchronization via Status Variables - An Example}
+	\pause
+	\begin{center}
+		\LARGE
+		\tb{Nope.}
+	\end{center}
+	
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+\subsection{Multiprocessing}
+
+\begin{frame}[fragile]{Processes in Python}
+        Python provides the \tb{multiprocessing} library\footnote{On MacOS this can cause problems. The library \texttt{multiprocess} is a 1:1 replacement which fixes these issues: \furl{https://pypi.org/project/multiprocess/}}.
+
+		\pause
+		\medskip
+		
+		Through this, it is possible to create \tb{truly concurrent} behavior across multiple processes/CPU cores.
+		\pause
+		
+		\medskip
+		
+		It is truly possible to utilize \tb{more performance}.
+		
+		\pause
+		\medskip
+		
+		The library provides functionality for creating and synchronizing processes.
+		
+		\pause
+		\medskip
+		
+		Since processes live in \tb{different address spaces}, simple data exchange is more difficult.
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Creating Processes}
+        The \pp{multiprocessing} library behaves very similarly to the \pp{threading} library.
+
+		\medskip
+		
+		The interfaces are \tb{almost identical}\footnote{The only quickly noticeable difference is that the keyword arguments parameter is called \texttt{kwargs} for threads and \texttt{kwds} for multiprocessing.}.
+		
+		\medskip
+		
+		However, the objects have different names.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Reminder: Minimal Threads Example}
+	\begin{lstlisting}[language=pytiny]
+import threading
+import time
+
+def say_a_word(word: str):
+    print(f"[{threading.current_thread().name: <16}] '{word}'")
+
+if __name__ == '__main__':
+
+    # Create thread that shall execute say_a_word(), with optional name
+    say_hello_thread = threading.Thread(target=say_a_word, args=("Hello",), name="hello_thread")
+    
+    say_hello_thread.daemon = True  # Decided to make it a daemon afterwards
+
+    say_hello_thread.start()  # Start the thread
+
+    # This print may appear in the same line as the first thread print
+    print(f"[{threading.current_thread().name: <16}] This is '__main__'")
+
+    say_hello_thread.join()  # Wait for threads to finish
+		
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Minimal Process Example}
+	\begin{lstlisting}[language=pytiny]
+import multiprocessing
+import time
+
+def say_a_word(word: str):
+    print(f"[{multiprocessing.current_process().name: <17}] '{word}'")
+
+if __name__ == '__main__':
+
+    # Create process that shall execute say_a_word(), with optional name
+    say_hello_process = multiprocessing.Process(target=say_a_word, args=("hello",), name="hello_process")
+    
+    say_hello_process.daemon = True  # Decided to make it a daemon afterwards
+
+    say_hello_process.start()  # Start the process
+
+    # This print may appear in the same line as the first thread print
+    print(f"[{multiprocessing.current_process().name: <17}] This is '__main__'")
+
+    say_hello_process.join()  # Wait for process to finish
+		
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Diff}
+	\begin{figure}
+		\includegraphics[height=0.7\textheight]{thread_vs_process.png}
+		\caption{The diff between the threading and multiprocessing examples}
+	\end{figure}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Multiprocessing - a 1:1 Replacement for Threading?}
+
+		The main problem is the \tb{different address space}.\newline
+		Because of this, there can be \tb{no shared} read and write operations on the same object.
+		\nll{There are workarounds we will later see}
+	
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Variables and Processes}
+        The function executed in a process takes along \tb{all global variables} of its scope.
+
+		\medskip
+		
+		A \tb{copy} of these is created.
+		
+		\medskip
+		
+		If one process \tb{changes} its data a variable, the \tb{other} processes are \tb{not} aware of it.
+		
+		\pause
+		
+		The creating process is called the \tb{parent}, the created one is called the \tb{child}.
+
+\end{frame}
+
+
+%TODO: Super mario meme
+\begin{frame}[fragile]{Communication Between Processes}
+	\begin{itemize}
+		\item So-called \tb{pipes} can be created between processes.
+		\pause
+		
+		\item Additionally, there are e.g. message \tb{queues}, semaphores.
+		\pause
+        \item Shared memory (\pp{Value}, \pp{Array}) can be created\furl{https://docs.python.org/3/library/multiprocessing.html\#shared-ctypes-objects}.
+        \item Shared objects via proxy access and a sync server\furl{https://docs.python.org/3/library/multiprocessing.html\#customized-managers}
+		\item Communication via sockets (as network communication) is also possible.
+		\item External databases, message queues, ... are also possible of course.
+	\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Pipe}
+        A \tb{multiprocessing.Pipe} is a connection between \tb{two processes}.
+
+		\medskip
+		
+		You can really think of it like a tube between two processes.\newline
+		On both sides you can \tb{read and write}\footnote{This only applies to duplex pipes. One-way pipes are also possible.}.
+		
+		\medskip
+		
+		Messages can be read from the receiving side of the pipe as long as the pipe is open on that side.
+		
+		\medskip
+		
+		A pipe can be written to as long as it is still open on the receiving side.
+		
+		\medskip
+		
+		A pipe should be \tb{closed} when it is no longer needed.
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Pipe in Python}
+    The return value of \pp{multiprocessing.Pipe()} is a \tb{tuple} of\\ \pp{multiprocessing.connection.Connection}\footnote{The connection has an interface analogous to a socket.}\footnote{To type-hint it, \texttt{multiprocessing.connection} or \texttt{Connection} must be directly imported.}, each representing \tb{one side}.
+
+\medskip
+
+With \pp{.send()} you can write, and with \pp{.recv()} you can read.
+
+\medskip
+
+Data is transferred \tb{serialized} via \pp{pickle}.
+\newline
+This is noticeably slow at high data rates, .
+
+\medskip
+
+With \pp{.poll(timeout=...)} you can check if data is available in the pipe.
+
+\medskip
+
+Pipes are closed with \pp{.close()} when no longer needed.
+\newline
+If you try to write to a pipe that is closed on the other side, you get an \pp{OSError}\footnote{Sources mention a BrokenPipeError, which however could not be reproduced for the 2024 lecture.}.
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Pipe in Python - Caution!}
+	If you try to \tb{read} from a \tb{closed} pipe with \pp{recv}, the docs\furl{https://docs.python.org/3/library/multiprocessing.html\#multiprocessing.connection.Connection.recv} promise an \pp{EOFError}.
+	
+	\medskip
+	
+	In reality, \pp{recv} \tb{blocks} until new data is received, which obviously never happens with a closed pipe.
+	
+	\medskip
+	
+	Thus, one can conclude that \pp{recv} should \tb{only be called in combination with} a positive check from \tb{poll}!
+	
+	\medskip
+	
+	This seems to be a Linux- and MacOS-specific issue\furl{https://github.com/python/cpython/issues/56697}. 
+	
+	\medskip
+	
+	Workaround: Define which \tb{message} means the \tb{end of communication} and always check for this message when receiving.\footnote{None or \glqq END\grqq~are common markers.}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Minimal Pipe Example}
+	\begin{lstlisting}[language=pytiny]
+def sender(pipe: multiprocessing.connection.Connection):
+    messages_to_send = ["Message 1", "Message 2", "Message 3"]
+    for msg in messages_to_send:
+        pipe.send(msg)   # put message to pipe
+        time.sleep(0.5)  # Add a delay between messages
+
+if __name__ == "__main__":
+
+    parent_side, child_side = multiprocessing.Pipe()  # create pipe
+
+    sender_process = multiprocessing.Process(target=sender, args=(parent_side,)).start()
+
+    while True:
+        if child_side.poll(timeout=2):  # try to get a new message, timeout after two seconds
+            received_data = child_side.recv()  # read data if available
+            print("Received:", received_data)
+        else:
+            print("No more messages.")
+            break
+	\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Queues in Python}
+    	\pp{multiprocessing.Queue}\footnote{\url{https://docs.python.org/3/library/multiprocessing.html\#multiprocessing.Queue}} is process-safe and is used for the \tb{exchange} of content between \tb{multiple processes}\footnote{In particular, more than two are possible.}.
+
+		\medskip
+		
+		All processes can \tb{write and read} to/from a queue.
+		
+		\medskip
+		
+		Note: Analogous to multiprocessing queue, there is \pp{queue.Queue}, which is thread-safe, and \pp{asyncio} also provides its own queue.
+		
+		\medskip
+		
+		The \glqq \tb{normal}\grqq~ (and more efficient) queue is called \pp{collections.deque}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Queues - Example}
+	\begin{lstlisting}[language=pytiny]
+def producer(queue):
+    messages_to_send = ["Message 1", "Message 2", "Message 3"]
+    for msg in messages_to_send:
+        queue.put(msg)
+        time.sleep(1)  # Add a delay between messages
+    queue.put(None)    # Signal the end of messages
+
+if __name__ == "__main__":
+    queue = multiprocessing.Queue()
+
+    producer_process = multiprocessing.Process(target=producer, args=(queue,))
+    producer_process.start()
+
+    while True:
+        message = queue.get()
+        if message is None:  # None is explicitly used to signal the end of messages
+            break
+        print("Received:", message)
+
+    producer_process.join()
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{A Look Under the Hood: pickle}
+        The \pp{pickle} module can \tb{serialize objects as a byte stream}.
+
+\pause
+\medskip
+
+This contains the \tb{concrete object} with its data.
+
+\pause
+\medskip
+
+Streams can then be sent to other \tb{processes} via \pp{Pipe}.
+
+\pause
+\medskip
+
+Condition: The serialized class must be \tb{known} in the importing module.
+
+\medskip
+
+\tb{Global} variables are carried over from the \tb{old} scope.
+
+\medskip
+
+\tb{Class variables}, etc., are taken from the \tb{current} scope.
+
+\pause
+\medskip
+
+It is possible to create \tb{dumps} which execute \tb{arbitrary} code during loading. This is especially useful for malicious developers\footnote{For securing, signing with hmac (\url{https://docs.python.org/3/library/hmac.html\#module-hmac}) or json serialization is recommended.}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Serializing with pickle}
+	\begin{lstlisting}[language=pytiny]
+import pickle
+
+
+class PickleClass:
+    class_var = "cv"
+    def __init__(self, data):
+        self.data = data
+
+    def say_global_var_x(self):
+        print(x)
+
+    def say_data(self):
+        print(self.data)
+
+x = 42
+obj = PickleClass(69)
+
+# file needs to be opened in byte mode
+with open("pkl_file.pkl", "wb") as f:
+    pickle.dump(obj, f)		
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Deserializing with pickle}
+	\begin{lstlisting}[language=pytiny]
+import pickle
+
+from pickle_dump import PickleClass
+
+x = 41
+
+PickleClass.class_var = "newcv"
+
+with open("pkl_file.pkl", "rb") as f:
+    obj = pickle.load(f)
+
+obj.say_global_var_x()  # >> 42
+obj.say_data()          # >> 69
+print(obj.class_var)    # >> "newcv"
+
+x = 43
+obj.say_global_var_x()  # >> 42
+		
+	\end{lstlisting}
+\end{frame}
+
+
+% TODO: is this universally correct?
+\begin{frame}[fragile]{Signals}
+    \tb{Signals} are a whole topic in themselves; we are covering them only very superficially.
+
+	\pause
+	
+	\medskip
+	
+	Processes can \tb{communicate} via signals.
+	
+	\pause
+	
+	\medskip
+	
+	Each process can register a \tb{signal handler}, which defines a behavior when a signal is received.
+	\newline
+	In Python, they can be registered via the \pp{signal} module.
+
+	
+	\pause
+	
+	\medskip
+	
+	Signals are handled \tb{independently of program flow} as soon as they arrive.
+	
+	\pause
+	
+	\medskip
+	
+	Relevant signals\footnote{Signals are also predefined in the signal module.} are \pp{SIGINT}\footnote{Sent e.g. by Ctrl+C.}, \pp{SIGTERM}\footnote{Sent by the kill command by default.} and \pp{SIGHUP}\footnote{The signal that the terminal running the process has been closed.}.
+	\newline  
+	Fun fact: \pp{SIGKILL} cannot be intercepted.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Minimal Signals Example}
+	\begin{lstlisting}[language=pytiny]
+def child_process():
+    def child_signal_handler(sig, frame):
+        print("Received SIGINT in child process. Exiting gracefully.")
+        exit(0)
+
+    # Set up the signal handler for SIGINT (Ctrl+C) in the child process
+    signal.signal(signal.SIGINT, child_signal_handler)
+
+    while True:
+        print("Child process is running.")
+
+if __name__ == "__main__":
+    child_proc = multiprocessing.Process(target=child_process)
+    child_proc.start()
+
+    time.sleep(3)
+    print("Sending the 'Ctrl+C' Signal from main to child process.")
+    child_proc.terminate()
+    child_proc.join()
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Signals - The Brutal Way}
+
+		Using the \pp{os} module, an unresponsive child process can be \tb{forcefully} killed.
+		
+		\pause
+		
+		This gives the process \tb{no} chance to stop gracefully, e.g., to save data.
+
+	\begin{lstlisting}[language=pytiny]
+def infinite_loop():
+    while True:
+        print("I'm unstoppable! - Wheeee!")
+
+# Start child
+child = multiprocessing.Process(target=infinite_loop)
+child.start()
+
+# Wait for a few seconds
+time.sleep(3)
+
+# Kill the child using SIGKILL
+print("That's enough...")
+os.kill(child.pid, signal.SIGKILL)
+print(f"No you're not. ~parent")
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Multiprocessing Made Easy}
+        Python has \tb{abstracted} much of the setup for processes.
+
+		\medskip
+		
+		\pause
+		
+		Python provides \tb{process pools}\footnote{\url{https://docs.python.org/3/library/multiprocessing.html\#module-multiprocessing.pool}}.
+		\newline
+		A \pp{Pool} is a collection of n processes, to which tasks are then \tb{automatically distributed}.
+		
+		\medskip
+		
+		\pause
+		
+		Pools can use \tb{maps}. One of these maps is \pp{starmap}.
+		\newline
+		It takes an \tb{iterable} object of iterable argument sets and returns the \tb{list} of return values. The values are in the same order as the arguments were ordered.
+		
+		\medskip
+		
+		\pause
+		
+		Just because a pool consists of n processes does not mean that all n processes are always used.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Starmap}
+	\begin{lstlisting}[language=pytiny]
+import multiprocessing
+import time
+
+
+def worker_function(a, b):
+    result = a + b
+    print(f"[{multiprocessing.current_process().name: <17}] {a+b = }")
+    time.sleep(2)  # sleep to better visualize the result
+    return result
+
+if __name__ == "__main__":
+    # List of argument tuples
+    arguments = [(1, 2), (3, 4), (5, 6), (7, 8)]
+
+    # Create a pool of processes with four processes
+    # If no number is passed python will use os.cpu_count() as default
+    with multiprocessing.Pool(processes=4) as pool:
+        results = pool.starmap(worker_function, arguments)
+
+    print("Results:", results)
+
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Pool.apply\_async}
+        \pp{Pool.apply_async} is a nice \glqq drop-in\grqq~\tb{replacement} for computations, e.g., inside an already \tb{existing loop}, without much restructuring.
+
+		\medskip
+		
+		Instead of explicitly preparing the inputs for a \pp{map} or \pp{starmap}, computations are scheduled directly with the current parameters.
+		
+		\medskip
+		
+		Tasks are scheduled \tb{non-blocking}. The return value is an \pp{AsyncResult}.
+		\newline
+		The result can be retrieved with \pp{.get()} (blocking).
+		
+		\medskip
+		
+		$\rightarrow$ It is necessary to keep track of the \tb{scheduled processes} when the \tb{return value} is relevant.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Pool.apply\_async - Example}
+	\begin{lstlisting}[language=pytiny]
+def parabola(x: float, a=1, b=0):
+    return a * x**2 + b
+
+pool = Pool(processes=4)
+inputs: list[int] = list(range(20))
+tasks: list[tuple[AsyncResult, tuple[int, int, int]]] = []  # stores task and parameters used
+
+for i in inputs:
+    # generate all the tasks from line that was the previous calculation
+    # note the creation of kwargs via dict() as easier drop-in from previous structure
+    task = pool.apply_async(parabola, args=(i,), kwds=dict(a=i, b=i))  
+    tasks.append([task, (i, i, i)])
+
+# Get the return values from the asynchronous tasks in the order they were submitted
+for task, (a, x, b) in tasks:
+    output = task.get()  # note: get is blocking
+    print(f"{a}*{x}**2+{b} = {output}")
+
+pool.close()  # don't accept any new tasks, worker-processes will exit when queue is done
+pool.join()   # wait for worker-processes to exit
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Note: RuntimeError}
+    During the creation of a process, \tb{no other} process can be spawned.
+
+	\medskip
+	
+	A long and somewhat cryptic \pp{RuntimeError} occurs if processes are spawned in the main file, \tb{outside} a function and the \pp{__main__} check.
+	
+	\medskip
+	
+	Reason: When a new process is created, the module is \tb{reloaded} in the new process and thus executed.
+	\newline
+	In doing so, it may \tb{recursively} attempt to spawn processes. Python prevents this with an error.
+	
+	\medskip
+	
+	The solution is to simply place the \tb{creation} behind the \pp{__main__} check.
+	\newline
+	This is because the \tb{value} of \pp{__name__} in child processes is \pp{__mp_main__} instead of \pp{__main__}.
+	
+	\medskip
+	
+	The \tb{name} of a \tb{process} can be queried with \pp{.current_process().name}.
+	\newline
+	The main process is always called \pp{MainProcess}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Debugging Potential Deadlocks Effectively}
+        It is difficult to pinpoint the \tb{location} where a program might hang.
+
+		\pause
+		\medskip
+		
+		Python provides the \pp{faulthandler}\furl{https://docs.python.org/3/library/faulthandler.html} module for \tb{examining} long-running operations that may potentially be \tb{deadlocks}.
+		
+		\pause
+		\medskip
+		
+		\pp{faulthandler} provides ways to neatly output Python's \tb{traceback}.
+		
+		\pause
+		\medskip
+		
+		Upon receiving a \tb{signal}\footnote{Possible signals to trigger a traceback: \texttt{SIGSEGV, SIGFPE, SIGABRT, SIGBUS, SIGILL}}, the current traceback is printed.
+		\newline
+		The module can be activated with \pp{.enable()}.
+		
+		\pause
+		\medskip
+		
+		Alternatively, a dump can be scheduled \tb{manually}.
+
+	\begin{lstlisting}[language=pytiny]
+# end programm in five seconds if it doesn't end on it's own - print traceback to terminal
+faulthandler.dump_traceback_later(5, exit=True, file=sys.stdout)
+function_that_takes_forever_maybe_because_of_deadlock()
+\end{lstlisting}
+
+	
+\end{frame}
+
+
+% TODO: Prozesse beenden
+
+
+
+
+\begin{frame}[fragile]{Interested?}
+	The lecture \tb{Systemnahe Programmierung}  (Bachelor Lecture) covers exactly these topics and is highly recommended!\\
+\end{frame}
+
+
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+\section{Iterators}
+
+%Special methods
+%Functional
+% Generator expressions
+
+% consume
+%loops
+
+
+\subsection{In Python}
+
+\begin{frame}[fragile]{A Small Example}
+
+    \begin{lstlisting}[language=pytiny]
+my_list = [1, 2, 3, 4]
+
+iterator = iter(my_list)
+
+print(next(iterator))
+print(next(iterator))
+
+print("----")
+
+for i in iterator:
+    print(i)
+
+# Output:
+# 1
+# 2
+# ----
+# 3
+# 4
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Class-based}
+
+    An iterator is a class that implements the \tb{special methods} \pp{__iter()__} and \pp{__next()__}.
+
+    \medskip
+
+    \begin{lstlisting}[language=pytiny]
+from typing import Any
+
+class ListIterator:
+    def __init__(self, lst: list[Any]):
+        self.lst = lst
+        self.index = -1
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> any:
+        self.index += 1
+        if self.index < len(self.lst):
+            return self.lst[self.index]
+        raise StopIteration
+
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Function-based}
+
+    With the help of \pp{yield}, functions can be transformed into iterators. These functions are called \tb{generator functions}.
+
+    \medskip
+
+    \begin{lstlisting}[language=pytiny]
+from typing import Any
+
+def list_iterator(lst: list[Any]) -> Generator[int, None, None]:
+    indx = 0
+    while indx < len(lst):
+        yield lst[indx]
+
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Generator Expressions}
+
+    \tb{Generator expressions} can also create an iterator.
+    
+    \medskip
+
+    \begin{lstlisting}[language=pytiny]
+my_list = [1, 2, 3, 4]
+
+it = (i for i in my_list)
+
+next(it)  # >> 1
+next(it)  # >> 2
+    \end{lstlisting}
+
+This is only possible if the object to be iterated over is itself \tb{iterable}.
+
+\end{frame}
+
+\begin{frame}[fragile]{Infinite Iterators}
+
+    If the iterator \tb{has no termination condition}, it becomes an infinite iterator. These can be useful for processing streams.
+
+    \begin{lstlisting}[language=pytiny]
+def inf_iterator():
+    counter = 0
+    while True:
+        yield counter
+        counter += 1
+
+it = inf_iterator()
+
+next(it)  # >> 0
+next(it)  # >> 1
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}{Iterable vs Iterator}
+    
+    In Python, an object can be either an \tb{iterator} or an \tb{iterable}.
+    \begin{itemize}
+        \item An \tb{iterable} represents an object that can be iterated over. An iterable implements \pp{__iter__()}.
+        \item An \tb{iterator} implements both the \pp{__iter__()} and \pp{__next__()} methods, where \pp{__next__()} always returns the next element.
+    \end{itemize}
+
+    Iterables \tb{produce} iterators. Iterators \tb{consume} a stream of data.
+
+\end{frame}
+
+
+
+\begin{frame}{A Few Fun Facts}
+        An iterator can only be traversed \tb{once}. Afterwards, it is empty and must be recreated.
+
+		\medskip
+		
+		Since only the \pp{__next__()} method exists, an iterator can only be traversed \tb{forward}, and the previous value can never be retrieved.
+		
+		\medskip
+		
+		All operations on iterators are \tb{\glqq lazily\grqq~evaluated}.\newline
+		This means a result is calculated exactly when it is needed.
+
+\end{frame}
+
+\begin{frame}[fragile]{Using Iterators}
+    With the help of iterators, concepts of \tb{functional programming} can be implemented.
+
+    \begin{lstlisting}[language=pytiny]
+nums1 = (1, 2, 3, 4)
+nums2 = (6, 7, 8, 9)
+nums3 = (10, 11, 6, 9)
+
+my_list = [1, 3, 4, None, 7, 8]
+
+# Checks where all of the values in the iterable are Truthy
+print(all(my_list))  # >> false, da bool(None) false
+
+# selects every element which returns true when given into bool()
+list_filtered = filter(bool, my_list)  # >> [1, 3, 4, 7, 8]
+zipped = zip(nums1, nums2, nums3, list_filtered)  # >> [(1, 6, 10, 1), (2, 7, 11, 3), (3, 8, 6, 4), (4, 9, 9, 7)]
+mapped = map(sum, zipped)  # >> [18, 23, 21, 29]
+filtered = filter(lambda x: x >= 20, mapped)  # >> [23, 21, 29]
+    \end{lstlisting}
+\end{frame}
+
+% Itertools:
+% Beispiel, map, filter, zip, all
+% islice, pemutations, combinations
+
+
+% Functools
+% partial, singledispatch, wraps
+\begin{frame}{Itertools}
+    The Python standard library \pp{itertools}\footnote{\url{https://docs.python.org/3/library/itertools.html}} provides additional functionality for iterators.
+
+    \begin{itemize}
+        \item With \pp{islice}, it is possible to look at only a specific \tb{section} of an iterator.
+        \item \pp{permutations} provides all possible \tb{permutations} of a given length of an iterator.
+        \item \pp{combinations} provides all possible \tb{combinations} of a given length of an iterator.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Functools}
+    The Python standard library \pp{functools}\footnote{\url{https://docs.python.org/3/library/functools.html}} provides additional functionality for functions.
+
+    \begin{itemize}
+        \item With \pp{partial}, a \tb{new} function can be created from an existing one, with some parameters fixed. The new function then only takes a \tb{part} of the parameters originally required, since it has already been partially filled with arguments.
+        \item \pp{singledispatch} allows \tb{function overloading}. 
+        \item \pp{wraps} makes it possible to set the signature of a wrapper function to that of the wrapped function.
+    \end{itemize}
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+\end{document}
+

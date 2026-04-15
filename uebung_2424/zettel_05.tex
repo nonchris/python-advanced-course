@@ -1,0 +1,294 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 05}
+\ausgabe{13. September 2023}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+	\maketitle
+
+
+    \noindent \tb{Evaluation}: \quad
+	
+	\noindent Bitte nehmen Sie sich etwas Zeit, um den Vertiefungskurs zu evaluieren. Dies ist für die Verbessereung und Einrichtung zukünftiger Angebote wichtig:\\
+    \underline{\url{https://limesurvey.informatik.uni-bonn.de/index.php/651666?lang=de-informal}}
+
+	\medskip
+    \medskip
+	
+	\noindent \tb{Hinweis}: \quad
+	
+	\noindent Die Aufgaben sind bewusst vage gehalten und laden dazu ein, sie um beliebige Funktionaliät zu erweitern.
+	
+	\noindent Aus diesem Grund ist es vollkommen okay, wenn Sie nicht zu allen Aufgaben kommen.
+	
+	\noindent In einigen Aufgaben finden Sie Referenzen zu bereits vorbereiteten Programmen. Diese können Sie aus diesem Sciebo-Share\furl{https://uni-bonn.sciebo.de/s/O4bU6jJ8UAN2pFR} im Ordner des entsprechenden Tages finden und runterladen.
+	
+	\medskip
+	
+	
+	\noindent \tb{Entwicklungsumgebung aufsetzen} \quad
+	
+    \begin{enumerate}
+	\item Falls dies nicht bereits an einem vorherigen Tag geschehen ist, setzen Sie sich ein Virtual Environment und eine Entwicklungsumgebung auf.\\
+	Mehr dazu finden Sie auf Zettel 1.
+	
+	\item Erweritern Sie ihr \pp{venv} um das Package \pp{discord.py}.
+\end{enumerate}
+
+\medskip
+
+
+\noindent \tb{Hinweis}: Unten auf dem Zettel befinden sich Übungsaufgaben zu \tb{Rich}, der Zettel besteht nicht nur aus Discord-Bots.
+	
+	\medskip
+	
+	\begin{aufg}[Vorbereitung]\quad
+		
+		\noindent Die folgenden Schritte sind nötig um einen funktionsfähigen Bot zu schreiben.
+		
+		\medskip
+		
+		\noindent\tb{Discord vorbereiten}.
+		\begin{itemize}
+			% login
+			\item Loggen Sie sich auf Discord\furl{https://discord.com/app} ein
+			
+			% developer mode
+			\item Aktivieren Sie den Developer Mode\footnote{Sie finden die Einstellung in den Einstellungen in dem Tab  \glqq Advanced\grqq.} für Discord.
+			Dies ermöglicht Ihnen mit einem Rechtsklick auf Nutzer, Nachrichten und Rollen etc. die ID zu kopieren.
+			Discord vergibt intern an jeden Server (Guilde), jedem Channel usw. eine eigene, einzigartige ID. Auf diesen IDs arbeiten die Bots nahezu ausschließlich.
+			
+			\item Treten Sie unserem Spaß-Server\furl{https://discord.gg/DKpYHyKWuW} bei.
+		\end{itemize}
+		
+		\pagebreak
+		
+		\noindent\tb{Einen Bot erstellen}
+		\begin{itemize}
+			\item \tb{Beachten} Sie beim Befolgen der Anleitung von discord.py\furl{https://discordpy.readthedocs.io/en/stable/discord.html}, um den Bot auf unseren Server einzuladen bitte unsere \tb{zusätzlichen} Schritte auf dieser und der nächsten Seite:
+			\begin{itemize}
+				
+				\item Zu Schritt 6:
+				\begin{itemize}
+					\item Geben Sie dem erstellten Bot bitte einen sinnvollen Namen
+					\item Scrollen Sie noch ein wenig runter und aktivieren Sie alle drei \pp{Privileged Gateway Intents}\footnote{Die Intents werden erst relevant, wenn Ihr Bot auf mehr als 100 Servern hinzugefügt wurde. Dann müssen Sie sich auf diese Rechte explizit bewerben und begründen, warum Ihr Bot diese Daten benötigt.}
+				\end{itemize}
+				\item Zu Schritt 7:
+				\begin{itemize}
+					\item Der Button zum Kopieren des Tokens existiert so nicht mehr. Sie müssen das Token durch den 'reset Token'-Button zurücksetzen, dann wird es Ihnen einmalig angezeigt. Sie können sich jederzeit ein neues Token geben lassen. Beachten Sie, dass das alte damit ungültig wird!
+				\end{itemize}
+				
+				\item Zu Invite Schritt 4:
+				\begin{itemize}
+					\item Sie müssen nach OAuth2 noch \pp{URL Generator} in der Seitenleite auswählen, um in das Menü zu kommen.
+					\item Wählen Sie neben \pp{bot} auch noch \pp{applications.commands} as Scopes aus
+					\item Wählen Sie als Permissions einfach \pp{Administrator} aus
+				\end{itemize}
+			\end{itemize}
+		\end{itemize}
+		
+		
+	\end{aufg}
+	\newpage
+	
+	\begin{aufg}[Code runterladen] \quad
+		
+		\noindent Die Aufgaben, welche Sie bearbeiten sollen, sind mit beiden Vorlagen bearbeitbar.
+		Typ 2 bietet eine bessere Konfigurierbarkeit des Codes und nimmt eine Menge sinnvoller Voreinstellungen vor. Es handelt sich dabei um ein vollwertiges python Projekt, welches alle Konzepte (Objektorientierung, Module, Paketierung, Config-Files), die Sie in der Vorlesung kennengelernt haben anwendet.
+		Sie können Code aus beiden Vorlagen nicht einfach hin und her kopieren!
+		In Typ1 wird z.B. \pp{@bot.command()} für das erstellen eines Commands benutzt, während Typ2 die Struktur von \pp{Cogs} benutzt und dadurch im selben Fall \pp{@commands.command()} verwendet.
+		
+		\medskip
+		
+		\noindent\tb{Vorlage importieren (Minmales Setup)} \quad
+		
+		\begin{itemize}
+			\item Kopieren Sie diese  Vorlage\furl{https://gist.githubusercontent.com/nonchris/40da6450cf9f9a56b501ecd0ce86795a/raw/206be265aa8be1666e3b076938be9409f582b0dc/simple_bot.py} in Ihren Editor
+			\item Fügen Sie Ihr Bot-Token in die Variable \texttt{I\_DONT\_PASTE\_TOKENS\_IN\_MY\_CODE} ein\footnote{Tokens im Code zu hinterlegen ist sehr gefährlich! Sobald Ihr Code mit Dritten geteilt wird, haben Sie ihr Token veröffentlicht. Normalerweise sollte der Code in einer separaten config-file liegen.}.
+		\end{itemize}
+		
+		\noindent\tb{Vorlage importieren (Git Project Template)} \quad
+		
+		\begin{itemize}
+			\item Falls Sie sich sicher fühlen und direkt mit einer fortgeschritteneren Vorlage starten wollen, können Sie sich mit dieser Vorlage von GitHub\furl{https://github.com/nonchris/discord-bot} vertraut machen.
+			\item Wie Sie ein Projekt von Git clonen können Sie hier in den Docs von Pycharm\furl{https://www.jetbrains.com/help/pycharm/cloning-repository.html} nachlesen.\\
+			\item Laden Sie das Tempate von GitHub runter und befolgen Sie die Schritte im \pp{README} des Projektes.
+		\end{itemize}
+
+        \noindent\tb{Alles selber machen} \quad
+		
+		\begin{itemize}
+			\item Lesen Sie den den Start Guide\furl{https://discordpy.readthedocs.io/en/latest/index.html\#getting-started} von discord.py und erarbeiten Sie sich die ganze Struktur selber.
+		\end{itemize}
+	\end{aufg}
+	
+	\pagebreak
+	
+	\noindent \tb{Los gehts!} \quad
+	
+	\noindent Sie sie haben es geschafft und sind nun frei!\\
+	Schreiben Sie einen Bot Ihrer Wahl. Hier ein Anreize für mögliche Projekte. Kleinere und detailiertere Ideen finden Sie weiter unten.
+	
+	\begin{itemize}
+		
+		\item Verpacken Sie eines Ihrer existierenden Projekte in einem Discord Bot.
+		
+		\item Lesezeichen-Bot. Nutzen Sie die \pp{Context}-Commands, um den Link zu einer Nachricht vom Bot via DM zugesandt zu bekommen.
+		
+		\item Erzeugen Sie ein Embed, welches alle Mitglieder einer Rolle inklusive ihres Online-Status anzeigt. Dies könnte z.B. hilfreich sein, um Leute mit einer Gaming-Role zu finden, die gerade anwesend sind.
+
+	\end{itemize}
+	
+	\noindent \tb{Ein erster Command: Wie ist meine User-ID?} \quad
+		
+		
+		\noindent Schreiben Sie einen kleinen Command, welcher Ihnen mit Ihrer User-ID antwortet.
+		Einen Beispiel-Command finden Sie in den minimalen Beispiel als \pp{hello_command}.\\
+		In dem Template ist der \pp{ping}-command in \pp{src/discord\_bot/cogs/misc.py} ein gutes Beispiel.
+		Ein Befehl gibt immer ein Kontext-Objekt in die Funktion als Input.
+		Sie können den Kontext verwenden, um den Channel zu erhalten, in den Sie eine Nachricht schicken wollen.
+		Eine Nachricht versenden Sie durch:
+		\begin{lstlisting}[language=pytiny]
+await ctx.channel.send("nachricht")
+		\end{lstlisting}
+	
+	\pagebreak
+	
+	
+	\noindent \tb{Applaus!} \quad
+		
+		\noindent Bringen Sie Ihrem Bot bei, dass er Ihnen immer zustimmt und auf alle anderen Nachrichten mit einem Daumen runter reagiert.
+		\begin{itemize}
+			\item  Der dazugehörige listener heißt \texttt{on\_message(message)}, die Funktion befindet sich bereits in der Minimalen-Vorlage.\\
+			Template: Ein Beispiel dafür finden Sie wieder in der Vorlage in \texttt{misc.py}.
+			Der \pp{on_message}-Listener erhält eine Nachricht als Input.\\
+			Was andere Listener als Input bekommen, können Sie in den offiziellen Docs\furl{https://discordpy.readthedocs.io/en/latest/api.html\#discord.on\_message} nachsehen.
+			
+			\item Überprüfen Sie innerhalb der Funktion, ob \texttt{message.author.id} Ihrer eigenen entspricht.
+			Ihre ID können Sie beispielsweise mit dem Command aus der letzten Aufgabe abfragen.
+			Falls dem so ist: Senden Sie Ihre zustimmende Antwort. Mit \pp{.reply()} können Sie direkt auf eine Nachricht antworten:
+			\begin{lstlisting}[language=pytiny]
+await message.reply("nachricht")
+			\end{lstlisting}
+			
+			\item Entspricht author nicht Ihrer ID, reagieren Sie mit einem Daumen runter.
+			\begin{lstlisting}[language=pytiny]
+await message.add_reaction("\N{Thumbs Down Sign}")
+			\end{lstlisting}
+			Die offiziellen Unicode-Namen von Emotes können Sie z.B. auf unicode-table.com \furl{https://unicode-table.com/en/1F44E/} nachschlagen.
+			
+			\item Wie können Sie dafür sorgen, dass Ihr Bot nicht seine eigene Nachricht runter votet?
+			
+		\end{itemize}
+
+	
+	\noindent \tb{Rückwärts} \quad
+	
+		\noindent Schreiben Sie einen weiteren Befehl, welcher diesmal ein Wort als Argument entgegennimmt.
+		Dieses Wort soll dann in umgedrehter Form wieder vom Bot als \textsl{reply} auf Ihre Nachricht geschickt werden.
+		\begin{lstlisting}[language=pytiny]
+async def respond_reverse(ctx: commands.Context, word: str):
+    ...  # invert word and respond with it
+		\end{lstlisting}
+		Wenn ihr Command zwei Wörter entgegennehmen soll, können Sie die Signatur einfach um ein weiteres Wort erweitern.
+		
+		\medskip
+		
+		\noindent \textit{Bonus}: Haben Sie eine Idee, wie Sie beliebig viele Argumente aufnehmen können?
+		Erweitern Sie Ihren Command so, dass er einen beliebigen Text entgegennimmt und diesen invertiert zurückgibt. Wie diese Invertierung genau aussehen soll, ist Ihnen überlassen.
+
+	\medskip
+	\medskip
+	% 5
+	\noindent \tb{Schreiben Sie einen Bot Ihrer Wahl!} \quad
+	
+		\noindent Machen Sie sich am besten zuerst ein wenig weiter mit der discord.py\furl{https://discordpy.readthedocs.io/en/latest/api.html} / Discord-API vertraut.
+		Suchen Sie einfach nach Funktionen oder Keywords und schauen Sie, was es dazu in der Library gibt!
+		Erstellen Sie neue Kanäle, verteilen Sie Rollen, begrüßen Sie neue Mitglieder...
+		Danach können Sie sich an weiterführenden Funktionen versuchen:
+		Beispielsweise das aktuelle Wetter\footnote{\href{https://github.com/chubin/wttr.in}{github.com/chubin/wttr.in}} der übergebenen Stadt antworten, den aktuellen Wert einer genannten Aktie zurückgeben, einfach nur die Eingabe des Nutzers manipuliert zurückgeben, oder, oder, oder ...
+
+
+	\medskip
+	\medskip
+	
+	\noindent \tb{Ein letzter FunFact}\quad
+
+	
+	\noindent Sie können die ID Ihres Accounts niemals ändern, die ID überlebt auch ein Umbenennen\furl{https://discord.com/developers/docs/reference\#snowflakes}.
+	
+	
+		\newpage
+		\begin{aufg}[Rich] \quad
+			  Mit Rich können Sie einfach tolle Terminal-UIs erzeugen\footnote{Denken Sie daran ggf. die Emulate Terminal Option in Pycharms run-config zu setzen.}. 
+			  \newline
+			  Hier ein paar Ideen:\newline
+			  
+			  \noindent \tb{Bunter Text} \quad
+			  
+			  \noindent Zeigen Sie Hello World auf der Konsole an, aber in bunt!
+			  
+			  	\medskip
+			  \medskip
+			  
+			  \noindent \tb{Pseudo Ladebalken} \quad
+			  
+			  \noindent Nutzen Sie die Rich, um einen Ladebalken anzuzeigen, welcher sich überzeugend vorwärts bewegt, als ob er wirklich etwas laden würde. Sie können die Random-Library nutzen, um eine zufällige Wartezeit/ einen zufälligen Fortschritt zu ziehen. Experimentieren Sie ein wenig mit den Werten rum.\newline
+			  Hinweis: Es kann sich besser anfühlen, wenn Sie mehrere Zufallszahlen auf einmal ziehen und miteinander verrechnen.
+			  
+			  	\medskip
+			  \medskip
+			  
+			  \noindent \tb{Layout} \quad
+			  
+			  \noindent Erzeugen Sie ein Layout mit mehreren Feldern und fülle Sie diese mit beliebigen Elementen.
+			  
+			  
+			  	\medskip
+			  \medskip
+			  
+  			  \noindent \tb{Live} \quad
+			  
+			  Erstellen Sie ein Live-Layout in welchen Sie sich verändernde Inhalte an.\newline
+			  Mögliche Inhalte wären:
+			  \begin{itemize}
+			  	    \item Die aktuelle Uhrzeit
+			  	    \item Ein sich Wort für Wort aufbauender Text
+			  		\item Eine durchgehend schnell hochzählende Zahl
+			  		\item Ein simpler Counter, der jedes Mal inkrementiert wird, wenn sich die UI refreshed
+			  \end{itemize}
+			  
+			  	\medskip
+			  \medskip
+			  
+			  \noindent \tb{Eigene Renderables} \quad
+			  
+			  \noindent Schreiben Sie eine eigene Klasse, die \pp{__rich__} implementiert. Denken Sie sich einen möglichen Inhalt aus und fügen sie das Element ihrer Live-UI hinzu.\newline
+			  Hinweis: Sie können z.B. einfach Elemente aus der vorherigen Teilaufgabe auf \pp{__rich__} umschreiben.
+			  
+			  	\medskip
+			  \medskip
+			  
+			  \noindent \tb{Discord Übersicht (Extremer Anstieg des Skilllevels)} \quad
+			  
+			  \noindent Schreiben Sie eine UI, welche Ihnen eine Vorschau der neuen Nachrichten in den Channels eines Discord Servers anzeigt.
+			  \begin{itemize}
+			  	\item Das Layout könne links -- ähnlich der Discord eigenen UI -- eine Übersicht der Channels zeigen und diese \glqq durchrotieren\grqq.
+			  	\item Im Hauptfenster könnte der Verlauf der letzten Nachrichten in dem aktuellen Channel angezeigt werden.
+			  \end{itemize}
+			  
+			  
+			  
+		\end{aufg}
+	
+\end{document}

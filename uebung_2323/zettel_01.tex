@@ -1,0 +1,146 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 01}
+\ausgabe{11. September 2023}
+\abgabe{}
+\hinweis{}
+
+\author{Chris Geron \& Adrian Oeyen}
+
+\tutor{
+Mathilde~Schreck
+}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Hinweis}: \quad
+Alle Aufgaben sind bewusst vage gehalten und laden dazu ein, sie um beliebige Funktionaliät zu erweitern.
+
+\noindent Aus diesem Grund ist es vollkommen okay, wenn Sie nicht zu allen Aufgaben kommen.
+
+\noindent In einigen Aufgaben finden Sie Referenzen zu bereits vorbereiteten Programmen. Diese können Sie aus diesem Sciebo-Share\furl{https://uni-bonn.sciebo.de/s/eADQTyhzRLkFSi6} im Ordner des entsprechenden Tages finden und runterladen.
+
+\medskip
+
+
+\noindent \tb{Entwicklungsumgebung aufsetzen} \quad
+
+    \begin{enumerate}
+        \item Machen Sie sich mit Pythons Virtual Environments\furl{https://docs.python.org/3/library/venv.html} vertraut und konfigurieren Sie eins für Ihre Projekte innerhalb des Vertiefungskurses.
+        \item Gehen Sie \pp{pycharm-cheatsheet.pdf} durch und schauen Sie welche Optionen für Sie von Interesse sind.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+\noindent \tb{Die Bi-Sprache} \quad
+
+    \noindent Die Bi-Sprache ist ein Slang, welcher hinter jeden Vokal einen \glqq bi\grqq~ einsetzt.\\
+    Beispiel: \glqq Felix\grqq~wird zu \glqq Febilibix\grqq.
+    \begin{enumerate}
+        \item Schreiben Sie ein Programm, welches ein gegebenen Satz in die Bi-Sprache umwandelt.
+        \item Experimentieren Sie mit verschiedenen Implementationen. Wie viele Zeilen brauchen Sie?
+    \end{enumerate}
+\medskip
+\medskip
+
+\pagebreak
+
+\noindent \tb{Comprehensions} \quad
+
+    \noindent Die folgenden Aufgaben sollen mit Hilfe von Comprehensions gelöst werden. Es kann hilfreich, sein die Aufgaben erst durch normale Schleifen zu lösen und sie dann in die Form einer Comprehension zu gießen.\\
+    \begin{enumerate}
+        \item Erzeugen Sie eine verschachtelte Liste der Form:
+        \item[]\[\begin{matrix}
+            [[0 & 1 & 2],\\
+            [3 & 4 & 5],\\
+            [6 & 7 & 8]]\\
+        \end{matrix}\]
+        \item Erzeugen Sie eine verschachtelte Liste der Form:
+        \item[]\[\begin{matrix}
+            [[0 & 1 & 0],\\
+            [1 & 1 & 1],\\
+            [0 & 1 & 0]]\\
+        \end{matrix}\]
+
+        \item Erzeugen Sie ein \pp{dict} aus der Liste der Tupel in \pp{comprehension.py}.
+    
+        \item Zählen Sie die Häufigkeit jedes Buchstaben des \pp{lorem\_ipsum} in dem \pp{comprehension.py}
+    \end{enumerate}
+
+\noindent \tb{Hangman} \quad
+
+    \noindent 
+    \begin{enumerate}
+        \item Erstellen Sie mit Hilfe der Random-Bibliothek\furl{https://docs.python.org/3/library/random.html} ein Hangman\furl{https://en.wikipedia.org/wiki/Hangman_(game)} Spiel, welches aus einer Sammlung von Worten eins wählt und als Aufgabe stellt.
+        \item Was würde die Bedienung leichter machen?
+        \item Passen Sie das System so an, dass die zu ratenden Wörter aus einer Datei gelesen werden. Nutzen Sie hierzu den Contextmanger.
+        \item Lesen Sie sich in \pp{datetime}\furl{https://docs.python.org/3/library/datetime.html\#datetime-objects} ein, nutzen Sie das Modul, um die zum Erraten gebrauchte Zeit zu stoppen.
+    \end{enumerate}
+
+\medskip
+\noindent \tb{PEP8} \quad
+
+    \noindent 
+    \begin{enumerate}
+        % TODO Gitlab
+        \item Formen Sie den gegebenen Code \pp{pep8.py} in eine PEP8 konforme Form um\footnote{PyCharm und andere IDEs bieten dafür einen Autoformatter. Es ist empfohlen dies dennoch einmal von Hand zu tun.}.
+        \item Fügen Sie nun Typehints hinzu.
+    \end{enumerate}
+
+\medskip
+\noindent \tb{Matrix} \quad
+
+\noindent
+     Gegeben sei diese Matrix-Implementation in \pp{matrix.py}.
+    \begin{enumerate}
+        % TODO Gitlab
+        \item Ergänzen Sie die Matrix um eine sinnvoll formatierte String-Repräsentation.
+        \item Erweitern Sie diese um die Matrix-Addition und die Matrix-Multiplikation\furl{https://peps.python.org/pep-0465/}.
+        \item Welche weiteren Funktionen könnten für eine Matrix nützlich sein?
+        \noindent 
+    \end{enumerate}
+
+\pagebreak
+\medskip
+\noindent \tb{Debugger} \quad
+
+\noindent
+    \begin{enumerate}
+        % TODO Gitlab
+        \item In \pp{debugging.py} haben sich ein paar Fehler eingeschlichen. Nutzen Sie den Debugger\furl{https://www.jetbrains.com/help/pycharm/debugging-your-first-python-application.html\#where-is-the-problem}, um diese ausfindig zu machen.
+        \noindent 
+    \end{enumerate}
+
+
+\medskip
+\noindent \tb{Turtle} \quad
+
+
+    \noindent Machen Sie sich mit der Python-Turtle\furl{https://docs.python.org/3/library/turtle.html} Library vertraut.\\
+    Bauen Sie Ihren Code so auf, dass die gewünschte Funktionalität einfach gewählt werden kann.
+    \begin{enumerate}
+        \item Zeichnen Sie ein Quadrat
+        \item Zeichnen Sie eine 8-Stufige Treppe.
+        \item Zeichnen Sie ein n-Eck, bei welchem vorher die Anzahl der Ecken abgefragt wird.
+        \item Zeichnen Sie die \textsl{Koch Snowflake}\furl{https://en.wikipedia.org/wiki/Koch_snowflake}
+        \item Zeichnen Sie eine \textsl{Fractal Tree}\furl{https://en.wikipedia.org/wiki/Fractal_canopy}
+        \item Fallen Ihnen weitere Muster ein, welche Sie zeichnen können?
+        \noindent 
+    \end{enumerate}
+
+    \medskip
+\noindent \tb{Schon mit allem durch?} \quad
+\noindent
+    Schauen Sie über Ihre Lösungen der vorherigen Aufgaben drüber. Wie könnten diese erweitert oder verbessert werden? Haben Sie auch alles dokumentiert?
+\end{document}

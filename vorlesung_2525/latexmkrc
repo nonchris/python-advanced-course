@@ -1,0 +1,6 @@
+# Default: Run on all tex files.
+# @default_files('...')
+$pdf_mode = 1;
+$lualatex = 'lualatex -shell-escape -halt-on-error';
+$clean_ext = "lol bbl nav out snm synctex.gz synctex.gz(busy) run.xml tex.bak bbl bcf fdb_latexmk run tdo %R-blx.bib";
+$biber = 'biber --validate-datamodel %O %S';

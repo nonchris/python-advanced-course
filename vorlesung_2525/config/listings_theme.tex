@@ -1,0 +1,73 @@
+\usepackage{xcolor}
+\usepackage{listings}
+
+% Listing colors from the original template.
+\definecolor{col_keywords}{HTML}{000000}
+\definecolor{col_classes}{HTML}{0057AE}
+\definecolor{col_members}{HTML}{644A9B}
+\definecolor{col_string}{HTML}{BF0303}
+\definecolor{col_preproc}{HTML}{006E28}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily\color{black},
+  numbers=left,
+  stepnumber=1,
+  showstringspaces=false,
+  tabsize=2,
+  breaklines=true,
+  breakatwhitespace=false,
+  backgroundcolor=\color{colororange!5},
+  frame=single,
+  numberstyle=\tiny\color{colorgray},
+  numbersep=6pt,
+  xleftmargin=3pt,
+  xrightmargin=3pt
+}
+
+\lstdefinelanguage{plain}{
+  basicstyle=\normalsize\ttfamily\color{black},
+  numberstyle=\footnotesize,
+  numbersep=5pt
+}
+
+\lstdefinelanguage{plsmall}{
+  basicstyle=\small\ttfamily\color{black},
+  numberstyle=\scriptsize,
+  numbersep=4pt
+}
+
+\lstdefinelanguage{pltiny}{
+  basicstyle=\scriptsize\ttfamily\color{black},
+  numbers=none
+}
+
+\lstdefinelanguage{py}[]{Python}{
+  basicstyle=\normalsize\ttfamily\color{black},
+  numberstyle=\scriptsize,
+  numbersep=5pt,
+  commentstyle=\color{black!50}\ttfamily,
+  stringstyle=\color{col_string},
+  deletekeywords={bool, complex, dict, float, int, list, print, set, tuple, frozenset},
+  morekeywords={async},
+  keywords=[2]{__init__, __name__},
+  keywords=[3]{bool, complex, float, int, list, print, set, tuple, frozenset},
+  keywordstyle=\bfseries\color{col_keywords},
+  keywordstyle=[2]\color{col_classes},
+  keywordstyle=[3]\bfseries\color{col_members}
+}
+
+\lstdefinelanguage{pysmall}[]{py}{
+  basicstyle=\small\ttfamily\color{black},
+  numberstyle=\scriptsize,
+  numbersep=4pt
+}
+
+\lstdefinelanguage{pytiny}[]{py}{
+  basicstyle=\scriptsize\ttfamily\color{black},
+  numbers=none
+}
+
+\newcommand{\lpl}[1]{\lstinline[language=plain]{#1}}
+\newcommand{\lplsmall}[1]{\lstinline[language=plsmall]{#1}}
+\newcommand{\lpy}[1]{\lstinline[language=py]{#1}}
+\newcommand{\lpysmall}[1]{\lstinline[language=pysmall]{#1}}

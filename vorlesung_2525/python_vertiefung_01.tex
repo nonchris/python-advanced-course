@@ -1,0 +1,1553 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+%\usepackage[utf8]{inputenc}
+
+\input{config/minimal_beamer_style}
+\input{config/listings_theme}
+\input{config/global_config}
+\input{config/custom-command}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+\AuthorName{Chris Geron \& Adrian Oeyen}
+\AuthorEmail{\{s6chgero, s6adoeye\}@uni-bonn.de}
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Organisatorisches \& Lernziel}
+
+% \setbeameroption{show notes}
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+\titlepage
+
+
+\framecardblue{
+  \Utext{Welcome!}
+  \nsl{Greet freshmans}
+}
+
+
+
+\begin{frame}{Who am I?}
+    \begin{itemize}
+        \item Chris Geron\furl{https://github.com/nonchris/} (s6chgero@uni-bonn.de)
+        \pause
+        \item Coming Semster Master Computer Science
+        \pause
+        \item Past Student Assistant at Project Wachmann\furl{https://itsec.cs.uni-bonn.de/wachmann/}
+        \pause
+        \item Current Student Assistant von WASP.SYSTEMS\furl{https://wasp.systems/}
+         \pause
+        \item Past Tutor (EDV for Physicists, Python Preliminary Course, POOSE, AlPro)
+        \pause
+        \item Instructor at Stiftung für Jugend und Medien\furl{https://www.sk-jugend.de/}
+        \pause
+        \item (Past) member of the Student Council
+        \pause
+        \item Free Time: Metal, Concerts, E-Guitar, Bouldering, Roller Coasters\pause~ Python
+        \pause
+        \item Owner of Info Bonn \& Uni Bonn: Connect Discords
+    \end{itemize}
+
+\nll{Holding this the third time}
+\end{frame}
+
+
+%TODO: 2025 TEAM
+
+\begin{frame}{The Team I}
+	\nsl{Nach vorne rufen\\}
+	\begin{itemize}
+		\item Sophia Sirtl (s35ssirt@uni-bonn.de)
+		%\nsl{Adrian hält heute auch die VL mit}
+		\pause
+		\begin{itemize}
+			\item Bachelor Computer Science 4th semester
+			\pause
+			\item Member of the Student Council
+			\pause
+			\item first paid job 
+			\pause
+			\item free time: video games, gardening, knitting/crocheting
+		\end{itemize}
+		\pause
+		\item Linus Rodríguez Gómez (linus.rg@uni-bonn.de)
+		\pause
+		\begin{itemize}
+			\item Master Computer Science 3rd semester 
+			\pause
+			\item Tutor Algo I \& Algo II (Bachelor courses)
+			\pause
+			\item likes science and the Python programming language
+      \pause
+      \item free time: sewing, making jewelry, crafts
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Team II}
+	\nsl{Nach vorne rufen\\}
+	\begin{itemize}
+    \item Miguel Cortina Zapp (miguelcz@uni-bonn.de)
+    \pause
+    \begin{itemize}
+        \item Bachelor Computer Science 5th semester
+        \pause
+        \item Student Assistant at Identeco (pharmfind.de)
+        \pause
+        \item Freelance Full-Stack Software Developer \& Founder of stundio.de
+        \pause
+        \item Developer of the Basis App
+    \end{itemize}
+
+		
+		\item Jonas Reif (jonas.reif@uni-bonn.de)
+		\pause
+		\begin{itemize}
+			\item Bachelor Computer Science 2nd semester
+			\pause
+			\item Student Council and Young Society for Computer Science (JGI)
+			\pause
+			\item administrator for different organizations
+			\pause
+			\item would like to be a software-minimalist
+    \end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+\include{config/orga.tex}
+
+
+
+\section{The Python Programming Language}
+
+
+% TODO: Insert quotes
+\begin{frame}[fragile, noframenumbering]{Introduction}
+  \nll{Mod: Chris\\
+If you have questions, just ask :)}
+  \begin{itemize}[]
+    \item Python\furl{https://www.python.org/} is an \tb{interpreted} programming language
+    \pause
+    \item Python also features \tb{garbage collection}.
+    \pause
+    \item Developed by Guido van Rossum\furl{https://gvanrossum.github.io/}
+    \pause
+    \item Python is not compiled, and is best known for its \tb{dynamic} properties
+    \pause
+    \item Furthermore, Python programs are practically \tb{platform-independent}
+    \pause
+    \item Python is constantly \tb{being developed}
+    \pause
+    \item We introduce Python in \lpl{python3.10}
+  \end{itemize}
+  \nll{Q: But what does a program actually look like?}
+\end{frame}
+
+
+\begin{frame}[fragile, noframenumbering]{Good Programs}
+  Good Python programs usually look like this:
+  \begin{lstlisting}[language=pytiny]
+# Import external code
+from random import randrange
+# More imports ...
+
+def main():
+    """The program starts here with the main work"""
+    print(f"This code is a {1+randrange(10)} out of 10")
+
+if __name__ == "__main__":
+    main()
+
+  \end{lstlisting}
+  \nll{Q: Are there other important things to consider to write good programs?}
+\end{frame}
+
+% TODO: Alles in Python sind Objekte
+
+\subsection{Types in Python}
+
+\begin{frame}[fragile]{Dynamic Typing}
+  In Python, variables have a name and a value, but no adressable physical memory values. 
+  Variables are \tb{dynamically typed}. 
+  Their type\footnote{
+    The type of a variable or an expression \texttt{EXPR} can be obtained using \texttt{type(EXPR)}.
+  } can change at runtime.
+  \begin{lstlisting}[language=pytiny]
+my_variable = 1              # >> type(my_variable): <int>
+my_variable = "never gonna"  # >> type(my_variable): <str>
+my_variable = ClassA()       # >> type(my_variable): <ClassA>
+  \end{lstlisting}
+
+  For readable code, clear naming and \tb{consistency} in variable types are highly recommended. 
+
+  \medskip
+
+  To document the \tb{intended}, not enforced, type of a variable for developers, IDEs\footnote{
+    See e.g.\ \url{https://www.jetbrains.com/help/pycharm/type-hinting-in-product.html}.
+  } and \tb{type checkers}\furl{https://mypy-lang.org/}, one uses \tb{type hinting}\footnote{\url{https://docs.python.org/3/library/typing.html}}.
+  
+\end{frame}
+
+
+% Mention here that type hinting is not binding
+\begin{frame}[fragile]{Type Hinting - Basics}
+  Basically, the \tb{intended type} of a variable is indicated as follows:
+  \begin{lstlisting}[language=pytiny]
+variable_name: type
+  \end{lstlisting}
+
+  Function parameters can also be annotated with same type hint syntax. 
+  Intended \tb{return types} are indicated as follows:
+  \begin{lstlisting}[language=pytiny]
+def f(param: type, ...) -> return_type:
+    ...
+  \end{lstlisting} 
+
+
+  \nll{Q: What about my own custom types?}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Typehinting - Custom Types}
+  In addition to Python’s standard types, you can also use \tb{custom types} as type hints.
+
+  \begin{lstlisting}[language=pytiny]
+class Cybifier:
+    def __init__(self, amount: int):
+        self.amount = amount
+      
+    def cybifiy(self, text: str) -> str:
+        return "Cyber" * self.amount + text
+     
+     # use literal to typehint the "self-type" inside the class
+    def return_self(self) -> "Cybifier":
+        return self
+
+def cool_function(cybifier: Cybifier):
+    ... 
+
+  \end{lstlisting}
+  \nll{C: We’ve talked about types – but what kinds of types can I specify?\\C -> A}
+\end{frame}
+
+
+\subsection{Data Types}
+
+\begin{frame}[fragile]{Basic Types}
+  Python provides several fundamental data types.
+  \begin{itemize}
+    \pause
+    \item \pp{int} stores an \tb{integer} of arbitrary size
+    \pause
+    \item \pp{float} stores a \tb{floating-point number} with 64-bit representation
+    \pause
+    \item \pp{str} stores an immutable \tb{string} of arbitrary length
+    \pause
+    \item \pp{bytes} stores an immutable sequence of \tb{bytes}. \pp{str} and \pp{bytes} can be converted using \pp{encode}/\pp{decode}\furl{https://docs.python.org/3/howto/unicode.html\#converting-to-bytes}
+  \end{itemize}
+\end{frame}
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Dynamic Arrays}
+  The type \lpl{list} implements \tb{dynamic arrays}. 
+  However, the elements of the array have no fixed type\footnote{
+    Since Python 3.9, the native types \texttt{dict}, \texttt{list}, and others can be used for type hints.
+    In earlier versions, helper classes from the \textsl{typing} module must be used.
+  }. 
+  \lpl{list} objects can be created using \lpl{[]} or \lpl{list()}. 
+  \begin{lstlisting}[language=pytiny]
+arr = ["list", "can", ["contain", "anything"], 69]
+arr_of_numbers = [42, 420, 99]
+
+arr.append(42)                # Append any object
+arr.extend(arr_of_numbers)    # Append elements of another list
+third_elem = arr[2]           # Access element at index 2
+last_elem = arr[-1]           # Access last element
+after_first = arr[1:]         # Slice (everything after index 1)
+first_three = arr[:3]         # Slice (everything up to index 3)
+last_three = arr[-3:]         # Slice (last three elements)
+arr[0] = "hello"              # Modify element at index 0
+del arr[1]                    # Delete element at index 1
+
+  \end{lstlisting}
+  \nsl{C: So how do I use such a list?\\
+  A: append, indexing with brackets, function overview incomplete\\
+  C: I always have to remember indices, can’t I give names instead?
+  }
+
+\end{frame}
+\fussy
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Hash Maps}
+	 \nll{dict keep order}
+  The type \lpl{dict} implements \tb{hash maps}. 
+  Neither keys nor values have a fixed type\footnote{
+    Since Python 3.9, the native types \texttt{dict}, \texttt{list}, and others can be used for type hints.
+    In earlier versions, helper classes from the \textsl{typing} module must be used.
+  }.
+  \lpl{dict} objects can be created using \lpl{\{\}} or \lpl{dict()}. 
+  \begin{lstlisting}[language=pytiny]
+my_map = {
+    "sixtynine" : "1 nice key!"
+    "foo"       : ["deeper", 21],
+}
+my_map["key"] = "value"       # add new key
+value = my_map["foo"]         # >> ["deeper", 21]
+value = my_map["eye"]         # >> KeyError
+value = my_map.get("eye", None)   # >> None
+"foo" in my_map               # >> True
+my_map.items()  # >> [('sixtynine', '1 nice key!'), ('foo', ['deeper', 21])]
+my_map.get("sixtynine", "Not in there")  # >> "1 nice key!"
+my_map.get("seventy", "Not in there")    # >> "Not in there"
+my_great_dict = my_map | {1: 2}  
+# >> {"sixtynine": "a nice key!", "foo": ["deeper", 21], 1: 2}
+  \end{lstlisting}
+  In addition to \lpl{.items()}, the methods \lpl{.keys()} and \lpl{.values()} are available.
+
+  \nsl{
+  Keys are ordered by insertion order\\
+  C: Are there restrictions for keys?\\
+  Keys: immutable\\
+  C: What are the important functions here?\\
+  A: square brackets with key\\
+  items -> kv tuple\\
+  binary OR operator (only works “recently” :)\\
+  A->A: Enough questions – what if I only care about the hashing property?}
+\end{frame}
+\fussy
+
+
+\begin{frame}[fragile]{Unordered Set}
+  The type \pp{set} implements an \tb{unordered collection}. A \pp{set} provides functionality for \tb{membership tests} and basic \tb{mathematical} set operations.\footnote{
+    Example from the Python docs: \url{https://docs.python.org/3/tutorial/datastructures.html\#sets}
+  }
+  \begin{lstlisting}[language=pytiny]
+basket = {'apple', 'orange', 'apple', 'pear', 'banana'}  
+# >> {'orange', 'banana', 'pear', 'apple'}
+'orange' in basket     # >> True
+'crabgrass' in basket  # >> False
+
+a = {'abracadabra'}    # >> {'a', 'r', 'b', 'c', 'd'}
+b = set('alacazam')    # >> {'a', 'l', 'c', 'z', 'm'}
+    
+d = a - b              # >> {'r', 'd', 'b'} difference
+
+d.add(42)                     # >> {'r', 'd', 'b', 42}
+d.intersect_update({'r', 3})  # >> {'r'}
+  \end{lstlisting}
+
+	Equivalent to \pp{-}, there is \pp{|} for union, \pp{&} for intersection, and \pp{^} for symmetric difference.
+	\nsl{C: All generic types so far have been mutable. Is there also something immutable?}
+\end{frame} 
+
+
+
+%% Tuple
+\begin{frame}[fragile]{Tuple}
+  The type \pp{tuple} represents an \tb{immutable} collection of data with a \tb{fixed} length.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+my_tuple = (1, "cybercyber", "py goes brrrr")
+my_tuple[0]  # >> 1
+my_tuple[1] = "notcyber"  # >> Error: assignment not allowed
+
+# Tuples can be unpacked
+first, second, _ = my_tuple 
+first   # >> 1
+second  # >> "cybercyber"
+  \end{lstlisting}
+
+
+With \pp{tuple}, a function can return \tb{multiple} values.
+
+
+	\nsl{A: Speaking of immutable data structures, don’t you want to talk about the other immutable one?\\
+	% \LARGE A -> C
+	}
+\end{frame}
+
+
+%% Tuple 2
+\begin{frame}[fragile]{Caution When Creating Tuples}
+   The \tb{comma} is decisive for the \tb{construction} of a tuple.
+   
+   \medskip
+   \pause
+   
+   This can quickly lead to confusion when declaring tuples.\newline
+   In particular, some expressions that look like a tuple are actually not.
+   \pause
+   \begin{lstlisting}[language=pytiny]
+a = (2, 3)     # >> (2, 3)
+b = 2, 3       # >> (2, 3)
+c = (2,)       # >> (2,)
+d = 2,         # >> (2,)
+e = (2)        # >> 2 (int, not tuple of int!)
+f = (1 == 1)   # >> True (also not a tuple, just bool)
+g = (1 == 1,)  # >> (True,)
+   \end{lstlisting}
+
+	It is best practice to \tb{always} use parentheses when constructing tuples, except when returning multiple values at the end of a function.
+   
+\end{frame}
+
+
+
+%% Strings
+\begin{frame}[fragile]{Strings}
+  For simple \tb{text formatting}, one can use \lpl{f-strings}, \lpl{split}, and \lpl{join} operations.
+  \begin{lstlisting}[language=pytiny]
+f_string  = f"The value is: {x}"      # >> 'The value is: ["42", "a", "three"]'
+arr       = "42,a,three".split(",")   # >> ["42", "a", "three"]
+joined    = " ----> ".join(arr)       # >> "42 ----> a ----> three"
+  \end{lstlisting}
+
+With \tb{raw-strings}, can create a string where escape characters\footnote {
+  List of escape characters \url{https://docs.python.org/3/reference/lexical_analysis.html\#string-and-bytes-literals}
+} are not interpreted.
+
+  \begin{lstlisting}[language=pytiny]
+print("This is\na text\nwith multiple lines")
+# >> "This is"
+# >> "a text"
+# >> "with multiple lines"
+
+print(r"This is\na text\nwith multiple lines") 
+# >> "This is\na text\nwith multiple lines"
+  \end{lstlisting}
+
+\nsl{We already introduced these formally.\\
+	Here are some extras:\\
+	If time is short: "Yes, these are strings" and move on.\\
+	Q: f-strings are cool, but can they do more?
+}
+\end{frame}
+
+
+%% f Strings
+\begin{frame}[fragile]{f-strings – Useful Formatting}
+	Automatic \tb{cut} of \pp{float} to n-decimal places:
+
+    \begin{lstlisting}[language=pytiny]
+# round floats
+pi = 3.141592653
+print(f"pi is approximately: {pi:.3f}")  # >> pi is approximately 3.142
+    \end{lstlisting}
+    \pause
+
+	Text can be \tb{automatically aligned} left/right with a given width\footnote{\url{https://docs.python.org/3/library/string.html\#format-specification-mini-language}}.
+    
+    \begin{lstlisting}[language=pytiny]
+for num in [128, -65]:
+    print(f"{num:<+7d} ==> {num:>11b}")
+# >> +128     ==>    10000000
+# >> -65      ==>    -1000001¿\pause¿
+
+my_str = "\n".join(f"{i: <{len(str(max(l)))}}: x" for i in [2, 111])
+# >> 2  : x
+# >> 111: x
+    \end{lstlisting} 
+
+    \begin{lstlisting}[language=pytiny]
+print(f"{'init':_^8}()")  # >> __init__()
+    \end{lstlisting}
+
+    \pause
+
+    \begin{lstlisting}[language=pytiny]
+print(f"{str(3+4) * 2 = }")  
+# >> str(3+4) * 2 = '77'  (note: whitespace matters)
+    \end{lstlisting}
+    \nll{note: variables in formatting are double \{\}}
+	\nsl{
+		my\_str is probably what you’d call pythonic. Or as Michael would say:\\ 
+		"Pythonic is just an excuse for code nobody can understand."\\~\\
+		C: But now that we’ve defined so much about data, can I make decisions on it?  
+		Because a purely linear program is kinda lame...\\}
+	\nll{Chris -> Adrian}  
+
+\end{frame}
+
+
+
+\subsection{Control Structures}
+
+\begin{frame}[fragile]{Conditions in Python I}
+  Conditions and their associated block are indicated by \tb{indentation}.\newline
+  By \tb{convention}, a block is indented by exactly \tb{four} spaces\footnote{
+    Python distinguishes between tabs and spaces. It is recommended to use spaces and enable auto-conversion from tabs to spaces in your editor.
+  }.
+  \begin{lstlisting}[language=pytiny]
+num_1 = 42.0
+num_2 = 69
+word_1 = "42069"
+
+if type(num_1) is int:
+    print("That is an integer!")
+  
+if (not num_1 == num_2) and num_1 <= num_2:
+    print("That was a very complicated 'num_1 < num_2'")
+  
+if "69" in word_1:
+    print("Nice!")
+
+x = "even" if num_1 % 2 == 0 else "odd"  # >> "even"
+  \end{lstlisting}
+
+  \nsl{C: How do all the familiar concepts look in Python?}
+\end{frame}
+
+%% One can mention "else" at the loop part
+\begin{frame}[noframenumbering]{Conditions in Python II}
+  The most important syntactic features are:
+  \begin{itemize}
+    \pause
+    \item Control flow with \lpl{if <cond>:}, \lpl{elif <cond>:}, and \lpl{else:}
+    \pause
+    \item Python supports classic comparators \lpl{==, !=, <, >, <=, >=}
+    \pause
+    \item \lpl{True}, \lpl{False}, and \lpl{None} are capitalized
+    \pause
+    \item \lpl{and} and \lpl{or} are the logical operators for \tb{and} and \tb{or}
+    \pause
+    \item Negation is written with the keyword \lpl{not}
+    \pause
+    \item Parentheses are optional, but can improve readability
+    \pause
+    \item Python also has special keywords \lpl{is}\furl{https://www.geeksforgeeks.org/difference-between-and-is-operator-in-python/} and \lpl{in}
+    \item 
+  \end{itemize}
+  \nsl{C: Suppose I want to check x, then check y, and it won’t fit in one statement.  
+Before I know it, I’ve got an unreadable pyramid of ifs.\\
+A: You mean like this? *click*}
+\end{frame}
+
+
+% TODO: geht das als eine Folie?
+
+\begin{frame}[fragile]{Guard Clauses}
+    With \tb{Guard Clauses}, deep nesting can be avoided.
+  
+    \medskip
+  
+    \begin{lstlisting}[language=pytiny]
+def get_secret_info(user: User) -> str:
+    if user is not None:
+        if user.is_authenticated():
+            if user.is_admin():
+                return top_secret_secret
+            else:
+                return "Not Admin"
+        else:
+            return "Not authenticated"
+    else:
+        return "No User"
+    \end{lstlisting}
+    \nsl{C: Is there a better way??\\
+    A: Yes. There is.}
+\end{frame}
+  
+\begin{frame}[fragile]{Guard Clauses II}
+  	
+  	Early return by introducing \tb{exit conditions} using negation.
+  	
+  	\medskip
+  
+    \begin{lstlisting}[language=pytiny]
+def get_secret_info(user: User) -> str:
+    if user is None:
+        return "No User"
+    if not user.is_authenticated():
+        return "Not authenticated"
+    if not user.is_admin():
+        return "Not Admin"
+
+    return top_secret_secret    
+    \end{lstlisting}
+  \nsl{C: Does this also work for loops?\\
+A: Yes, but first let’s see how loops work in Python.}
+\end{frame}
+
+
+
+\begin{frame}[fragile,noframenumbering]{Loops in Python}
+
+  \begin{lstlisting}[language=pytiny]
+my_list = ["Apple", "Banana", "Milk"]
+for el in my_list:
+    print(f"In my list: {el}")
+
+for i in range(0, 100):
+    print(f"Step: {i}")
+
+for index, el in enumerate(my_list);
+    print(f"At index {index} in my list: {el}")
+
+my_dict = {
+  "sixtynine" : "1 nice key!"
+  "foo" : ["deeper", 21],
+}
+
+for key, value in my_dict.items():
+    print(f"{key} -> {value}")
+    \end{lstlisting}
+  \nsl{A: And now let’s check how guard clauses work in loops.}
+\end{frame}
+
+\begin{frame}[fragile]{Loops in Python II}
+  The behavior of loops can be controlled with \pp{break} and \pp{continue}, .
+
+  \begin{lstlisting}[language=pytiny]
+mylist = ['apple', 'banana', 'orange', 'peach', 'bread']
+
+for el in mylist:
+    if el == 'apple':
+        continue  # Skips current iteration
+    if el == 'peach':
+        break  # Stops the loop
+    print(el)
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=pytiny]
+  Output:
+  >> banana
+  >> orange
+  \end{lstlisting}
+\pause
+
+  Python also has \pp{while} loops, those are slower than \pp{for} loops since the condition check happens in Python.
+  \nll{Is there something fun we can do with for-loops?\\
+  A -> C}
+\end{frame}
+
+
+\begin{frame}[fragile,noframenumbering]{Loops in Python III}
+  Python allows expressing a sequence of elements using \tb{Generator Expressions}\furl{https://docs.python.org/3/reference/expressions.html\#generator-expressions}, which consist of two parts:
+  \pause
+  \begin{itemize}
+    \item An \tb{expression} that defines the value of each element
+    \pause
+    \item A \pp{for} loop with optional \pp{if} to filter elements
+    \pause
+  \end{itemize}
+
+  They can be used to initialize data structures like lists, tuples, and sets.
+  \pause
+  \begin{lstlisting}[language=pytiny]
+# Generator Expression (can only be used once)
+exp = (i for i in range(10) if i % 2 == 0)
+
+my_list = list(exp)   # >> [0,2,4,6,8]
+
+my_set = set(exp)     # >> {0,2,4,6,8}
+
+my_tuple = tuple(exp) # >> (0,2,4,6,8)
+  \end{lstlisting}
+  Generators can only be used \tb{once} after creation.
+  \nll{not a tuple!}
+  \nsl{Generator expressions let you define a for-loop that generates data within one line.\\
+  Syntax is similar to sets (expr, for, if).}
+\end{frame}
+
+\begin{frame}[fragile, noframenumbering]{Real life}
+  In practice, \textsl{generator expressions} are almost never used on their own, but always in the context of a \tb{list comprehension} or \tb{dict comprehension}. For \tb{dict comprehensions}, the expression must be \pp{key:value} pairs.
+
+  \pause
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+# List Comprehension
+squares = [i**2 for i in range(1, 5)]  
+# >> [1,4,9,16]
+
+# Dict Comprehension with Condition
+cubes_dict = {i : i**3 for i in range(1, 10) if i % 2 == 0}  
+# >> {2: 8, 4: 64, 6: 216, 8: 512}
+  \end{lstlisting}
+  \pause
+	The \glqq loop body\grqq~ can be arbitrarily complex.
+	
+	\medskip
+	
+	Comprehensions do not support \pp{break} or \pp{continue}.\newline
+	Each iteration must add one element.\newline
+	With an \tb{if-expression}, you can \tb{filter} which elements are iterated over.
+	\nsl{Filtering is important because comprehensions must add one element per iteration.}
+	  \nll{C: How do I avoid writing everything twice or three times?\\
+	  C -> A}
+
+\end{frame}
+
+\subsection{Functions}
+
+% TODO: Hier steht was von Union
+
+\begin{frame}[fragile]{Functions}
+  Functions are defined as follows:
+  \begin{lstlisting}[language=pytiny]
+def FUNCTIONNAME(PARAM1: TYPE1, PARAM2: TYPE2, ...) -> RETURN_TYPE:
+    """Function documentation"""
+  \end{lstlisting}
+  
+  \pause
+
+  Functions have \tb{no fixed} return type\footnote{
+    With the typehint \texttt{Union[TYP1, TYP2, ...]}, the expected return types can be documented.
+  }. 
+  While it is possible to return different types, this almost always reduces readability.
+
+  \pause
+  \medskip
+
+  With \tb{docstrings}, the functionality, parameters, and return type of a function can be documented. They are written with \pp{\"\"\"}\footnote{Docstrings can also be used for variables.}.
+
+  \pause
+  \medskip
+
+  With \pp{pass}, empty functions or \pp{if}-blocks can be created.\footnote{
+    More on pass: \url{https://realpython.com/python-pass/}
+  }
+\end{frame}
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile, noframenumbering]{Example}
+  \begin{lstlisting}[language=pytiny]
+def str_to_bool_converter(word: str) -> bool:
+    """
+    Takes a word and converts it to a boolean
+
+    Args:
+      word: The word to be converted
+    
+    Returns:
+      Converts 'yes' to True and 'no' to False
+    
+    Raises:
+      ValueError if the given word is neither 'yes' nor 'no'
+    """
+    if word == "yes":
+        return True
+    elif wort == "no":
+        return False
+    else:
+        raise ValueError(f"Valid inputs are 'yes' and 'no', got {word}!")
+  \end{lstlisting}
+
+  
+\end{frame}
+\fussy
+
+
+\begin{frame}[fragile]{Parameters \& Arguments}
+  Parameters can have \tb{default values}, which are used if no argument is passed.
+  \pause 
+  \begin{itemize}
+    \item In the parameter list, no parameter without a default value may come after one with a default value. This also applies to the call.
+    \pause 
+    \item Parameters can be assigned via their \textsl{name}, this is called a \tb{keyword-argument}\footnote{also commonly refered to as kwarg(s)}.
+    \pause 
+  \end{itemize} 
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+def my_sum(val1: int, val2: int = 10):
+    return val1 + val2
+
+my_sum(2)      # >> 12
+my_sum(10, 5)  # >> 15
+my_sum(val1=20, val2=10)  # >> 30
+my_sum(val2=15, val1=10)  # >> 25
+my_sum(val1=5, 10)        # >> SyntaxError: positional argument follows keyword argument
+  \end{lstlisting}
+  \nsl{C: What if I want to sum up more than two values? – Should I use lists or write a function for every number of values?}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Args \& Kwargs}
+  With the help of the \tb{unpacking operator} \pp{*}, functions can be written that accept a \tb{variable} number of parameters.\footnote {
+    A good overview of (*) and (**) can be found here: \url{https://realpython.com/python-kwargs-and-args/}
+  }
+
+  \begin{lstlisting}[language=pytiny]
+def my_sum(*args: int) -> int:  # args: tuple[int]
+    result: int = 0
+    for i in args:
+        result += i
+    return result
+
+my_sum(1,2) # >> 3
+
+my_sum(10, 20, 30, 40) # >> 100
+  \end{lstlisting}
+  \nsl{*args is a tuple\\
+makes total sense with decorators -> Day 2}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Args \& Kwargs II}
+  The operator \pp{*} can also be used to \tb{unpack values from a data structure} and \tb{pass} them to a function that accepts multiple parameters.
+
+  \begin{lstlisting}[language=pytiny]
+import math
+  
+def vector_length(x: float, y :float, z: float) -> float:
+  return math.sqrt(x**2 + y**2 + z**2)
+
+vector_length(10, 2, 4)  # >> 10.954
+
+vec: tuple[float, float, float] = (13, 25, 11) 
+vector_length(*vec)  # >> 30.248
+
+vec2: list[float] = [1, 2, 3]
+vector_length(*vec2)  # >> 3.7416
+  \end{lstlisting}
+  \nsl{*unpack works on Iterables}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Args \& Kwargs III}
+
+With \pp{*}, it is possible to enforce the use of \tb{keyword arguments}.\footnote{Positional-only arguments can be enforced with /. But this is rarely useful.}
+
+\medskip
+
+  \begin{lstlisting}[language=pytiny]
+def operation_with_keywords(*, op1: str="Read", op2: str="Sum")
+    return f"{op1} : {op2}"
+
+operation_with_keywords(op1="Write") # >> "Write : Sum"
+
+operation_with_keywords("Write", op2="Filter") # >> TypeError
+  \end{lstlisting}
+  \nsl{unnamed: enforces\\
+C: And what about keyword arguments? Can they do that too?}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Args \& Kwargs IV}
+  Equivalent to \pp{*}, there is the \pp{**}\tb{-operator} for \tb{keyword-arguments}.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny] 
+def operation_with_options(values: list[int], **kwargs) -> int:  # kwargs: dict[str, arg_types]
+  print("You chose the following kwargs")
+  for op, v in kwargs.items():
+    print(f"{op} -> {v}")
+
+operation_with_options([1,2,3], op1="Read", op2="Sum", op3=10)
+  \end{lstlisting}
+  \nsl{Keys: str, Value: whatever the kwarg is}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Args \& Kwargs V}
+  Similarly, the \pp{**}\tb{-operator} can also be used to pass values from a \pp{dict} as \tb{keyword arguments}.
+
+  \begin{lstlisting}[language=pytiny]
+import math
+
+def vector_length(x: float = 0, y: float=0, z: float=0) -> float:
+  return math.sqrt(x**2 + y**2 + z**2)
+  
+vec = {
+    "x": 0,
+    "y": 10,
+    "z": 20
+}
+  
+print(vector_length(**vec)) # >> 22.360
+  \end{lstlisting}
+  \nsl{A: What other properties do functions have?\\
+  \LARGE A -> C}
+\end{frame}
+
+\begin{frame}[fragile]{Functions as Objects}
+  Functions are also \tb{objects} and can be passed to other functions. 
+  
+  \medskip
+
+  This way, any collection of data can be sorted.
+  \begin{lstlisting}[language=pytiny]
+from typing import Tuple
+
+mylist = [("cyber", 6), ("Chrisch", 2), ("Adrian", 5), ("pythoooon", 0)]
+
+# key-function to define key on which two elemnts are compared
+def get_second_idx(t: Tuple[str,int]) -> int:
+    return t[1]
+
+# key-function is given to sorted as comparator
+sorted(mylist, key=get_second_idx) 
+# >> [('pythoooon', 0), ('Chrisch', 2), ('Adrian', 5), ('cyber', 6)]
+  \end{lstlisting}
+
+  \nsl{A: Writing a separate function for this sounds a bit tedious…}
+
+\end{frame}
+
+% TODO:  Need comp pare?
+\begin{frame}[fragile]{Lambda Expressions}
+  Anonymous functions are functions that \tb{don’t need a name} and can be created anywhere using \pp{lambda}.
+
+  \medskip
+  \pause
+
+  This simplifies functions that are only needed in one place.
+  \begin{lstlisting}[language=pytiny]
+mylist = [("cyber", 6), ("Chrisch", 2), ("Adrian",5), ("pythoooon", 0)]
+
+sorted_list = sorted(mylist, key=lambda x: x[1])
+# >> [('pythoooon', 0), ('Chrisch', 2), ('Adrian', 5), ('cyber', 6)]
+    \end{lstlisting}
+  \nsl{A: And where does this sorted function come from anyway?}
+\end{frame}
+
+
+
+%% Built-in functions
+\begin{frame}[fragile]{Built-in Functions}
+  Python provides various built-in functions.\footnote{
+    Overview of all built-ins \url{https://docs.python.org/3/library/functions.html}
+  }
+
+  \begin{itemize}
+    \item \pp{len} returns the \tb{length} of a data structure.
+    \item \pp{int/ str/ float/ ...} can be used for \tb{type conversion}.
+    \item \pp{sorted} can \tb{sort} a data structure.
+    \item \pp{input}\furl{https://docs.python.org/3/library/functions.html\#input} waits in the terminal for \tb{user input}.
+  \end{itemize}
+  \nll{bytes, tuple, list...}
+  \nll{A: That sounds good, but what about classes?\\
+  C: Hmm. True. Do you want to do something about it?\\
+  A: With pleasure\\
+  \LARGE C -> A}
+\end{frame}
+
+\subsection{Classes}
+
+
+% Diese Seite bricht absichtlich nach unten aus.
+% Wir wollen diese vertikale Badbox nicht genannt bekommen.
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Classes}
+  Classes are defined as follows: \newline
+  \pause
+  Defining and accessing \tb{member variables} is done with the \tb{instance reference} \lpl{self}.
+  \pause 
+  The \tb{first} parameter of every member function is the instance reference \lpl{self}.
+  \pause 
+  \begin{lstlisting}[language=pytiny]
+class Cybernator:
+    """Description of the class"""
+    def __init__(self, person_name: str):  # init is the constructor of a class
+        """Description of the constructor"""
+        self.name = person_name  # Defines the member variable 'name'
+
+    def swap_name(self, person_name: str):  # 'normal' member function
+        """Description of the member function"""
+        self.name = person_name
+
+    def __str__(self):  # 'special' member function; executed during dynamic str-casting
+        return f"Cyber{self.name}!"
+
+    def say_cyber(self):
+        print(str(self))  # str(self) calls self.__str__(self)
+
+  \end{lstlisting}
+
+  
+\end{frame} 
+\fussy
+
+
+\vfuzz 2.0\paperheight
+\tolerance 10000
+\begin{frame}[fragile]{Inheritance}
+  \begin{lstlisting}[language=pytiny]
+class A:
+  def __init__(self, name):
+      self.name = name
+
+  def foo(self):
+      print("Foo", self.name)
+
+# Class B inherits from Class A
+class B(A):
+  def __int__(self, name):
+      super.__init__(name)
+
+  def bar(self):
+      print("Bar", self.name)
+
+
+b = B("Test")
+b.bar()  # >> "Bar Test"
+b.foo()  # >> "Foo Test"
+  \end{lstlisting}
+  \nsl{Inherited class in parentheses, super is a bit odd.\\
+  A: But Chris, what is this \_\_init\_\_ doing there?\\
+  \LARGE A -> C}
+\end{frame}
+\fussy
+
+
+\begin{frame}[noframenumbering]{Special Methods}
+  Python uses \tb{special methods} to implement the concept of \tb{duck typing}\furl{https://en.wikipedia.org/wiki/Duck_typing}. 
+
+  \medskip
+  \pause
+
+  Interesting special methods include, among others\footnote{
+    A full list of special methods can be found at \url{https://docs.python.org/3/reference/datamodel.html\#specialnames}.
+      }:
+  \begin{itemize}
+    \item \pp{__init__} is called during \tb{initialization}
+    \item \pp{__len__} enables the built-in function \pp{len}
+    \item \pp{__getitem__} provides the \pp{[]} operator
+    \item \pp{__add__}/\pp{__iadd__} allow overriding \pp{+} out-of-place/in-place
+    \item \pp{__contains__} allows use of the \pp{in} keyword
+  \end{itemize}
+  \nll{If it walks like a duck and it quacks like a duck, then it must be a duck}
+  \nsl{A: Which one is the funkiest?\\
+C: I’ve got a funky special method for you:}
+\end{frame}
+
+
+\begin{frame}[fragile, noframenumbering]{Special Methods II}
+  With \pp{__call__}, an object can be \tb{called} like a function.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+class CyberChrisch:
+    # Object of type CyberChrisch can be used like a function 
+    def __call__(self):
+        print("A cyber function!")
+  
+    # Returns string representation of the object and its contents
+    def __str__(self):
+      return "I am CyberChrisch!"
+
+c = CyberChrisch()
+print(c)  # >> outputs "I am CyberChrisch"
+c()       # >> "A cyber function"
+      \end{lstlisting}
+	\nsl{C: What kind of example did you just write?\\
+	A: I am CyberChrisch.\\
+	C: You can’t just *REPResent* us like that – speaking of representation:}
+\end{frame}
+
+\begin{frame}[fragile]{Special Methods III}
+
+  The special methods \pp{__str()__} and \pp{__repr()__} create a \tb{string representation} of the object. However, with an important \tb{difference}.\footnote{More at \url{https://docs.python.org/3/reference/datamodel.html\#object.__repr__}}
+
+  \medskip
+  \pause
+
+    \pp{__str()__} creates an \tb{informal} representation that is easy to print. It is called by the built-in \pp{str()} function.
+
+	\medskip
+	\pause
+	
+	\pp{__repr()__} creates an \tb{official} representation, ideally a valid Python \tb{expression} that \tb{creates this object}.\newline
+	Alternatively, it can return a format like \pp{<Class(x=..., ...)>}.\newline
+	 It is called by the built-in \pp{repr()} function.
+	 \footnote{If only \_\_repr()\_\_ is defined, it will be used for the informal representation.} 
+	\footnote{You can access the repr-representation inside an f-string with f\glqq\{var!r\}\grqq~.}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Static Methods}
+  Python allows defining \tb{static} methods inside classes, which are called \tb{on the class} and therefore receive \tb{no} \pp{self}.\newline
+   They are created with the \pp{@staticmethod} decorator.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+class TemperatureConverter:
+    
+    currently_unused_class_var = 42
+    
+    @staticmethod
+    def celsius_to_fahrenheit(c):
+        return 9*c/5 + 32
+
+    @staticmethod
+    def fahrenheit_to_celsius(f):
+        return 5*(f-32)/9
+
+TemperatureConverter.celsius_to_fahrenheit(30)   # >> 86.0
+TemperatureConverter.fahrenheit_to_celsius(100)  # >> 37.77777777777778
+  \end{lstlisting}
+  \nll{C: You know what’s not so static?\\
+  The behavior of our code when errors occur.\\
+  A: Then let’s take a look at that: \\
+  \LARGE Chris -> Adrian}
+\end{frame}
+
+
+
+\subsection{Exception Handling}
+
+\begin{frame}[fragile]{Exception Handling}
+  Exceptions in Python are triggered with \lpl{raise EXCEPTIONTYPE(ARGS)}. 
+  \begin{lstlisting}[language=pytiny]
+def i_break():
+    raise NameError("Friends don't lie")
+  \end{lstlisting}
+  \pause
+
+  In Python, exceptions are handled with a \lpl{try-except} construct. 
+  \begin{lstlisting}[language=pytiny]
+def main():
+    try:
+        i_break()
+    except NameError as my_exception:
+        print(f"Handling naming exception: {my_exception}")
+  \end{lstlisting}
+\end{frame}
+	
+
+
+\begin{frame}[fragile]{Exception Handling II}
+	\tb{Multiple} exceptions can be caught within a \pp{try}-block.
+	\begin{lstlisting}[language=pytiny]
+def main():
+    try:
+        i_break()¿\pause¿
+    # list multiple exceptions to catch here 
+    except (NameError, AttributeError) as my_exception:
+        print(f"Handling name or attribute exception: {my_exception}")¿\pause¿
+    # catch everything that has Exception in its inheritance and raise from it with extra context
+    except Exception as e:
+        raise RuntimeError("<further context, e.g. state of local variables>") from e
+	\end{lstlisting}
+	\pause
+	\pp{Exception} is the class from which all exceptions inherit\footnote{The naming scheme of exceptions is a complete mess. KeyError, NameError, etc. are not errors but “normal” exceptions.}, which can \tb{normally} be handled.
+	\newline\pause
+	Therefore, at \tb{minimum}, \pp{Exception} should be specified as the base of an \pp{except}.\footnote{There are errors that do not inherit from Exception. Ideally, you don’t want to catch those. KeyboardInterrupt and MemoryError are two examples.}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Exception Handling III}
+  \tb{Custom exceptions} are defined by inheriting from \lpl{Exception}.
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+class BadSongException(Exception):
+    pass
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=pytiny]
+def i_break():
+    raise BadSongException("Magenetic isn't a good song.")
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=pytiny]
+def main():
+    try:
+        i_break()
+
+    except BadSongException as my_exception:
+        print(f"Handling my exception: {my_exception}")
+
+    # finally will also be executed, even if error handling fails
+    finally:
+        print("I will be executed no matter what happened above!")
+  \end{lstlisting}
+  \nsl{C: Error handling often happens when working with files. How does that actually work?\\}
+\end{frame}
+
+
+\subsection{Files}
+
+\begin{frame}[fragile]{Context Manager: With}
+  In Python, objects can be managed within a \tb{context} using the \pp{with}-keyword, which takes care of \tb{automatic} cleanup.\newline \pause
+  This can be used, among other things, for file handling.\footnote{
+    All file modes \url{https://docs.python.org/3/library/functions.html?highlight=open\#open}.
+  }
+
+  \medskip
+
+  \begin{lstlisting}[language=pytiny]
+read_file = "read_file.txt"
+write_file = "write_file.txt"
+
+# File handle f does not need to be closed since it's managed by the context
+# Multiple context managers can be used in the same context
+with open(read_file) as f_r, open(write_file, "w") as f_w:
+    text = f_r.read()
+    print(f"Writing copy of '{read_file}' to '{write_file}', text: {text}")
+    f_w.write(text)
+
+  \end{lstlisting}
+  \nsl{
+A: Now that we’ve seen so much nice code – does it actually follow any rules?\\
+C: Yes, there are quite a few.\\
+A: But why? 
+  \LARGE C -> A}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Managing Files: Pathlib}
+  For easy interaction with files, Python offers the module \tb{Pathlib}\furl{https://docs.python.org/3/library/pathlib.html\#basic-use}.\newline
+  It allows:\pause
+  \begin{itemize}
+     \item Simple work with paths\pause
+	  \item Functions to read, write, and create files\pause
+	  \item Easy interaction with the file system\pause
+	% Das einfache\footnote{haha lol} expanden von Pfaden
+  \end{itemize}
+
+    \tb{Pathlib} provides the \tb{Path} object. \pause
+    
+  \medskip
+  
+  It behaves like a string but offers many functions for working with files and paths.\pause
+	
+	\medskip
+	
+	\begin{lstlisting}[language=pytiny]
+p = Path("file.txt")  # >> file.txt, behaves like a string externally
+p.touch()  # create file if it doesn’t exist                                   
+p.write_text("Hello World")  # write text to file                               
+text = p.read_text()  # read text
+	\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Creating Absolute Paths}
+	A \tb{Path} object can be initialized with a \tb{relative} or absolute path. \pause
+	
+	\medskip
+	
+	If it contains a relative path, an \tb{absolute} path can be \tb{derived} from it. \pause \newline
+	For this, there are \tb{.absolute()}, \tb{.resolve()}, \tb{.expanduser()}\footnote{All methods are out-of-place. The new path is the return value.}. \pause \newline
+	Their \tb{behavior} is similar but \tb{different}\furl{https://docs.python.org/3/library/pathlib.html\#expanding-and-resolving-paths}.\pause
+	
+  \medskip
+	
+	There is \tb{no perfect}, universally valid way of creating an absolute path.
+  Even the Python developers themselves disagree\furl{https://discuss.python.org/t/pathlib-absolute-vs-resolve/2573/10}.
+	
+	\medskip
+	
+	\pause
+	To check whether a path is absolute, use \tb{.is\_absolute()}.
+	
+	
+	\nsl{
+    .absolute() -> no symlinks, no normalization\\
+	.resolve() -> resolves symlinks and normalizes\\
+	neither can handle ~/paths correctly\\
+	that’s what .expanduser() is for\\
+	to check if path is absolute: is\_absolute()\\
+	}
+	
+	\nll{solution: read the docs, think about the situation, and handle special cases.\\}
+	
+	\nsl{This forum post is highly recommended}
+	
+	% https://discuss.python.org/t/pathlib-absolute-vs-resolve/2573/10   
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Combining Paths}
+
+With the \pp{/}-operator, paths (and strings) can be \tb{appended} to a \pp{Path}.
+	\begin{lstlisting}[language=pytiny]
+p = Path.cwd()  # get current working directory
+p_1 = Path("sub/path")
+p = p /  p_1 / "data" / "target_file.txt"
+	\end{lstlisting}
+  \nsl{Many things like .cwd() also exist in the os library. The advantage of Pathlib is that it returns Path objects.}
+\pause
+
+If multiple joined paths are absolute, the last one is used as the anchor.\pause
+
+  \medskip
+
+  \tb{Important:} Pathlib \tb{does not check} whether paths are \tb{valid}! It is up to the developers to ensure the existence of paths before use.\pause
+
+  \medskip
+
+A path with multiple subdirectories that may need to be created can be elegantly handled with:
+ \pp{<path_obj>.mkdir(partens=True, exist\_ok=True)}.
+  \nsl{see docs}
+\end{frame}
+
+
+\subsection{A Uniform Coding Style}
+\begin{frame}{Why use a coding style?}
+  \begin{itemize}
+	  \item Many programming languages leave a lot of \tb{freedom} for formatting code.
+	  \item This means the same program can look very \tb{different}.
+	  \pause
+	  \item To make it easier to \tb{merge changes} from many people working on the same codebase, \tb{coding styles} are defined.
+	  \pause
+	  \item They also help you to \tb{navigate projects faster} and create a shared, \tb{uniform codebase}.
+	  \pause
+	  \item In general, such styles are adopted as \tb{conventions} by the community, while large projects usually enforce a particular style.
+	  \item For most coding styles there are \tb{code formatters} that automatically format the code into the desired form.
+	  \item A very well-known style guide is the one for the Linux Kernel\footnote{\url{https://www.kernel.org/doc/html/v4.10/process/coding-style}}.
+  \end{itemize}
+
+  \nsl{A: Luckily, Linux is not written in Python – So, what is there specifically for Python?}
+\end{frame}
+
+
+\begin{frame}{A uniform coding style in Python}
+    \begin{itemize}
+       \item A very widely used convention in Python is Python’s own \tb{PEP8}\footnote{\url{https://peps.python.org/pep-0008/}}\footnote{\url{https://pypi.org/project/autopep8/}}.
+       \item Conveniently, PyCharm comes with a built-in PEP8 formatter.
+       \item PEP8, despite being a convention, still leaves a lot of freedom. A widely adopted, much stricter style for Python is \tb{black}\footnote{\url{https://github.com/psf/black}}, which includes a formatter by default.
+       \item All the code shown in this course is PEP8-compliant\footnote{In some cases the maximum line length or the rule of two blank lines was violated to fit the examples on one slide.}.
+    \end{itemize}
+    \nsl{Some dialogue especially about English\\
+    C: Let’s move on to such a matter of faith...}
+
+\end{frame}
+
+
+\begin{frame}{PEP8 - Spaces vs. Tabs and Line Length}
+  \begin{itemize}
+    \item PEP8 uses only (four) \tb{spaces} for indentation.
+    \item Many IDEs and text editors provide tools to automatically convert tabs into spaces\footnote{Important cultural heritage on Tabs vs. Spaces: \url{https://www.youtube.com/watch?v=SsoOG6ZeyUI}}.
+    \item[] A mix of tabs and spaces in Python code can lead to very using errors in seemingly correct code!
+    \item The \tb{maximum line length} in PEP8 is limited to 79 characters.
+    \item[] With descriptive variable names this can become tight very quickly.
+    \item[] Of course, this should not reduce code readability!
+    \item[] PyCharm’s \glqq PEP8\grqq-formatter sets the limit to a more reasonable\footnote{Attention: author’s opinion ;)} \tb{120 characters}.
+  \end{itemize}
+  \nsl{A: Sounds cool. Can you at least show a bit of code?}
+\end{frame}
+
+
+\begin{frame}{PEP8 - Sources}
+	
+	The examples on the following slides are mostly taken from or inspired by:\newline \url{https://peps.python.org/pep-0008}
+	
+\end{frame}
+
+\begin{frame}[fragile]{What PEP8 looks like I - A new Variable}
+  \begin{lstlisting}[language=pytiny]
+# python means in general: snake_case
+import my_package         # package names are lowercase
+a_variable = "text"       # a normal variable in snake_case
+res = my_func()           # functions are lowercase, their parameters also
+that_class = ThatClass()  # class names are CapitalizedCamelCalse
+PI_AS_AN_INT = 3          # a constant IN_ALL_CAPS_SNAKE_CASE
+  \end{lstlisting}
+  \nsl{everything snake\_case except classes\\
+A: This is all getting a bit too spacey my friend.\\
+C: Don’t worry, there’s more to come}
+\end{frame}
+
+
+\begin{frame}[fragile]{What PEP8 looks like II - The Space Strikes Back}
+  \begin{lstlisting}[language=pytiny]
+# One space behind and in front of the equals ¿\pause¿
+num = 69  # inline comments: at least two whitespaces in front and one behind the # ¿\pause¿
+
+if type == 69:      # no parenthesis for simple if-statements ¿\pause¿
+    print("nice!")  # four spaces for an indeted code-block ¿\pause¿
+
+
+# two free lines before and after each function declaration
+# four additional spaces for the indentation of parameters (this may vary)
+def long_function_name(
+        var_one: int,  # one space between the colon and type of annotation
+) -> None:             # spaces between the arrow and returned type
+    print(var_one)¿\pause¿
+
+
+# no whitespaces between function name and parenthesis
+# hanging indents should add a level
+foo = long_function_name(
+    var_one, var_two)
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{What PEP8 looks like III - The Return Of The Operators} 
+	\nsl{In general, it is advisable to always have a blank line at the end of a file -> git diffs}
+
+  \begin{lstlisting}[language=pytiny]
+x = 2 + 3  # whitespaces in arithmetical operations¿\pause¿
+
+# operators infront of the variable in case of linebreaks
+# note that we can do statements over multiple lines using parenthesis!
+income = (gross_wages
+          + taxable_interest
+          + (dividends - qualified_dividends)
+          - ira_deduction
+          - student_loan_interest)¿\pause¿
+
+# operators in slices should have equal amounts of spaces on both sides
+ham[lower+offset : upper+offset]
+ham[lower + offset : upper + offset]
+ham[: upper_fn(x) : step_fn(x)], ham[:: step_fn(x)]
+
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{What PEP8 looks like IV - We Should Have Stopped Here.}
+  \begin{lstlisting}[language=pytiny]
+# don't use whitespaces around the = sign on keword arguments ¿\pause¿
+# except they're annotated
+def complex(real=0, imag: float = 0.0):
+    return magic(r=real, i=imag) ¿\pause¿
+
+# dont't compare against True, False or None with equals!
+y = False
+if not y:
+    print("y, y did u do that? :(")
+
+x = "hello."
+if x is not None:  # put is and not together to negate the statement
+    print("x is not None") ¿\pause¿
+
+
+# use whitespaces when initializing dicts, lists etc
+my_dict = {1: 2, 3: 4}
+my_list = [1, 2, 3, 4]
+    
+
+    
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{PEP8 - Imports}
+    \begin{itemize}
+        \item Imports should be at the \tb{very top} of the file.
+        \item They are \tb{ordered} as follows:
+        \item[] \begin{itemize}
+            \item Built-in modules
+            \item Modules installed from PyPi
+            \item Imports of your own code
+        \end{itemize}
+        \item Each used module should be on its \tb{own line}.
+        \item Each of these blocks should be separated by a blank line\footnote{General rule of thumb for PEP8: Just leave some space (spaces or linebreaks)!}.
+    \end{itemize}
+  \nsl{C: What’s the deal with imports anyway?\\
+A: Glad you asked.\\
+  \LARGE C -> A}
+\end{frame}
+
+
+\begin{frame}[fragile]{Importing modules}
+  In Python there are two ways to import foreign modules (external libraries). 
+  \begin{lstlisting}[language=pytiny]
+import numpy as np  # Imports the entire module 'numpy' and renames it to 'np'.
+array = np.array()  # Access via modulename.functionality
+
+from random import randrange  # The function 'randrange' is imported into the own namespace
+print(f"This code is a {1+randrange(10)} out of 10")
+  \end{lstlisting}
+
+  Importing foreign functionality via \lpl{from module import *} 
+  contradicts the concept of namespace separation and should not be used\footnote{There are cases where a wildcard import makes sense, but you should really(!) know why you're doing it.}.
+
+  \nsl{
+    C: Where do I actually get modules like Numpy from?}
+  
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Getting modules}
+  Python modules are usually published on the \tb{Python Package Index}, or \tb{PyPI} for short.
+  
+  \medskip
+  
+  \pause 
+  Publishing modules on PyPI is relatively easy,
+  since the module code is \tb{not checked for content}. \pause
+   
+  This is particularly convenient for malicious software developers. 
+
+  \medskip
+
+  To \tb{download} a chosen module from PyPI, you use \lpl{pip}\furl{https://pypi.org/project/pip/} . 
+  \begin{lstlisting}[language=pltiny]
+python3 -m pip install --user MODULENAME
+  \end{lstlisting}
+
+  Optionally, you first create a corresponding \tb{virtual environment}\furl{https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/}
+  and then use \lpl{pip} inside it to fetch the desired modules. 
+  \nsl{
+C: What does PIP actually stand for?\\
+A: Pip installs Packages\\
+Keep this joke going for as long as it’s remotely funny.\\
+A: We’ve talked a lot about code and especially good code, but where do I actually write it?\\
+C: PyCharm. But before we get to that – are there any questions so far?\\
+\LARGE A -> C
+  }
+\end{frame}
+
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+\section{Pycharm}
+\subsection{Live Demo}
+
+\end{document}
+

@@ -1,0 +1,1738 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+\usepackage{tikz}
+
+\input{config/minimal_beamer_style}
+\input{config/listings_theme}
+\input{config/global_config}
+\input{config/custom-command}
+\SubTitle{Packaging, Typehinting II, Data Modeling,\\Requests, FastAPI}
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+
+% \setbeameroption{show notes}
+% \setbeameroption{show notes on second screen=right}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+\begin{document}
+
+\titlepage
+
+\include{config/orga.tex}
+
+
+
+\framecardblue{
+  \Utext{Welcome}
+}
+
+\section{Modules and Packages in Python}
+
+
+%\begin{frame}[fragile]{Bedingungen in python}
+%	Bedingung und der dazugehöriger Block werden durch Einrückung gekennzeichnet.
+%	\begin{lstlisting}[language=python]
+%		zahl_1 = 42.0
+%		zahl_2 = 69
+%		wort_1 = "42069"
+%		
+%		if type(zahl_1) is int:
+%		print("Das ist eine Zahl!")
+%		
+%		if (not zahl_1 == zahl_2) and zahl_1 <= zahl_2:
+%		print("Das war aber ein sehr komplizerites 'zahl_1 < zahl_2'")
+%		
+%		if "69" in wort_1:
+%		print("Nice!")
+%	\end{lstlisting}
+%\end{frame}
+
+
+\subsection{Imports von Modulen}
+
+\begin{frame}[fragile]{Importing Packages and Modules}
+        The entire Python \tb{ecosystem} is based on importing (external) packages.
+
+		\medskip
+		
+		In Python there are \tb{two ways} to import packages.
+		
+		\medskip
+		
+		\begin{lstlisting}[language=pytiny]
+import random
+from random import randint
+		\end{lstlisting}
+		
+		\medskip
+		
+		The first structure imports the \tb{entire module} and makes \tb{its namespace} available in an object-like way.\footnote{If your own code changes the value of a global variable in the module, this change is visible everywhere the module was imported with the \texttt{import} structure.}
+		
+		\medskip
+		
+		The \pp{from}-structure binds a \tb{reference} of the imported object to the \tb{given name} within the importing namespace.
+		
+		\medskip
+		
+		Importing external functionality via \lpl{from module import *} \pause contradicts the concept of namespace separation and should not be used.
+
+\end{frame}
+
+
+\begin{frame}{A Module}
+        Every Python file is an independent \pp{module}\furl{https://packaging.python.org/en/latest/glossary/\#term-Pure-Module} with its own \tb{namespace}.
+
+		\medskip
+		
+		Multiple \tb{files} in one folder can be grouped into a \tb{single} \pp{package}\footnote{\texttt{Packages} are often also called \texttt{modules} in Python’s own docs. A package is basically a more specific term that says something about structure. In essence: a package consists of one or more modules.} which can then \tb{be imported as one}.\newline
+		%
+		For this, the directory must contain an \pp{__init__.py} file\footnote{One of the very few places where \texttt{from x import *} can make sense, to expose all elements of other package files from init.}.
+		
+		\medskip
+		
+		Every module has a \tb{name}. This consists of \pp{packagename.modulename}.
+		
+		\medskip
+		
+		The \tb{initially executed} module has a \tb{second} name: \pp{__main__}\footnote{The main module of a process created by \texttt{multiprocessing} is called \texttt{\_\_mp\_main\_\_}, which is useful to detect if you're a child process or the main one}.
+	
+
+		\nsl{First modulename.file, then \_\_main after init when executed.\\ basically first import/init, then exec}
+\end{frame}
+
+
+\begin{frame}[fragile]{Execution and Import of a Module}
+        Importing a module triggers its \tb{complete execution}.\newline
+		%
+		This execution should \tb{only} define \tb{functions and constants}.
+		
+		\medskip
+		
+		A module should \tb{only} execute functionality if it is explicitly run as a \tb{program}.
+		
+		\medskip
+		
+		Thus a \tb{module} should be able to \tb{distinguish} whether it is the initially executed entry point or an import.
+		
+		\medskip
+		\pause
+		
+		This works by \tb{checking} the information available in \pp{__name__}.
+		
+		\medskip
+
+    \begin{lstlisting}[language=pytiny]
+# some imports and functions
+
+if __name__ == '__main__':
+    some_functionality()
+            \end{lstlisting}
+\end{frame}
+
+
+\subsection{Packaging Modules}
+\begin{frame}{What is Packaging}
+	\begin{itemize}
+		\item \tb{Standardized} structure of a project
+		\pause
+		\item Follows \tb{conventions}, so that – in this case Python – can handle it by default
+		\pause
+		\item Allows smooth \tb{integration} of external code and \tb{distribution} of your own code
+		\pause
+		\item Such packaged projects are often distributed via \tb{package managers}
+		\item[] Python comes with its own \tb{package manager} \pp{pip}
+	\end{itemize}
+	\nll{Other examples: apt, pacman, winget, brew, ...}
+\end{frame}
+
+\subsection{Packaging in Python}
+
+\begin{frame}{Sources}
+	The following chapter is an excerpt from the following sources. \newline
+	\pause
+	We deliberately \tb{deviate} from the documentation in one aspect: 
+	\pause
+	
+	\medskip
+	
+	The Python \tb{modules} are placed directly in the \tb{project root}, instead of in a \pp{src/} folder.
+	
+	This has advantages, which will be briefly mentioned throughout the chapter.
+	
+	\medskip
+	\pause
+	
+	\begin{itemize}
+		\item \tb{Sample Project} that implements the project structure:
+		\item[] \url{https://github.com/pypa/sampleproject}
+		\item Tutorial covering also the final \tb{distribution} of the package:
+		\item[] \url{https://packaging.python.org/en/latest/tutorials/packaging-projects/}
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{How does that look in Python?}
+% TODO example code
+\begin{verbatim}
+my_project/
+├── LICENSE             # License under which project is distributed
+├── pyproject.toml      # Setup and metadata for the project
+├── README.md           # Classic README of the project
+├── requirements.txt    # Central place to define dependencies
+├── package_name/       # Package containing the code
+│   ├── __init__.py     # Entry point for the package
+│   └── example.py      # First additional file containing code
+└── tests/              # If tests exist, they should be placed here 
+\end{verbatim}
+
+\medskip
+
+Multiple packages can reside in \lpl{my_project/}, which can then be made available.
+
+
+\end{frame}
+
+
+
+\begin{frame}{Packages in the Project Directory}
+	Packages that Python can potentially \tb{import} depend partly on the \tb{working directory}\footnote{Packages and modules in the working directory are added to sys.path, modules in subdirectories like src/ are not.}\furl{https://docs.python.org/3/library/sys_path_init.html}.
+	
+	\medskip
+	
+	This is a problem for \tb{importing local packages} in particular.\newline
+	\pause
+	IDEs, among others, may not resolve imports if the package is not in the working directory, which by default is the project root.
+	
+	\medskip
+	\pause
+	
+	To ensure \tb{consistent} behavior for \tb{internal and external} project \tb{imports} 
+	of the package, 
+	\pause 
+	running it as a terminal program, 
+	\pause
+	or executing the \pp{__init__.py} directly, 
+	\pause
+	all \tb{developed} packages should be placed directly in the \tb{project root}.
+\end{frame}
+
+
+
+\begin{frame}[fragile]{A Fix for Projects that evolved over time with src/ Directory}
+	
+	A simple yet effective \tb{solution} is to use this code block \tb{before} specifying your own imports in the initially executed file of the package.
+	\pause
+	
+	
+	\begin{lstlisting}[language=pytiny]
+# make sure we can import other modules from our package when it is run directly
+# package is None when the module is executed directly (and not imported)
+# a module is frozen when it's packaged in an executable that doesn't rely on external dependencies
+if __package__ is None and not hasattr(sys, "frozen"):
+    import os.path
+
+    # get path of the current file
+    path = os.path.realpath(os.path.abspath(__file__))
+    # add current directory to list of directories interpreter searches when a module is required
+    sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
+
+# import things from your package here!
+from packaging_sample_project import some_functions
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\subsection{A Closer Look at the Specific Components of a Package}
+
+
+\begin{frame}{The pyproject.toml specifies...}
+	\begin{itemize}
+		\item \tb{Metadata}\furl{https://packaging.python.org/en/latest/specifications/pyproject-toml/\#declaring-project-metadata-the-project-table} about the project:
+		\begin{itemize}
+			\item Name, Author, Description, ...
+		\end{itemize}
+		\item The \tb{compatible} Python versions
+		\item The \tb{dependencies} required by the package and their version numbers\footnote{From the Python Package Index: \url{https://pypi.org}}
+		\item Other build-related entries, which can be left at the default value\footnote{It may make sense to include "wheel" in the requires when using external packages \url{https://peps.python.org/pep-0518/\#build-system-table}} of the pypa sample project\furl{https://github.com/pypa/sampleproject/blob/main/pyproject.toml}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{requirements.txt}
+	The probably most widely used way to \tb{specify dependencies}.
+	Difference from specifying dependencies in the \lpl{.toml}:
+	
+	\begin{itemize}
+		\item Dependencies specified in the \lpl{.toml} should be the \tb{minimum} needed to use the package.
+		\item The \lpl{requirements.txt} file is usually used to specify a complete\\ Python \tb{environment}\footnote{e.g., including the jupyter-notebook package}.
+	\end{itemize}
+	
+	\medskip
+	
+	Note: \tb{All} packages in a \lpl{requirements.txt} can be installed with:
+	
+	\medskip 
+	
+	\begin{lstlisting}[language=pytiny]
+		python3 -m pip install -r requirements.txt¿\footnote{\texttt{python -m} to run \texttt{pip} ensures that the always included module \texttt{pip} is executed instead of requiring pip as an executable.}¿
+	\end{lstlisting}
+	
+	\pause
+	
+	\begin{tikzpicture}[remember picture, overlay]
+		\draw[red, line width=8pt] (current page.south west) -- (current page.north east);
+		\draw[red, line width=8pt] (current page.north west) -- (current page.south east);
+	\end{tikzpicture}
+	
+\end{frame}
+
+\begin{frame}[fragile]{requirements.txt}
+	The probably most widely used way to \tb{specify dependencies}.\newline
+	\pause
+	There is \tb{no real difference} compared to the \pp{.toml}; packages either:
+	\begin{itemize}
+		\item Specify dependencies directly in the \pp{.toml}
+		\pause
+		\item Specify dependencies in a \pp{requirements.txt} and read them into the \pp{.toml}
+		\pause
+		\item Have no meaningful packaging
+	\end{itemize}
+	
+	\medskip
+	\pause
+	
+	With \pp{requirements.txt}, a widely \tb{known standard} for specifying dependencies has emerged, which is much better known and \tb{easier} to use than specifying in the \pp{.toml}.
+	
+	\medskip
+	
+	Note: \tb{All} packages in a \lpl{requirements.txt} can be installed with:
+	
+	\medskip 
+	
+	\begin{lstlisting}[language=pytiny]
+python3 -m pip install -r requirements.txt¿\footnote{\texttt{python -m} to run \texttt{pip} ensures that the always included module \texttt{pip} is executed instead of requiring pip as an executable.}¿
+	\end{lstlisting}
+	
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Specifying Dependencies I}
+
+	In the \lpl{.toml} there is a field called \lpl{dependencies}, where dependencies can be specified. This is compatible with the \pp{requirements.txt}.
+	
+	\pause
+	\medskip
+	
+	Dependencies should always include a version number\footnote{The way packages specify their version numbers may vary} for \tb{reproducibility}.
+	\begin{itemize}
+		\item Version numbers can be specified with \lpl{==}, \lpl{>=}, \lpl{\~=}.
+		\item Here, \lpl{\~=} means "compatible with".
+	\end{itemize}
+	The same kind of \tb{version pinning} can also be done in \lpl{requirements.txt}\furl{https://pip.pypa.io/en/latest/reference/requirements-file-format/}:
+	
+	\begin{lstlisting}[language=pytiny]
+fastapi==0.103.1
+openai-whisper>=20230124¿\footnote{This listing is an example for the requirements.txt syntax. The .toml syntax is slightly different: \url{https://peps.python.org/pep-0631/\#example}}
+	\end{lstlisting}
+%
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Specifying Dependencies II}
+	Dependencies can be \tb{dynamically} read from the \pp{requirements.txt} into the \pp{.toml}.
+	
+	\medskip
+	
+	Similarly, the project version can be read from \pp{__init__.py} to have a \textsl{single source of truth} for the version number in the project.
+	
+	\begin{lstlisting}[language=pytiny]
+[project]
+dynamic = ["dependencies", "version"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+version = { attr = "whisper_api.__version__" }
+	\end{lstlisting}
+
+\pause
+
+You can also declare \tb{optional} dependencies\furl{https://packaging.python.org/en/latest/guides/writing-pyproject-toml/\#dependencies-and-requirements}, e.g. tools that only the library devs need.
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Setting the Entrypoint}
+
+	If the package contains \tb{directly} executable code, an \tb{entrypoint} must be specified in the \lpl{.toml}.
+		
+		\medskip
+		
+	This is done by specifying a \tb{function} within the package that should be called via a \tb{command}.
+	
+	
+	
+	\begin{lstlisting}[language=pytiny]
+[project.scripts]
+run_package = "package_name:main"
+	\end{lstlisting}
+	
+	After installing via \lpl{pip}, entering the command \lpl{run_package} in the terminal executes the main function of the package \lpl{package_name}.
+\end{frame}
+
+
+\begin{frame}[fragile]{Installing your own Package and making it executable}
+	You can \tb{install} your own package into a Python environment by:
+		
+	\medskip
+	
+	\begin{lstlisting}[language=pytiny]
+python3 -m pip install -e .
+	\end{lstlisting}
+	
+	\medskip
+	
+	\begin{itemize}
+		\pause
+		\item Assuming you are in the \tb{root directory} of the project (where the \lpl{.toml} is located).
+		\pause
+		\item \lpl{-e} ensures that the package is installed as \tb{editable}.
+		\item[] Allowing the code to be developed further without reinstalling the package each time.
+		\pause
+		\item[] This flag should \tb{not} be used in deployment!
+	\end{itemize}
+	
+	\medskip
+	
+	As with all Python package \tb{installations}, it is recommended to work in a \tb{venv}\furl{https://docs.python.org/3/library/venv}.
+
+	
+\end{frame}
+
+\subsection{Additional Important Notes on Packaging}
+
+\begin{frame}{\_\_init\_\_.py}
+	An \tb{non-empty} \pp{__init__.py} exposes only \tb{functionalities}, that are declared or \tb{imported} in it, if the package itself is imported.
+	\nll{Ofc its possible to import sub modules}
+
+	\medskip
+	\pause
+	
+	To avoid unexpected \tb{side effects}, the \pp{__init__.py} should be \tb{limited} to the following:	
+	
+	\medskip
+	%
+	\pause
+	\tb{At a minimum}:
+	\pause
+	\begin{itemize}
+		\item Declaration of metadata
+		\pause
+		\item Import of functionality that should be available upon import
+	\end{itemize}
+	\pause
+	\tb{Optional}:
+	\pause
+	\begin{itemize}
+		\item Define an entrypoint function for executing the project
+		\pause
+		\item A \pp{__main__}-clause
+	\end{itemize}
+	\nsl{Not every \_\_init\_\_.py has to or should include all these aspects.}
+\end{frame}
+
+\begin{frame}{setup.py}
+	\begin{itemize}
+		\item Is a \tb{dynamic} way to specify the data from the \lpl{.toml}, which can be found in many projects
+		\item Since PEP 621\furl{https://peps.python.org/pep-0621/} \tb{deprecated}
+		\item[] Motivation: Simplification and \tb{standardization} of project metadata specification
+		\item Both ways of specifying a project feel very \tb{similar}. If you understood one way, the other is also understandable!
+	\end{itemize}	
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+\section{Typehinting II}
+\subsection{Abstract}
+\begin{frame}{Reminder: Why Typehinting}
+	\begin{itemize}
+		% TODO Spiderman meme from variable to str to int
+		\item Python is \tb{dynamically} typed. A variable can be anything.
+		\item For more \tb{traceability} of the code, typehinting was introduced.\footnote{PEP484: \url{https://peps.python.org/pep-0484/}, introduced with python3.5}
+		\item Typehints indicate the \tb{expected} type or the \tb{possible types} of a variable.
+		\item[] This helps
+		\begin{itemize}
+			\item when \tb{documenting} your own code, for yourself and for others.
+			\item the \tb{IDE} to understand the code and make more meaningful \tb{suggestions}.
+			\item libraries to perform \tb{automatic} checks and conversions.
+			\item static \tb{typecheckers}, such as \pp{mypy}\furl{https://mypy-lang.org/}, to test our code.
+		\end{itemize}
+	\end{itemize}	
+\end{frame}
+
+
+
+\begin{frame}{What do Typehints do internally?}
+
+		% TODO: Should this point be included and is it correct this way? – not here. And applies only partially for e.g. Iterable
+		% \item In principle, TypeHints only communicate which special methods and other functionalities an object provides.
+		
+        Typehints are \tb{not checked at runtime}, but remain available and can be \tb{read out}, e.g. using the \pp{inspect}\furl{https://docs.python.org/3/library/inspect.html\#introspecting-callables-with-the-signature-object} module or \pp{obj.__annotations__}.
+
+		\medskip
+		
+		Some \tb{libraries} actively make use of this, for example to detect signatures, or create and \tb{validate} data schemas.
+		
+		\medskip
+		
+		With the help of typehints, function overloading à la Java can be implemented natively\furl{https://youtu.be/yWzMiaqnpkI?t=483}. However, with significant performance drawbacks.
+
+\end{frame}
+
+
+
+\subsection{Concrete}
+\begin{frame}[fragile]{Reminder: Typehinting – The Basics}
+        Basically, the intended type of a \tb{variable} is specified as follows:
+
+		\medskip
+		
+		\begin{lstlisting}[language=pytiny]
+variablename: type = value
+		\end{lstlisting}%\pause
+		
+		\medskip
+		
+		\tb{Function parameters} can also be annotated with typehinting. %\pause
+		
+		\medskip
+		
+		Similarly, the intended \tb{return type}:
+		
+		\medskip
+		
+		\begin{lstlisting}[language=pytiny]
+def f(param: type, param_2: type) -> returntype:
+    ...
+		\end{lstlisting} %\pause
+		
+		\medskip
+		
+		Primary source for this chapter: \url{https://docs.python.org/3/library/typing}
+	
+\end{frame}
+
+
+
+%TODO: Footnotes should only appear once the point is displayed
+\begin{frame}[fragile]{Typehinting – Basics \#2}	
+        If \tb{multiple} types should be allowed, Python permits the notation:
+		\footnote{This notation is available starting with Python 3.10. In earlier versions, the helper classes \texttt{Union} and, if needed, \texttt{Optional} from the \texttt{typing} module are required.}
+		
+		\begin{lstlisting}[language=pytiny]
+type1 | type2
+		\end{lstlisting}%\pause
+		
+		\medskip
+		
+		\begin{lstlisting}[language=pytiny]
+def my_path_fn(arg1: str | Path) -> Path | None:
+    return None  # TODO: this is a valid return, but maybe do something useful here?
+		\end{lstlisting}
+		
+		\medskip
+		
+		All known built-in \tb{datatypes} can be used as typehints.\newline
+		%
+		“Generic” types can be specified even \tb{more precisely}.
+		\footnote{This notation is available starting with Python 3.9. In earlier versions, the helper classes \texttt{List}, \texttt{Dict}, etc. from \texttt{typing} are required.}
+		
+		\begin{lstlisting}[language=pytiny]
+my_fave_bands_list: list[str] ¿\pause¿ = ["Bring me the Horizon", "VINTA", "Architects"]¿\pause¿
+my_important_tuple: tuple[str, int, float] = ("42", 42, 42.0)¿\pause¿
+my_dict: dict[str | int, list[int | str] | bool] = {"69": [1, "nice", "key"], 1: True}¿\pause¿
+		\end{lstlisting}%\pause
+		
+			If the type is \tb{arbitrary}, this can be specified explicitly with \pp{Any}%
+		\footnote{Also from the \texttt{typing} module} or \pp{object}.
+
+	% TODO: @Felix how do I render slides with and without "memes"?
+	% yep this comment below is in there deliberately
+%	\only<6|handout:4>{
+%		\begin{textblock}{14.28}(1.22, 5.9)
+%			\% this is funny, because people expect characters like 'a', 'b' but instead it's character attributes, funny. right? yeah. they'll laugh for certain. hmmm...
+%		\end{textblock}
+%	}
+\nll{Technically the byte-wise or operator}
+\end{frame}
+
+\begin{frame}[fragile]{Advanced Typing}
+    \tb{Types} can also be stored in \tb{variables} (\pp{Type aliases}).
+		\footnote{There is no naming convention for aliases. A common notation is \texttt{typenameT}. Python’s docs do not distinguish between an alias and a “normal” variable.}
+		%
+		\begin{lstlisting}[language=pytiny]
+numberT = int | float  # this is technically a bad example, because float itself also allows int
+x: numberT = 3.14
+		\end{lstlisting}
+		
+		\medskip
+		
+		\tb{Additional} types can be created with \pp{TypeVar}\footnote{Also from the \texttt{typing} module}.\newline
+		%
+		This is useful to create, for example, \tb{generic} types \pp{TypeVar("T")}.
+		%
+		\begin{lstlisting}[language=pytiny]
+K, V = TypeVar("K"), TypeVar("V")
+dict[K, V] = {}
+		\end{lstlisting}
+		
+		\medskip
+		
+		There are types for \tb{special} properties, such as \pp{Callable}, \pp{Literal}, \pp{Iterable}.
+		%
+		\begin{lstlisting}[language=pytiny]
+choicesT = Literal["yes dear", "no"]  # narrower specification what a string should contain
+fn: Callable[[choicesT, int], list | None]  = lambda c, i: [c, i] if i % 2 == 0 else None
+fn("yes dear", 2)  # >> ["yes dear", 2]
+fn("yes", 1)  # >> None
+		\end{lstlisting}
+
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Typing self}
+	\begin{itemize}
+		\item Typehinting \pp{self} is not that easy
+		\pause
+		\item \pp{self} is only \tb{defined} once the class is defined
+		\pause
+		\item While the class is being parsed and the typehints are evaluated, \pp{self} is still \tb{unknown}
+		\pause
+		\item This can be bypassed by declaring a \tb{literal}\furl{https://peps.python.org/pep-0484/\#forward-references}: \pp{-> "MyClass":}
+		\pause
+		\item As of Python 3.11, the \tb{helper type} \pp{Self} from the \pp{typing} module\furl{https://peps.python.org/pep-0673/} provides a solution
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Notes}
+ 	\pp{Ellipsis} or \pp{...} is a type primarily used as a \tb{placeholder}.
+	
+	\medskip
+	
+	In typehinting, it is used to
+	
+	\medskip
+	
+	\begin{itemize}
+		\item describe a \pp{tuple}, or other sequences of \tb{arbitrary} length
+		\item[]\begin{lstlisting}[language=pytiny]
+my_tuple: tuple[int, ...] = (1, 2, 3)  # (1,) would be also okay
+		\end{lstlisting}
+		
+		\medskip
+
+		\item symbolize \tb{arbitrary} parameter signatures of a function
+		\item[]\begin{lstlisting}[language=pytiny]
+# parameters are arbitrary, important is that we get a list
+fn: Callable[..., list]  = lambda x, y, z, a, b, c: []  
+		\end{lstlisting}
+		
+	\end{itemize}
+	
+	\medskip
+	
+	For \pp{*args} and \pp{**kwargs}, only the types of the \tb{arguments} are specified.
+	\begin{lstlisting}[language=pytiny]
+def some_fn(*args: str | int | float, **kwargs: int | float) -> None:¿\footnote{Explicitly allowing int is not strictly necessary once float is allowed.}¿
+    ...
+	\end{lstlisting}
+	
+	
+	\nsl{The Never Type}
+	
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+% TODO: typehint self?
+% TODO: TypeVar
+
+\section{requests}
+
+% Credits: Base from the Python Intro Course 2122
+\begin{frame}{Network Input/Output}
+	\begin{itemize}
+		\item Python has a \tb{built-in} network I/O package \pp{urllib}
+		\pause
+		\item Every normal person \tb{uses} \pp{requests}
+		\begin{itemize}
+			\item \pp{pip install requests}
+		\end{itemize}
+		\pause
+		\item \pp{requests} provides simple functions to \tb{request} (GET) and \tb{send} (POST) data.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Requests}
+        There are different types of \tb{requests} to a website.
+		
+		\medskip
+		
+		Requests can be passed with two kinds of \tb{context}:
+		%
+		\begin{itemize}
+			\item The \tb{path parameters} in the URL: \pp{url/\{server_id\}/\{channel_id\}}.
+			\item The \tb{query parameters}, which are appended to the URL.
+		\end{itemize}
+		
+		\medskip
+		
+		A \pp{GET} request asks a server for \tb{information}.\newline
+		%
+		The request should not cause any change to the server’s state.
+		
+		\medskip
+		
+		% TODO: phrase this better.
+		
+		A \pp{POST} request is intended to inform the server of a \tb{change}.\newline
+		%
+		This request to change something can be simple text or even a file.
+		
+		\medskip
+		
+		Requests can contain \tb{query parameters}.\newline
+		%
+		These are appended to the request using the syntax \pp{?arg1=val1&arg2=val2}.
+
+\end{frame}
+
+
+
+
+
+%---FOLIE---
+\begin{frame}[fragile]{GET - The Basics}
+
+	\begin{lstlisting}[language=pytiny]
+import requests
+
+# what my ip?
+resp: requests.Response = requests.get('https://httpbin.org/ip')
+
+if resp.status_code != 200:
+    print(f"There was an error: {resp.status_code} - exiting")
+    exit(1)
+
+message = resp.json()  # parse the response into a json
+print(message)  #> {'origin': '131.220.42.42'}
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{GET - A bit more exciting. Downloading an image.}
+	
+	\begin{lstlisting}[language=pytiny]
+import requests
+
+resp: requests.Response = requests.get('https://avatars.githubusercontent.com/u/58270603?v=4')
+
+if resp.status_code != 200:
+    print(f"There was an error: {resp.status_code} - exiting")
+    exit(1)
+
+message = resp.content  # content of request as bytes
+print(message)
+
+# create file and write bytes (if you use 'with' you'd need the 'wb' mode to write bytes)
+Path("img.png").write_bytes(message)
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{GET - More than just a Request I}
+		When \tb{accessing} the APIs of certain web applications\footnote{One such example application is \url{https://supersecretstuff.miguelcz.com}}, it may be necessary to pretend to be a \tb{legitimate browser}.
+		\pause
+		
+		\medskip
+		
+		Web servers recognize and distinguish browsers based on \tb{HTTP headers}, particularly the \tb{User-Agent}.
+		\pause
+		
+		\medskip
+		
+		Setting these headers can help bypass simple security mechanisms or gain access to certain content.
+		\pause
+		
+		\medskip
+		
+		Important headers:
+		\begin{itemize}
+			\item User-Agent\footnote{More here: \url{https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent}}: Defines, among other things, the browser and operating system
+			\begin{lstlisting}[language=pytiny]
+Mozilla/5.0 (<system-information>) <platform> (<platform-details>) <extensions>
+			\end{lstlisting}
+			\item Referer: Indicates from which page the request originated
+		\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{GET - More than just a Request II}
+	
+	\begin{lstlisting}[language=pytiny]
+import requests
+	
+headers: dict = {
+		"Referer": "https://supersecretstuff.miguelcz.com",
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 SecretStuffApp/42.0",
+}
+response: requests.Response = requests.get(
+    f"https://supersecretstuff.miguelcz.com/validate-request", headers=headers)
+
+if response.status_code != 200:
+				raise Exception(f"Failed to get response: {response.status_code} - {response.text}")
+	
+data : dict = response.json()
+print(data)
+
+	\end{lstlisting}
+\end{frame}
+
+% NO zu cookies
+%\begin{frame}[fragile]{POST \& GET für ein simples Registrieren.}
+%	
+%\begin{lstlisting}[language=pytiny]
+%import requests
+%
+%url = "http://127.0.0.1:3001"
+%
+%# http://127.0.0.1:3001?username=CyberChris
+%data = {"username": "CyberChris"}
+%r = requests.post(f"{url}/register", params=data)
+%
+%user_cookie = r.cookies.get("user_id")
+%print(f"user_id cookie: {user_cookie}")
+%
+%who_am_i = requests.get(f"{url}/whoami", cookies={"user_id": user_cookie})
+%print(who_am_i.text)
+%
+%	\end{lstlisting}
+%\end{frame}
+
+
+
+% TODO: more requests
+% -> session
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+\section{Decorators}
+\subsection{Syntactic Sugar - Function Decorators}
+\begin{frame}{Function Decorators}
+          To add additional functionality to a function we use 
+        \tb{function decorators}\footnote{Meaningful, easy-to-understand examples of function decorators: \url{https://realpython.com/primer-on-python-decorators/}}.
+
+		\medskip
+		
+		A decorator takes a \tb{function} to be wrapped as an \tb{argument}, defines a \tb{new} function, that \tb{adds functionality} around a call of the original function,
+		and returns a \tb{reference} to the \tb{new function}.
+		
+		\medskip
+		
+		It is \tb{used} with an \pp{@} and placed above the wrapped function.
+		
+		\medskip
+		
+		It is a popular tool in well-known \tb{libraries}, such as \lpl{dataclass}, \lpl{FastAPI}, or \pp{discord.py}.
+		
+		\medskip
+		
+		A very simple yet powerful decorator is the \pp{@cache}-decorator\furl{https://docs.python.org/3/library/functools.html\#functools.cache}.
+\end{frame}
+
+
+\begin{frame}[fragile, noframenumbering]{Function Decorators - A simple Example}
+	\begin{lstlisting}[language=pytiny]
+def call_me_twice(old_function: Callable) -> Callable:
+    def new_function():
+        old_function()
+        old_function()
+
+    return new_function
+
+@call_me_twice
+def say_cyber():
+    print("Cyber!")
+
+say_cyber()  # >> Cyber![NEWLINE]Cyber!
+	\end{lstlisting}
+	
+	Simply put, you pass a function object to a \tb{decorator definition}
+	and use it to create and return a new function object.
+	
+	\medskip
+	
+	\tb{Nested} function have \tb{access} to the outer functions \tb{scope}, even if the outer function has already returned.
+	
+\end{frame}
+
+\subsection{More Examples}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+% TODO: Beispiel zeigen?
+
+\section{Interlude}
+\subsection{Why Mutable Defaults are a Problem for Parameters with Default Values}
+
+\begin{frame}[fragile]{Why Mutable Defaults are a Problem for Parameters with Default Values}
+        The \tb{default values} for the parameters are evaluated once at the \tb{start} of runtime and are then \tb{fixed}.
+
+	\medskip
+	
+	Each created \tb{object} of a class therefore receives the \tb{same} reference to the same object.\newline
+	%
+	This is not a problem if the argument is \tb{immutable}.
+	
+	\medskip
+	
+	If a \pp{list} is required as a default, it can, for example, be realized as a \pp{tuple}.\newline
+	%
+	The \tb{more common} method is to set the argument to \pp{None} and then properly initialize it in \pp{__init__}.
+	
+	\begin{lstlisting}[language=pytiny]
+def my_default_fn(an_optional_list: list | None = None):
+    """takes optional list, if None is passed an empty one will be create"""
+    if an_optional_list is None:
+        an_optional_list = []  # create new list 
+	\end{lstlisting}
+
+\nll{If this is unclear try it yourself}
+\end{frame}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+% Erstmal überspringen
+
+\section{Modelling Data}
+\subsection{Motivational Example}
+% \subsection{Das Entfernen der Herdplatte}
+\begin{frame}[fragile]{Who doesn’t know it?}
+	Situations often arise where \tb{data} should be \tb{packaged} into a custom class.\newline
+	%
+	Users of a system, unpacked Wi-Fi packets from a measurement series, tasks in a queue...
+	
+	\medskip
+	
+	Each class requires the same recurring \tb{boilerplate} elements.
+	
+	\medskip
+	
+	Python’s \pp{dataclass} module\furl{https://docs.python.org/3/library/dataclasses} or \pp{Pydantic}\furl{https://docs.pydantic.dev/latest/} provides a remedy.
+	
+	\medskip
+	
+	Inherriting from \pp{pydantic.BaseModel} automatically generates a \tb{blueprint} for a class the actual class with all the standard methods needed, including the constructor.
+	
+	\medskip
+	
+	Additional \tb{methods} and attributes can be defined normally, just like in any other class.
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Example: A simple Comment-Class}
+
+\pause
+
+\begin{minipage}{0.45\textwidth}
+	%\vspace{-1.8cm}
+\begin{lstlisting}[language=pytiny]
+class ManualImmutableComment:
+    __init__(self, id: int, name: str, replies: list[str]):
+        self.id: int = id
+        ...
+
+    def __repr__(self): ...
+
+    def __eq__(self, other): ...
+    
+    def __ne__(self, other): ...
+
+    def __lt__(self, other): ...
+    def __le__(self, other): ...
+    def __gt__(self, other): ...
+    def __ge__(self, other): ...
+    
+    def __hash__(self): ...
+    
+    # TODO: start your functionality here!
+	\end{lstlisting}
+\end{minipage}
+\hfill
+\pause
+\begin{minipage}{0.45\textwidth}
+	\begin{lstlisting}[language=pytiny]
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class ImmutableComment(BaseModel):
+    id: int
+    name: str = ""
+    replies: list[str] = Field( 
+        default_factory=list, repr=False
+    )
+
+    # makes it immutable
+    model_config = ConfigDict(
+        frozen=True,
+        arbitrary_types_allowed=True
+    )
+
+# TODO: start your functionality here!
+
+	\end{lstlisting}
+\pause
+	\begin{itemize}
+		\item \pp{Field}: Allows mutable kwargs.
+	\end{itemize}
+\end{minipage}
+	
+\end{frame}
+
+
+\subsection{Pydantic - Data Validation at Runtime}
+
+\begin{frame}{Pydantic}
+	\begin{quotation}
+		Pydantic is the most widely used data validation library for Python.\furl{https://docs.pydantic.dev/latest/}
+	\end{quotation}
+\end{frame}
+
+
+\begin{frame}{Pydantic - Overview}
+	\pp{Pydantic}\footnote{We discuss version v2.x released in July 2023; even in currently active tutorials, caution may be needed. FastAPI also ships with v2 since 0.100.0.\\If different dependencies in a project require v1 and v2, v2 provides the old version as pydantic.v1.} provides tooling to easily create type-safe dataclasses in Python.\newline
+	%
+	The idea is also to \tb{create} classes using type hints.
+	
+	\medskip
+	
+	The key \tb{difference} to other libraries like the built-in \pp{dataclasses}: Pydantic \tb{validates} the provided data.\newline
+	%
+	It allows choosing between \textsl{automatic type conversion} and \textsl{strict type validation with exceptions raised on type mismatches}.
+	
+	\medskip
+	
+	\pp{Pydantic} provides a direct \tb{interface} to serialize objects as \pp{JSON}.\newline
+	%
+	This makes it ideal for use by libraries like \pp{FastAPI}.
+	
+	\medskip
+	
+	It is also very \tb{performant}, because \pause it is \pause written in \tb{Rust}.
+	
+	\nsl{Why use an external lib if built-in exists?\\ - More features\\ - Faster update cycle\\ - Downward compatible}
+\end{frame}
+
+
+% TODO: Meme irgendwas mit statische typisierung ah shit here we go again
+
+\begin{frame}[fragile]{Pydantic - How To}
+	Pydantic builds around its class \pp{BaseModel}.
+	
+	\medskip
+	
+	\tb{Classes} that should be validated by Pydantic \tb{inherit} from it.\newline
+	They declare their \tb{instance} variables \tb{as class} variables\footnote{You can declare as \texttt{ClassVar} (from typing) to preserve their state as class-variable: \url{https://docs.pydantic.dev/latest/concepts/models/\#automatically-excluded-attributes}}.
+	
+	\medskip
+	
+	Pydantic classes can be treated as \tb{normal} classes. They can hold arbitrary methods.\newline
+	Most modern IDEs should be able to detect Pydantic usage and offer working intelli-sense for instance variables.
+	
+	\medskip
+	
+	The auto-generated constructor is \tb{keyword}-argument \tb{only}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Pydantic - Example}
+	\begin{lstlisting}[language=pytiny]		
+import datetime as dt;from pydantic import BaseModel, Field
+
+class User(BaseModel):
+    id: int
+    name: str = 'Undisclosed'
+
+class Pet(BaseModel):
+    type: str
+    name: str | None
+
+class UserAndPet(BaseModel):
+    user: User
+    pet: Pet
+    date_of_creation: dt.datetime = Field(default_factory=dt.datetime.now, exclude=True)
+
+pi = User(name="Das Pi", id=31415)
+dongo = Pet(name="Dongo", type="Labrador")
+
+pair = UserAndPet(user=pi, pet=dongo)
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Pydantic Details I - Post-Init Method}
+
+		Pydantic \tb{creates} the \pp{\_\_init\_\_} function \tb{automatically}, making it difficult to attatch functionality to it.
+		
+		\medskip
+		\pause
+		
+		For this reason Pydantic offers the method\newline \pp{model_post_init(self, \_\_context: )}, which is called after  all attributes are set. This method is meant to be overridden. 
+		\pause
+		
+		\medskip
+		
+		This provides a \tb{hook} to perform additional work during the init process (e.g., content validation of the variables).
+		\pause
+		
+		\medskip
+
+		If a \pp{super} constructor needs to be called, it also happens here.
+\end{frame}
+
+
+\begin{frame}{Pydantic Details II - Neat Functions}
+	
+		Selected additional features\footnote{More on BaseModel: \url{https://docs.pydantic.dev/latest/usage/models/\#model-methods-and-properties}}:
+	\begin{itemize}
+		\item \pp{<BaseModel>.model_dump()} returns a \pp{dict} of the created fields\footnote{The counterpart for serialization is the class method MyModel.validate(dumped\_dict)}.
+		\item \pp{<BaseModel>.model_dump_json()} returns a \pp{JSON} string.
+		\item A model can hold a field of the type of another class inherriting from \pp{BaseModel}.
+		\item A drop-in replacement for Python's \pp{dataclass} decorator is available\footnote{This is not a complete replacement for Pydantic's BaseModel. See: \url{https://github.com/pydantic/pydantic/issues/710}}.
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}{Pydantic Details III - The Field}
+	The \tb{Field} object allows for a \tb{more precise} specification of fields\furl{https://docs.pydantic.dev/latest/concepts/fields/}:\pause  
+	\begin{itemize}
+		\item An immutable default value is defined using \pp{default}.
+		\item Using \pp{default_factory}, a function can be provided which generates the default for each object instantiation.
+		The factory can be \tb{any} function with an empty signature.
+		\nll{So it can be arbitrarily complex.\\Methods of the class are not possible bc class is not yet defined.}
+		\item With \pp{exclude=True}, fields can be excluded from serialization.
+		\item \tb{Aliases} for fields can be defined\furl{https://docs.pydantic.dev/latest/concepts/fields/\#field-aliases}.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Pydantic Details IV - Model Validators}
+	
+	Pydantic allows you to specify additional \tb{validators} that can be executed either \tb{before} or \tb{after} Pydantics own data validation.
+	
+	\medskip
+	
+	The before-validation hook can be useful if default values are more complicated
+	
+	\begin{lstlisting}[language=pytiny]
+class GuessingGame(BaseModel):
+
+    possible_words: list[str]
+
+    @model_validator(mode="before")
+    @classmethod
+    def _fill_target_list_if_none(cls, data) -> None | dict:
+         # note: we don't have the object yet. we have a data dict
+         # this dict are essentialy all the kwargs that were passed into the constructor
+         if data.get("possible_words") is None:
+             data["possible_words"] = get_possible_words()
+
+         return data  # we return the 'manipulated' data
+	\end{lstlisting}
+	
+	Note: Pydantic will still require all entries to exist prior to this validator.\nll{Default value or kwarg is still required. \\if not wanted use default factory...}
+	
+\end{frame}
+
+\framecardyellow{
+	\Utext{Any Questions?}
+}
+
+\subsection{Pydantic Live Examples}
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+% HIER wieder einspringen
+
+\section{Properties}
+% TODO: hippedi hoppedi meme
+
+\begin{frame}{Properties - Motivation}
+        Sometimes data is stored in an \tb{internally} useful form, but one that's externally not convenient to use (keyword: timestamp vs. datetime).
+		
+		
+		\medskip
+		
+		It would be desirable to make this data more \tb{accessible externally},\newline
+		%
+		without having to keep this representation permanently up-to-date.
+		
+		\medskip
+		
+		Similarly, when \tb{setting} an attribute, it may be useful to perform such a \tb{conversion} or checks in the opposite direction\footnote{Without falling into the Java-like getter+setter jungle}.
+		
+		\medskip
+		
+		There are also cases where variables should perhaps be made available as \tb{read-only}.
+		
+		\medskip
+		
+		All of these problems are solved by the \pp{@property} \tb{decorator}\furl{https://docs.python.org/3/library/functions.html\#property}.
+\end{frame}
+
+\subsection{Example}
+
+\begin{frame}[fragile]{A simple Getter / Setter Example}
+	
+	\begin{lstlisting}[language=pytiny]
+class Temperature:
+    """Stores a temperature, provides access to valuein celsius and fahrenheit"""
+
+    def __init__(self, t_celsius: float):
+        self.celsius = t_celsius
+
+    @property
+    def fahrenheit(self):
+        return 9*self.celsius/5 + 32
+
+    @fahrenheit.setter
+    def fahrenheit(self, t_fahrenheit):
+        self.celsius = self.fahrenheit_to_celsius(t_fahrenheit)
+
+    @staticmethod
+    def fahrenheit_to_celsius(f):
+        return 5*(f-32)/9
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}{Properties - Notes}
+	     Property getter calls should not have \tb{unexpected effects} on the object!
+		
+		\medskip
+		
+		When writing the class, one must pay close \tb{attention} to whether the internal or external \tb{version} of an attribute is being accessed.
+		
+		\medskip
+		
+		If a property getter \tb{waits} for I/O or a \tb{lock}, then the (seemingly harmless) access to an attribute can cause the program to \glqq freeze\grqq!
+		
+		\medskip
+		
+		Property \tb{setters} can \tb{quickly become confusing} if they implement more functionality than simple type checks/conversions!\newline
+		%
+		If they need to do more than this, it is advisable to instead use a \glqq classic\grqq~(setter) function.\footnote{In general, properties are just nice syntactic sugar. There is nothing wrong with working with getters and setters in the classic way.}
+\end{frame}
+
+% TODO: insert "non-pythonic complaining" meme here
+
+%\framecardfragen
+
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+
+\section{FastAPI}
+
+
+\subsection{A RestAPI - Overview}
+
+\begin{frame}{REST Conditions\footnote{Slide taken from the 4th POOSE lecture by Felix Boes and translated to English.}}
+    \vspace{-0.3ex}
+    A web application is \tb{RESTful} if it meets the following conditions. \pause
+    \begin{itemize}
+      \item Client-server architecture: The \tb{service} consists of server and client parts. \pause
+      \item \tb{Statelessness}: Requests and responses are \tb{fully} described by individual REST messages. \pause
+        There is no session between client and server (at the \tb{HTTP} communication level, but possibly at other communication levels). \pause
+      \item Caching: Because of statelessness, it is (very often) reasonable to cache responses. \pause
+      \item \tb{Uniform} interface (fundamental design condition):
+        \begin{itemize}
+          \item \tb{Resource addressing} through URIs \pause
+          \item Resource modification through appropriate resource representations \pause
+          \item \tb{Self-descriptive} messages \pause
+          \item Hypermedia as the Engine of Application State (\tb{HATEOAS}) \pause
+        \end{itemize}
+      \item Layered systems: Behind the interface, the service is implemented through the interaction of layered applications and services.
+    \end{itemize}
+  \end{frame}
+
+\begin{frame}[fragile]{Responses\footnote{Also taken from POOSE and translated.}}
+    Structure of a \tb{response}:
+    
+    \begin{lstlisting}[language=pltiny]
+  PROTOCOL_VERSION | STATUS_CODE | STATUS_MESSAGE
+  CONTENT (Optional)
+    \end{lstlisting}\pause
+    
+    The valid status codes and status messages are divided into five groups\footnote{A complete overview can be found here, among others: \url{https://http.cat/}}.
+    \begin{itemize}
+      \item Informational responses (100-199)
+      \item \tb{Successful} responses (200-299)\footnote{Fun fact: the unofficial status code 218 \glqq This is fine\grqq\ is used to smuggle errors past a reverse proxy.} Example: \lpl{200 = OK}
+      \item Redirection messages (300-399)
+      \item \tb{Client} error responses (400-499) Example: \lpl{404 = RESOURCE NOT FOUND}
+      \item \tb{Server} error responses (500-599)
+    \end{itemize}\pause
+    
+    The type of the received \lpl{CONTENT} is usually the desired return type.
+    
+    \note{\LARGE XX:51}
+  \end{frame}
+
+  % HIER wieder aufhören
+\subsection{FastAPI}
+
+\begin{frame}{FastAPI}
+    \begin{quotation}
+        FastAPI framework, high performance, easy to learn, fast to code, ready for production\furl{https://fastapi.tiangolo.com/}
+    \end{quotation}
+	\pause
+
+	% Das erste meme! :D
+	\only<2|handout:0>{
+		  
+	\begin{textblock}{10}(0.51, 1.65)
+
+		\includegraphics[width=\columnwidth]{images/fastapi_experience.png}
+		\tiny https://x.com/tiangolo/status/1281946592459853830
+	\nsl{Falls ihr cool findet und nen Job in dem bereich haben wollt, besser bereits vor sechs jahren angefangen haben haben (:}
+	\end{textblock}
+}
+
+\end{frame}
+
+\begin{frame}{FastAPI - Overview}
+	FastAPI provides all the \tb{tools} to build a so-called REST API.
+	
+	\medskip
+	
+	This is mainly done by \tb{defining} routes.
+	
+	\medskip
+	
+	For each route, a \tb{function} (\pp{endpoint}) is registered, which is executed when a \tb{request} is made to the route.
+	
+	\medskip
+	
+	By using \pp{Starlette}\furl{https://www.starlette.io/} and \pp{Pydantic}, FastAPI is very \tb{performant}.
+	
+	\medskip
+	
+	The application is run via \pp{uvicorn}\furl{https://www.uvicorn.org/}.
+	
+	\medskip
+	
+	An automatic \tb{documentation} of the API is available at \pp{[url]/docs}.
+\end{frame}
+
+
+
+\begin{frame}[fragile]{FastAPI - The FastAPI-Class}
+	
+    The \pp{FastAPI} object\furl{https://fastapi.tiangolo.com/reference/fastapi/} is instantiated once and forms the \tb{core} of the web server.\newline
+%
+All \tb{routes} are defined on it, as well as metadata such as the title, description, and version of the application.
+
+\medskip
+
+\pp{uvicorn} takes this object as \pp{app} and then runs it.
+
+        % TODO: ironic star wars meme
+
+
+    \begin{lstlisting}[language=pytiny]
+app = FastAPI(title="Demo Server", description="Simple Requests",
+    version="v0.0.1",
+    contact={
+        "name": "Cyber AG",
+        "url": "https://github.com/nonchris/",
+    },
+    terms_of_service="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+)             
+    \end{lstlisting}
+    
+\end{frame}
+
+
+\begin{frame}{uvicorn - The Webserver}
+	% TODO: ironic Star Wars meme
+	\pp{uvicorn} takes the \pp{FastAPI} object and provides the \tb{server}.\newline
+	%
+	This includes, among other things, setting the \tb{web address} and the \tb{port}.\newline
+	%
+	Default is \url{http://localhost:8000}
+	
+	\medskip
+	
+	\pp{uvicorn} also offers the option to automatically reload the webserver when \tb{changes} are made to the source files.
+	
+	\medskip
+	
+	\pp{uvicorn} can be run both from the \tb{CLI} and directly from a Python \tb{script}.
+	
+	\medskip
+	
+	PyCharm provides a dedicated run configuration for FastAPI.
+\end{frame}
+
+
+
+\begin{frame}[fragile]{FastAPI - Erstes Beispiel}
+    \begin{lstlisting}[language=pytiny]
+# assuming this code is in a file named main.py
+from fastapi import FastAPI
+
+app = FastAPI()  # the main webserver
+
+
+# routes can be defined using decorators
+@app.get("/")
+async def read_root():
+    return {"Hello": "World"}
+
+# we can define path-parameters with {param} in the ressource path
+# to access them we require the same-named parameter in our signature
+# query parameters are required by defining them in the signature
+@app.post("/api/v1/items/{item_id}")
+def read_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id, "q": q}
+        
+    \end{lstlisting}
+    \begin{lstlisting}[language=pytiny]
+uvicorn main:app --reload
+    \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{Parameters}
+	\tb{Path parameters} can be received by including a parameter of the \tb{same} name in the function signature.
+	
+	\medskip
+	
+	\tb{Query parameters} are declared normally in the \tb{function signature}.\newline
+	%
+	If the parameters are type-annotated, FastAPI automatically takes care of \tb{validation} and conversion.
+	
+	\medskip
+	
+	A function can also take only \tb{one parameter} \pp{request: fastapi.Request}\furl{https://fastapi.tiangolo.com/advanced/using-request-directly/}.\newline
+	%
+	This contains the \tb{entire} context: \pp{path_params}, \pp{query_params}, \pp{cookies}, etc.\newline
+	%
+	When using the \pp{Request} class, there is \tb{no} automatic type validation anymore.
+\end{frame}
+
+
+
+\begin{frame}{Defining Routes}
+	A \tb{route} can be defined using the \pp{app.get()} or \pp{app.post()} \tb{decorator}.
+	
+	\medskip
+	
+	Another option is \pp{app.add_api_route(path, endpoint, methods)}.\newline
+	%
+	This becomes especially relevant when \tb{routes} are split across \tb{multiple files} or when \tb{methods} should be used as endpoints.
+	
+	\medskip
+	
+	For splitting endpoints, FastAPI provides the \tb{APIRouter}\furl{https://fastapi.tiangolo.com/reference/apirouter/} class.\footnote{A real-life example: \url{https://github.com/MayNiklas/whisper_api/blob/pydantic-v2-migration/src/whisper_api/api_endpoints/endpoints.py}}
+	
+	\medskip
+	
+	It is good practice to put all routes of an API version into a \tb{namespace}.\newline
+	Example: \pp{url:port/api/v1/here_the/route_name}.
+	
+	\medspace
+\end{frame}
+
+
+
+\begin{frame}{Responses}
+	Every endpoint function must return a \tb{response}.
+	
+	\medskip
+	
+	A response\footnote{\url{https://fastapi.tiangolo.com/tutorial/response-model/}} can be:
+	
+	\medskip
+	
+	\begin{itemize}
+		\pause
+		\item a \pp{dict}.
+		\pause
+		\item an object that inherits from \tb{Pydantic}'s \pp{BaseModel}.
+		\pause
+		\item a response from \pp{fastapi.responses}, e.g. \pp{JSONResponse}.
+		\pause
+		\item a raised \pp{fastapi.HTTPException}. %Adrian told me so
+		\pause
+	\end{itemize}
+	
+	\medskip
+	
+	\pp{BaseModel} ensures better \tb{automatically} generated documentation\footnote{This also applies to objects that inherit from BaseModel.}.
+	
+	\medskip
+	
+	% TODO: add an example with status code
+	
+	The \tb{response type}, as well as the expected \tb{status code}, can be \tb{created} and returned normally within the function.
+	
+	\medskip
+	
+	Alternatively, the expected types can already be set when \tb{registering} the route.
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{FastAPI - Zweites Beispiel}
+    \begin{lstlisting}[language=pytiny]
+import uuid
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class User(BaseModel):
+    name: str
+    id: uuid.UUID | None = None
+
+    def model_post_init(self, ctx):
+        if self.id is None:
+            self.id = uuid.uuid4()
+
+@app.post("/api/v1/register/{u_name}")
+async def read_item(request: Request):
+    u = User(name=request.path_params["u_name"])
+    # could also be just 'return u' in case of a 200 response
+    return JSONResponse(content=u.model_dump_json(), status_code=200)
+    \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{FastAPI - A Cool Concept}
+	FastAPI provides an \tb{entrypoint} to initialize resources before receiving requests and to release them again after processing the last request.\newline
+	This is implemented via the \tb{lifespan}\furl{https://fastapi.tiangolo.com/advanced/events/} function\footnote{Strictly speaking, an asynchronous generator}.\newline
+	Initialization and release are separated by the \pp{yield} keyword.
+	\begin{lstlisting}[language=pytiny]
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # init some things before api starts
+    start_some_threads()
+    yield
+    # kill the things, api has shut down
+    join_the_threads()
+app = FastAPI(lifespan=lifespan)  # register lifespan function
+	\end{lstlisting}
+	The first part of the function is executed before startup, the second after shutdown.
+	\nsl{Again: the function name is arbitrary.\\}
+	\nsl{why exactly do you need this? why not just make everything global? - global vars are bad style, separate initialization from functionality\\}
+	
+\end{frame}
+
+
+
+% TODO: THIS and middleware needs some work!
+%\begin{frame}[fragile]{Cookies}
+%	\begin{itemize}
+%		\item Das Erstellen und Entpacken von \pp{Cookies}\furl{https://fastapi.tiangolo.com/advanced/response-cookies/} ist einfach möglich.
+%
+%        \item[]\begin{lstlisting}[language=pytiny]
+%response = JSONResponse(content=content)
+%response.set_cookie(key="user_id", value=user.uuid)
+%        \end{lstlisting}
+%
+%    \item Es können noch weitere Flags wie \pp{expires} und \pp{samesite} gesetzt werden.
+%    \item Das Abfragen von Cookies ist gleichermaßen simpel\footnote{Bei Funktionen mit expliziten Parametern, müssen Cookies dementsprechend annotiert werden: \url{https://fastapi.tiangolo.com/tutorial/cookie-params/}}:
+%    
+%    \item[]\begin{lstlisting}[language=pytiny]
+%async def endpoint_x(request: Request):
+%    response = JSONResponse(content=content)
+%    user_id = request.cookies.get("player_id")
+%    \end{lstlisting} 
+%
+%    % TODO: den noch überprüfen bzgl params bei cookie initialisieren.
+%    \item Hinweis: Cookies können das Testing erschweren, wenn Backend und Client nicht auf dem selben Host/ der selben Domain laufen.
+%
+%\end{itemize}
+%\end{frame}
+%%user_id = request.cookies.get("player_id")
+%
+%\begin{frame}{Middleware}
+%	\begin{itemize}
+%		\item Eine Middleware\furl{https://fastapi.tiangolo.com/tutorial/middleware/} ist eine Funktion, welche jeden \pp{Request} vor der Weitergabe an die Zielfunktion anpasst und jede \pp{Response} vor dem dem Versand.
+%		\item Sie kann \pp{Request} und \pp{Response} beliebig bearbeiten.
+%		\item Eine Middleware, wird spätestens bei der Implementierung von Authentifizierungen relevant.
+%	\end{itemize}
+%\end{frame}
+%
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+% HIER wieder einspringen
+
+\section{A Clean Shutdown}
+\subsection{atexit}
+\begin{frame}[fragile]{atexit}
+        A (gracefully) \tb{terminated} program, is able to shut down in a controlled manner.
+
+		\medskip
+		
+		This \tb{time} can be used to transfer data from memory to a persistent medium, remove temporary files that were created, and more.
+		
+		\medskip
+		
+		Python provides the \pp{atexit} module specifically for this purpose.
+		
+		\medskip
+		
+		This module offers a \tb{decorator} as well as an explicit \pp{register} function.
+		
+		\medskip
+		
+		Functions \tb{registered} here are executed when the program receives the signal to terminate.
+		
+		\medskip
+
+
+ \begin{lstlisting}[language=pytiny]
+@atexit.register
+def goodbye():
+    print('You are now leaving the Python sector.')	
+
+def goodbye_with_args(name: str, adjective: str):
+   print(f"Goodbye {name}, was {adjective} to meet you!")
+
+atexit.register(goodbye_with_args, 'Donny', 'nice')
+	\end{lstlisting}
+\end{frame}
+
+
+
+
+% Copyright: Kristi
+% \begin{frame}[fragile]{}
+% 	\begin{figure}[ht]
+% 		\centering
+% 		\begin{tikzpicture}[scale=0.75]
+	
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecoblue, draw=black] (0,0) rectangle (2,2) node[midway] {\textcolor{white}{task 3}};
+% 			\filldraw[fill=identecoyellow, draw=black] (0,2) rectangle (2,4) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (0,4) rectangle (2,6) node[midway] {\textcolor{white}{task 1}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,-,red] (3,6.3) -- (3,-0.5) node[anchor=south east] {};
+	
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecoblue, draw=black] (4,4) rectangle (6,6) node[midway] {\textcolor{white}{task 3}};
+% 			\filldraw[fill=identecoyellow, draw=black] (7,4) rectangle (9,6) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (10,4) rectangle (12,6) node[midway] {\textcolor{white}{task 1}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,-,red] (13,6.3) -- (13,-0.5) node[anchor=south east] {};
+			
+% 			% Here is the code for the boxes
+% 			\filldraw[fill=identecogray, draw=black] (14,1) rectangle (16,1.5);
+% 			\filldraw[fill=identecoyellow, draw=black] (14,1.5) rectangle (16,3) node[midway] {\textcolor{white}{task 2}};
+% 			\filldraw[fill=identecogray, draw=black] (14,3) rectangle (16,3.5);
+% 			\filldraw[fill=identecoyellow, draw=black] (14,3.5) rectangle (16,3.75);
+% 			\filldraw[fill=identecogray, draw=black] (14,3.75) rectangle (16,4.75) node[midway] {\textcolor{white}{task 1}};
+% 			\filldraw[fill=identecoblue, draw=black] (14,4.75) rectangle (16,6) node[midway] {\textcolor{white}{task 3}};
+	
+% 			% Here is the line for the time
+% 			\draw[thick,->] (18,6.3) -- (18,-0.5) node[anchor=south east] {time};
+			
+% 		\end{tikzpicture}
+% 		\label{fig-models}
+% 	\end{figure}
+	
+% \end{frame}
+
+
+
+%\framecardfragen
+\framecardyellow{
+  \Utext{Any Questions?}
+}
+
+
+
+
+\end{document}
+

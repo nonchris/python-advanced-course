@@ -1,0 +1,156 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 01}
+\ausgabe{September 9, 2023}
+\abgabe{}
+\hinweis{}
+
+\author{Chris Geron \& Adrian Oeyen}
+
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Note}: \quad
+All exercises are intentionally vague and invite you to extend them with any functionality you like.
+
+\noindent For this reason, it is perfectly fine if you do not complete all exercises.
+
+\noindent Some exercises contain references to pre-prepared programs. You can find and download these from this Sciebo-Share\furl{https://uni-bonn.sciebo.de/s/O4bU6jJ8UAN2pFR} in the folder corresponding to the day.
+
+\medskip
+
+
+\noindent \tb{Setting up the development environment} \quad
+
+    \begin{enumerate}
+        \item Familiarize yourself with Python's Virtual Environments\furl{https://docs.python.org/3/library/venv.html} and configure one for your projects in the advanced course.
+        \item Go through \pp{pycharm-cheatsheet.pdf} and see which options are of interest to you.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+\noindent \tb{The Bi-Language} \quad
+
+    \noindent The Bi-Language is a slang which inserts a \glqq bi\grqq~after every vowel.\\
+    Example: \glqq Felix\grqq~becomes \glqq Febilibix\grqq.
+    \begin{enumerate}
+        \item Write a program that converts a given sentence into Bi-Language.
+        \item Experiment with different implementations. How many lines do you need?
+    \end{enumerate}
+\medskip
+\medskip
+
+\noindent \tb{Files} \quad\newline
+\noindent \tb{Note}: \quad
+All steps should obviously be solved using Python. The program should behave the same each time.
+\begin{enumerate}
+	
+	\item Create a Pathlib object \pp{test/} in any folder.
+	\item Convert the path to an absolute path.
+	\item Append \pp{data/test1/} to the path.
+	\item Make sure the path exists.
+	\item Create a file \pp{text.txt} in this directory.
+	\item Request any input from the console.
+	\item Write the input to the file.
+	\item Read the content of the file.
+	\item Append the line \pp{This text was machine-generated} to the file content.
+	\item Verify the correctness of your program by running it multiple times.
+
+\end{enumerate}
+
+
+\noindent \tb{Comprehensions} \quad
+
+    \noindent The following tasks should be solved using comprehensions. It can be helpful to first solve them using normal loops and then convert them to comprehensions.\\
+    \begin{enumerate}
+        \item Generate a nested list of the form:
+        \item[]\[\begin{matrix}
+            [[0 & 1 & 2],\\
+            [3 & 4 & 5],\\
+            [6 & 7 & 8]]\\
+        \end{matrix}\]
+        \item Generate a nested list of the form:
+        \item[]\[\begin{matrix}
+            [[0 & 1 & 0],\\
+            [1 & 1 & 1],\\
+            [0 & 1 & 0]]\\
+        \end{matrix}\]
+
+        \item Create a \pp{dict} from the list of tuples in \pp{comprehension.py}.
+    
+        \item Count the frequency of each letter in \pp{lorem\_ipsum} in \pp{comprehension.py}.
+    \end{enumerate}
+
+\noindent \tb{Hangman} \quad
+
+    \noindent 
+    \begin{enumerate}
+        \item Using the Random library\furl{https://docs.python.org/3/library/random.html}, create a Hangman\furl{https://en.wikipedia.org/wiki/Hangman_(game)} game which picks a word from a collection and asks the player to guess it.
+        \item What would make the game easier to play?
+        \item Adapt the system so that the words to guess are read from a file. Use the context manager for this.
+        \item Learn about \pp{datetime}\furl{https://docs.python.org/3/library/datetime.html\#datetime-objects} and use it to measure the time spent guessing.
+    \end{enumerate}
+
+\medskip
+\noindent \tb{PEP8} \quad
+
+    \noindent 
+    \begin{enumerate}
+        \item Transform the given code \pp{pep8.py} into PEP8-compliant code\footnote{PyCharm and other IDEs provide an autoformatter. It is still recommended to do it manually at least once.}.
+        \item Add type hints.
+    \end{enumerate}
+
+\medskip
+\noindent \tb{Matrix} \quad
+
+\noindent
+     Given this matrix implementation in \pp{matrix.py}.
+    \begin{enumerate}
+        \item Add a properly formatted string representation for the matrix.
+        \item Extend it with matrix addition and matrix multiplication\furl{https://peps.python.org/pep-0465/}.
+        \item Which other functions could be useful for a matrix?
+        \noindent 
+    \end{enumerate}
+
+\medskip
+\noindent \tb{Debugger} \quad
+
+\noindent
+    \begin{enumerate}
+        \item Some errors are hidden in \pp{debugging.py}. Use the debugger\furl{https://www.jetbrains.com/help/pycharm/debugging-your-first-python-application.html\#where-is-the-problem} to locate them.
+        \noindent 
+    \end{enumerate}
+
+
+\medskip
+\noindent \tb{Turtle} \quad
+
+
+    \noindent Familiarize yourself with the Python Turtle\furl{https://docs.python.org/3/library/turtle.html} library.\\
+    Structure your code so that the desired functionality can be easily selected.
+    \begin{enumerate}
+        \item Draw a square.
+        \item Draw an 8-step staircase.
+        \item Draw an n-sided polygon, where the number of sides is requested beforehand.
+        \item Draw the \textsl{Koch Snowflake}\furl{https://en.wikipedia.org/wiki/Koch_snowflake}.
+        \item Draw a \textsl{Fractal Tree}\furl{https://en.wikipedia.org/wiki/Fractal_canopy}.
+        \item Can you think of other patterns to draw?
+        \noindent 
+    \end{enumerate}
+
+    \medskip
+\noindent \tb{Finished everything?} \quad
+\noindent
+    Review your solutions to the previous exercises. How could they be extended or improved? Have you documented everything?
+\end{document}

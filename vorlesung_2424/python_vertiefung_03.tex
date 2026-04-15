@@ -1,0 +1,785 @@
+% !TEX program = lualatex
+
+%The Aspectration can be 4:3 (43) and 16:9 (169)
+\documentclass[12pt, aspectratio=169, usepdftitle=false]{beamer}
+% \documentclass[12pt, aspectratio=169, usepdftitle=false, handout]{beamer}
+
+\usepackage[ngerman]{babel}
+\usepackage{marvosym}
+\usepackage{pifont}
+\usepackage{pgfpages} 
+\usepackage{ifthen}
+\usepackage{ragged2e}
+
+\usepackage{ubo_tex_beamer/uni-template}
+\apptocmd{\frame}{}{\justifying}{} % Allow optional arguments after frame.
+\input{config/global_config}
+\input{config/custom-command}
+
+
+% \MainTitle{Praktikum Objektorientierte\\Softwareentwicklung}
+\SubTitle{Organisatorisches \& Lernziel}
+
+
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	breakatwhitespace=true,
+	showstringspaces=false,
+}
+
+% I reaaaaallly hate always typig this fucking lpl command 
+\newcommand{\pp}[1]{\lpl{#1}}
+% should have done this weeks ago...
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\newcommand{\nll}[1]{\note{\LARGE{#1}}}
+\newcommand{\nsl}[1]{\note{\large{#1}}}
+
+\begin{document}
+
+\titlepage
+
+\section{Organisatorisches}
+\begin{frame}{Zur Erinnerung}
+	\begin{itemize}
+		\item Übungen finden von 14 c.t. bis 16 Uhr statt.
+		\item[] Wir nutzen die Computer-Räume U1.041, 42, 43 und 0.107 (bei Bedarf).
+		\nsl{Wer plant alles zu kommen?\\An die kommenden: CT oder ST?}
+		\pause
+		\item Die Folien sowie alle weiteren Materialien werden über Sciebo verteilt\furl{https://uni-bonn.sciebo.de/s/O4bU6jJ8UAN2pFR}.
+		\pause
+		\item[] Der Link befindet sich auch auf dem Info Bonn Discord\furl{https://discord.gg/mBm6bEchAe} in \pp{\#python-vertiefungskurs}.
+		
+		\item[] \begin{center}
+			\includegraphics[height=.25\textheight]{images/info-bonn.png}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+\framecardfragen
+
+
+\section{NumPy}
+
+
+\begin{frame}{Was ist das?}
+        \pp{NumPy}\footnote{\url{https://numpy.org/}} bietet eine \tb{effiziente} Lösung für numerische Operationen.\newline
+		%
+		Diese umfasst eine effiziente n-dimensionale \tb{Arraystruktur}.
+		
+		\medskip
+		
+		Außerdem auch eine Reihe von Funktionen für \tb{lineare Algebra}, Transformationen und Weiteres.
+		
+		\medskip
+		
+		NumPy ist in \pp{C} implementiert und dadurch sehr performant.
+		
+		\medskip
+		
+		Natürlich profitiert man nur, wenn man auch NumPys \tb{eigene Operationen} verwendet!
+
+\end{frame}
+
+
+% TODO: np witz
+% numpy wird zwar np abgekürztz, ist aber nicht np-schwer zu bedinenen
+% hab für fancy indexing mehr Zeit gebraucht als fürs verstehen von np schweren problemen
+\begin{frame}{NumPy in der Benutzung}
+        Anders als Pythons built-in \pp{list} ist das \pp{np.array} \tb{statisch} in Länge und kann nur \tb{einen Typ} enthalten.
+
+		\medskip
+		
+		\pp{NumPy} hält sich nahe an der Python-eigenen \tb{Slicing-API}, aber mit einer Menge Extras.
+		
+		\medskip
+		
+		Die konkrete Benutzung wird in einem Jupyter Notebook und weiteren Code-Beispielen erklärt.
+
+\end{frame}
+
+\subsection{Das slice}
+
+\begin{frame}[fragile]{Exkurs: Das slice}
+        Python verfügt über den Built-in Typen \pp{slice}.
+
+		\medskip
+		
+		Dieser wird als \tb{Container} genutzt, um einer Funktion ein gegebenes \tb{Intervall} zu übergeben.
+		
+		\medskip
+		
+		Der \pp{__getitem__} Zugriff mit \pp{[start:end:step]} erzeugt genau ein solches \pp{slice}.
+		
+		\medskip
+		
+		Ein \pp{slice} kann manuell erzeugt werden und an z.B. eine Liste übergeben werden.
+		
+		\medskip
+		
+		Es verfügt über \pp{.start}, \pp{.stop} und \pp{.step}.
+		
+		\medskip
+
+		\begin{lstlisting}[language=pytiny]
+slc = slice(1, 6, 2)
+my_list = list(range(10))
+res1 = my_list[slc]  # >> [1, 3, 5]
+res2 = my_list[slc.start : slc.stop : slc.step]  # >> [1, 3, 5]
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}{NumPy - Live Demo.}
+	\begin{center}
+       \large Los geht's!
+    \end{center}
+\end{frame}
+
+\framecardfragen
+
+% TODO: drin lassen?
+\begin{frame}{Nothing is True \& Everything is Possible}
+    \begin{center}
+    	\pause
+        \large Crossing The Rubicon.
+     \end{center}
+\end{frame}
+
+
+\section{pandas}
+
+% TODO: sehr süßes pandas bild
+\begin{frame}{pandas}
+    \begin{quotation}
+        pandas is a fast, powerful, flexible and easy to use open source data analysis and manipulation tool,
+built on top of the Python programming language.\footnote{\url{https://pandas.pydata.org/}}
+    \end{quotation}
+\end{frame}
+
+\begin{frame}{Die Series - Die Konstruktion}
+       \pp{pd.Series(data, index=index)}
+	
+		\medskip
+		
+		Die \pp{Series} ist ein \tb{eindimensionales} Array, welches \pp{index}-\tb{Labels} entlang der Achse erlaubt.
+		
+		\medskip
+		
+		Sie kann aus einem \pp{dict}, einem \pp{np.ndarray} oder einem Skalar erzeugt werden.
+		
+		\medskip
+		
+		Wird ein \pp{np.ndarray} genutzt, kann eine \tb{Indexliste} der selben \tb{Länge} mit übergeben werden.
+		
+		\medskip
+		
+		Um mit einem \pp{dict} eine \tb{Indexliste} zu übergeben, müssen die Namen des \tb{Keys} matchen. Indizes, die keinem Key entsprechen, werden mit \pp{np.NaN} gefüllt.
+		
+		\medskip
+		
+		Bei der Erstellung durch einen \tb{Skalar} wird jedem übergebenen Index der \tb{Wert} des Skalars assigned.
+		
+\end{frame}
+
+
+\begin{frame}{Die Series - Das Verhalten}
+        Eine Series verhält sich \glqq \tb{ndarray-like}\grqq~.
+
+		\medskip
+		
+		Aus \pp{NumPy} bekannte \tb{Operationen} wie \pp{.sum()} sind für eine Series \tb{implementiert}. 
+		
+		Sie kann wie ein \pp{array} \tb{gesliced} werden.
+		
+		\medskip
+		
+		Dies inkludiert \tb{Masking} einer Series.
+		
+		$\rightarrow$ Beim Slicen werden die \tb{Indizes} mit gesliced.
+		
+		\medskip
+		
+		Die meisten \pp{NumPy}-eigenen Funktionen können auf eine \pp{Series} angewandt werden.
+		
+		\medskip
+		
+		Eine Series verhält sich zugleich auch \glqq \tb{dict-like}\grqq~.
+		
+		Sie kann über den \tb{Index adressiert} werden.
+
+\end{frame}
+
+
+\begin{frame}{Das Dataframe}
+
+        Ein \pp{Dataframe} kann als \tb{Tabelle} oder als \pp{dict} aus \pp{pd.Series} betrachtet werden.
+
+		\medskip
+		
+		Erstellbar aus:
+		\begin{itemize}
+			\item einem \pp{dict} aus ndarrays, lists, dicts, \pp{pd.Series}
+			\item einer Series.
+			\item einem 2-D \pp{np.ndarray}.
+			\item einer \pp{pd.Series}.
+			\item einem anderen \pp{pd.DataFrame}.
+			\item ...und vielem mehr\footnote{\url{https://pandas.pydata.org/docs/user_guide/dsintro.html\#dataframe}}.
+		\end{itemize}
+		
+		\medskip
+		
+		Ein \pp{DataFrame} bietet zudem \tb{Labels} für die \tb{Spalten}, neben \tb{Indizes} für die \tb{Reihen}.
+
+\end{frame}
+
+
+\begin{frame}{pandas - Live Demo.}
+	\begin{center}
+       \large Los geht's!
+    \end{center}
+\end{frame}
+
+\framecardfragen
+
+
+% TODO: lass ich diese lorna shore referenz drin?
+\begin{frame}{Welcome Back, O'Sleeping Dreamer}
+	\begin{center}
+		\pause
+       \large Let's go To the Hellfire.
+    \end{center}
+\end{frame}
+
+\section{matplotlib}
+
+\begin{frame}{matplotlib}
+    \begin{quotation}
+        Matplotlib is a comprehensive library for creating static, animated, and interactive visualizations in Python. Matplotlib makes easy things easy and hard things possible.\footnote{\url{https://matplotlib.org/}}
+    \end{quotation}
+\end{frame}
+
+% TODO: ein bild zur motivation
+% TODO insg. mehr motivation, erklären wofür die libs da sind
+
+\begin{frame}{Artist}
+        Ein \tb{Artist}-Objekt\footnote{\url{https://matplotlib.org/stable/api/artist_api.html\#matplotlib.artist.Artist}} ist quasi \tb{jedes} Element, welches auf dem Canvas \tb{sichtbar} ist.        
+
+		\medskip
+
+		$\rightarrow$ \pp{Figure}, \pp{Axes}, \pp{Axis}, \pp{Text}, \pp{Patch} etc. sind \tb{Artists}.
+
+		\medskip
+
+		Ein an ein \pp{Axes} gebundenes Artist kann von mehreren \pp{Axes} genutzt werden.
+
+\end{frame}
+
+
+\begin{frame}{Figure}
+        Ein \tb{Figure}-Objekt\footnote{\url{https://matplotlib.org/stable/api/figure_api.html\#matplotlib.figure.Figure}} enthält \tb{alle} Elemente, welche im gesamten \tb{Plot} enthalten sind.
+
+		\medskip
+		
+		Es ist quasi das \tb{gesamte} Bild, während \pp{Axes} je eine \tb{Teilgrafik} enthält.
+
+\end{frame}
+
+
+\begin{frame}{Axes}
+        Ein \pp{Axes}-Objekt\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.htm\#matplotlib.axes.Axes}} enthält \tb{alle} Elemente, die zu \tb{einem} gegebenen (\tb{Sub-})Plot gehören.
+
+		\medskip
+		
+		Es ist an ein \pp{Figure} gebunden, auf welchem es einen \tb{zugewiesenen} Platz für das \tb{Plotten} von Daten hat.
+		
+		\medskip
+		
+		Jedes \pp{Axes}-Element enthält zwei \pp{Axis}-Objekte\footnote{Im Fall eines 3D-Plots sind es drei Stück.}.
+		
+		\medskip
+		
+		Es bietet u.A. die \tb{Methoden}, den Sub-Plot zu \tb{beschriften} (Titel, Label(X, Y)) und die \tb{Limits} der Achsen zu setzen.
+		
+		\medskip
+		
+		$\rightarrow$ Es ist die \tb{Hauptschnittstelle} für das Erstellen des Plots.
+		
+		\medskip
+		
+		In einem \pp{Axes}-Objekt können \tb{mehrere} Plots sein.
+
+\end{frame}
+
+
+\begin{frame}{Axis}
+        Ein \pp{Axis}-Objekt\footnote{\url{https://matplotlib.org/stable/api/axis_api.html\#matplotlib.axis.Axis}} repräsentiert die \tb{Achsen} des Plots.
+
+		\medskip
+		
+		In ihm werden die gesetzten \pp{ticks} und deren \tb{Format} verwaltet.
+		
+		\medskip
+		
+		Hier drunter fällt u.A. die Wahl der \tb{Skalierung} (normal, logarithmisch, ...)
+		
+		\medskip
+		
+		\tb{Vorsicht}: Die Limits des Plots werden auf dem \pp{Axes}-Objekt konfiguriert. Das \pp{Axis} ist wirklich \tb{nur} für die \tb{Darstellung} der gegebenen Skalen zuständig.
+
+\end{frame}
+
+
+\begin{frame}{Erwartete Inputs}
+    Die Plot-Methoden erwarten \tb{Arrays} als Eingabe.
+	\pause
+	
+	\medskip
+	
+	Hierbei ist der \tb{Standard} das \pp{numpy.array}, oder etwas woraus sich durch\\
+	\pp{numpy.asarray()} ein solches erstellen lässt.\newline
+	%
+	Hierzu gehören beispielsweise \pp{list} und \pp{tuple}.
+	
+	\medskip
+
+	
+	\pause
+	
+	% TODO: wirklich 1 Dim immer?
+	
+	Als \tb{Argumente} erwartet werden i.d.R. zwei \tb{1D-Arrays} (X-Achse, Y-Achse) \pause mit \tb{gleicher} Länge,\pause die die zu plottenden \tb{Punkte} repräsentieren.\footnote{Ähnlich zum Advanced-Indexing von NumPy.}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Schematische Struktur eines einfachen Plots}
+	\begin{verbatim}
+Figure
+└── Axes
+    ├── Title
+    ├── X-Axis
+    ├── Y-Axis
+    ├── Legends
+    ├── Data (e.g., Line2D, Scatter, etc.)
+    ├── Annotations
+    ├── Spines
+    └── ...
+	\end{verbatim}
+\end{frame}
+
+
+\begin{frame}[fragile]{Schematische Struktur eines 2x2 Subplots}
+	\begin{verbatim}
+Figure
+├── Axes (0, 0)
+│   └── ...
+├── Axes (0, 1)
+│   └── ...
+├── Axes (1, 0)
+│   └── ...
+└── Axes (1, 1)
+    └── ...
+	\end{verbatim}
+\end{frame}
+
+
+\begin{frame}{Der Objektorientierte Ansatz}
+	\begin{itemize}
+        \item Wir schauen uns die \tb{objektorientierte} Nutzung von \pp{matplotlib} an.
+        \item[] Diese besteht aus dem \tb{expliziten} Arbeiten auf \pp{Figure}, \pp{Axes} etc. durch das \tb{Nutzen} von \pp{plt.subplots()}.
+        \pause
+        \item Das direkte Plotten auf dem \pp{pyplot}-Objekt ist ebenfalls ein valider, wenn auch limitierender, Ansatz. \footnote{\url{https://matplotlib.org/stable/tutorials/introductory/quick_start.html\#coding-styles}}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{matplotlib - Live Demo.}
+	\begin{center}
+       \large Los geht's!
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{Ein paar weitere Bergriffe}
+    \begin{itemize}
+        \item \pp{rcparams}\footnote{\url{https://matplotlib.org/stable/tutorials/introductory/customizing.html\#matplotlibrc-sample}} ist eine (globale) \tb{Config} für die Defaults von \pp{matplotlib}.
+        \item[] Die Defaults können zur Laufzeit angepasst werden. Es handelt sich um eine \pp{dict}-like Stuktur.
+        % TODO: bbox beschreibung korrekt?
+        \pause
+        \item \pp{BBox}\footnote{\url{https://matplotlib.org/stable/api/transformations.html\#matplotlib.transforms.Bbox}} ist die \glqq Bounding Box\grqq~, das \tb{Canvas}, auf welcher Elemente einer Figure platziert werden können.
+        \item[] Alle \pp{Axes} einer \pp{Figure} werden in ihr platziert.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Muss ich mir das alles merken?}
+    \begin{itemize}
+        \item Eine gute Kurzübersicht zum \tb{Nachschlagen} von Funktionen findet sich hier:
+        \item[] \url{https://matplotlib.org/cheatsheets/}.
+        \item Eine \tb{Übersicht} aller Funktionalitäten:
+        \item[] \url{https://matplotlib.org/stable/gallery/index}
+        \item Mehr zu \tb{Farben}: \url{https://matplotlib.org/stable/tutorials/colors/colors}
+        \item Mehr zu \tb{Markern} und Linien (Abschnitt \glqq Notes\grqq):
+        \item[] \url{https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot}
+        \item \pp{pandas} bettet \pp{matplotlib} in seine Datenstrukturen ein: 
+        \item[] \url{https://pandas.pydata.org/docs/user_guide/visualization}
+    \end{itemize}
+    
+    
+\end{frame}
+
+\framecardfragen
+
+\section{logging}
+\subsection{Endlich was entspanntes}
+\begin{frame}{logging - Motivation}
+    \begin{itemize}
+        \item Das \glqq Loggen\grqq~ auf das \tb{Terminal} kommt mit einigen \tb{Problemen}:
+        \pause
+        \item[] \begin{itemize}
+            \item Prints sind in der Regel sehr \tb{chaotisch} und nicht einheitlich formatiert.
+            \pause
+            \item Je nach Umgebung kann \pp{stdout} des Programms \tb{nicht} so einfach \tb{eingesehen} werden (Hintergrundtask und geschlossene SSH-Verbindung).
+            \pause
+            \item Das Terminal kann irgendwann die obersten Zeilen des Outputs \tb{abschneiden}.
+            \pause
+            \item Im Allgemeinen nicht gut zu durchsuchen.
+            \pause
+        \end{itemize}
+    \item Es wäre wünschenswert, die \tb{Logs} in einer \tb{strukturierteren}, persitenten Form einsehbar zu haben.
+        
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{logging - Konzept}
+    \begin{itemize}
+        \item Logging besteht aus dem \tb{strukturierten Dokumentieren} von Ereignissen, welche innerhalb des Programms auftreten.
+        \pause
+        \item Die geloggten Nachrichten sollen \tb{einheitlich formatiert} sein.
+        \pause
+        \item[] Hierbei sollte die Nachricht möglichst viel Kontext enthalten.
+        \item[] $\rightarrow$ Zeit des Events, Funktion / Modul, Thread, ...
+        \pause
+        \item Diese Nachrichten sollten an einem persistenten, \tb{zentralen Ort} gesammelt werden.
+        \item[] Hierfür eignet sich in der Regel die Nutzung einer Datei.
+        \pause
+        \item Im Allgemeinen wird bei den Log-Nachrichten zwischen \tb{verschiedenen Leveln} von Wichtigkeit unterschieden: \pp{debug}, \pp{info}, \pp{warning}, \pp{error} und \pp{critical}.
+        \pause
+        \item Es soll ein \tb{Relevanz-Level wählbar} sein, ab welchem Nachrichten geloggt werden.
+        
+    \end{itemize}
+\end{frame}
+
+\subsection{Pythons logging-Modul}
+\begin{frame}{Das logging-Modul}
+    \begin{itemize}
+        \item Python liefert das eigene \tb{Modul} \pp{logging}.
+        \pause
+        \item Dieses enthält alles Nötige, um \tb{sinnvolles} Logging nutzen zu können.
+        \pause
+        \item Wir betrachten das \tb{fortgeschrittene} Logging mit Hilfe der \pp{Logger}-, \pp{Handler}- und \pp{Formatter}-Klassen.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{logging - Der Logger}
+    \begin{itemize}
+        \item Die \tb{zentrale Klasse} des \tb{Moduls} ist \pp{Logger}.
+        \pause
+        
+        \item Logger ist das Objekt, welches die \tb{Methoden zum Melden von Nachrichten} zur Verfügung stellt, welche vom Code aufgerufen werden.
+        \pause
+        
+        \item Es evaluiert, ob die Nachricht dem gesetzten Log-Level oder höher entspricht.
+        \pause
+        
+        \item Ist die \tb{Nachricht von Relevanz}, gibt er den \pp{LogRecord}\footnote{\url{https://docs.python.org/3/library/logging.html\#logging.LogRecord}} an die registrierten \pp{Handler} weiter. 
+        \pause
+        
+        \item \pp{Logger} werden nicht direkt, sondern \tb{über} \pp{getLogger()} \tb{instanziiert}.
+        \item[] Dies \tb{registriert} das Objekt global in der Library.
+        \pause
+        \item[] $\rightarrow$ Andere Module können sich damit die \tb{selbe} (konfigurierte) Instanz holen.
+        \pause
+
+
+    \end{itemize}
+    \begin{lstlisting}[language=pytiny]
+import logging
+logger = logging.getLogger('my_logger')
+    \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{logging - Die Handler}
+    \begin{itemize}
+        \item Ein \tb{Handler} nimmt Nachrichten in Form eines \pp{LogRecord} entgegen.
+        \pause
+        \item Dann prüft er, ob die Nachricht seinem eigenen \tb{gesetzten Log-level} entspricht.
+        \pause
+        \item Im Anschluss ruft er seine \pp{emit()}-Methode\footnote{\url{https://docs.python.org/3/library/logging.html\#logging.Handler.emit}} auf, welche den Record mit Hilfe eines \pp{Formatters} formatiert und anschließend \tb{meldet}.
+        \pause
+        \item \tb{Relevante Handler}\footnote{\url{https://docs.python.org/3/library/logging.handlers}} sind:
+        \item[] \begin{itemize}
+            \item \pp{StreamHandler}: Schreibt auf einem \tb{Stream}, wie \pp{stdout}, aus.
+            \item \pp{FileHandler}: Schreibt in eine gegebene \tb{Datei}.
+            \item \pp{TimedRotatingFileHandler}: Schreibt in eine Datei, die in \tb{Intervallen} wechselt.
+            \item \pp{SysLogHandler}: Schreibt in einen \tb{Unix-Syslog}.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{logging - Formatter}
+    \begin{itemize}
+        \item Das \pp{Formatter}-Objekt\footnote{\url{https://docs.python.org/3/library/logging.html\#formatter-objects}} konvertiert den \pp{LogRecord} in eine \tb{lesbare Form}.
+        \pause
+        
+        \item Dies inkludiert das automatische \tb{Hinzufügen von Informationen}\footnote{Alle verfügbaren Informationen: https://docs.python.org/3/library/logging.html\#logrecord-attributes}.
+    \end{itemize}
+    \begin{lstlisting}[language=pytiny]
+formatter_string = "[{asctime}] [{levelname}][{threadName}][{module}.{funcName}] {message}"
+formatter = logging.Formatter(formatter_string, style="{")
+	\end{lstlisting}
+	
+	\pause
+	
+    \begin{itemize}
+        \item Im Programm muss dann nur noch das \tb{Event gemeldet} werden.
+    \end{itemize}
+\begin{lstlisting}[language=pytiny]
+logger.warning("Counting Worms")
+# >> [2023-09-06 20:08:24,847] [WARNING] [MainThread][logging_example.<module>] Counting Worms
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}{logging - Ablaufdiagramm}
+    \begin{figure}
+        \includegraphics[height=0.7\textheight]{images/03_logging_flow.png}
+        \caption{\url{https://docs.python.org/3/howto/logging.html\#logging-flow}}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{logging - Ein ziemlich gutes Beispiel-Setup}
+	\begin{lstlisting}[language=pytiny]
+formatter = logging.Formatter("[{asctime}] [{levelname}] [{threadName}][{module}.{funcName}] {message}", style="{")
+
+# init one normal filehandler and a stream-handler for stdout
+file_logger = logging.FileHandler("events.log")
+file_logger.setLevel(logging.DEBUG)
+file_logger.setFormatter(formatter)
+
+console_logger = logging.StreamHandler()
+console_logger.setLevel(logging.WARNING)
+console_logger.setFormatter(formatter)
+
+logger = logging.getLogger("my_logger")
+# set logger to lowest, the handlers can then decide on their own
+logger.setLevel(logging.DEBUG)
+
+logger.addHandler(console_logger)
+logger.addHandler(file_logger)
+	\end{lstlisting}
+\end{frame}
+
+\framecardfragen
+
+
+\section{Einige coole Module der Standard-Library}
+\subsection{os}
+
+\begin{frame}{os}
+	\begin{quotation}
+		This module provides a portable way of using operating system dependent functionality.\furl{https://docs.python.org/3/library/os.html}
+	\end{quotation}
+\end{frame}
+
+
+\begin{frame}[fragile]{Environment Variablen I}
+	\begin{itemize}
+		\item \tb{Environment} Variablen sind Teil der \tb{Umgebung}, in welcher das Programm ausgeführt wird.
+		\pause
+		\item Ein Programm kann diese dann zur Laufzeit bei Bedarf \tb{einlesen}.
+		\pause
+		\item Daher eignen sie sich zur \tb{Vorab-Konfiguration} eines Programms.
+		\pause
+		\item Sie sind ein guter Weg zur Übergabe von \tb{Tokens} oder anderen Credentials, welche nicht im Quellcode stehen sollen.
+		
+	\end{itemize}
+
+	
+\end{frame}
+
+\begin{frame}[fragile]{Environment Variablen II}
+	\begin{itemize}
+	\item Unter Unix-like Systemen lassen sich Env-Variablen einfach per \tb{Command} setzen\footnote{Die meisten IDEs - so auch PyCharm - bieten die Option Env-Variablen in den integrierten Run-Konfigurationen zu hinterlegen.}.
+	\pause
+	\end{itemize}
+	\begin{lstlisting}[language=pytiny]
+export SLEEP_TOKEN="W A S P S H I P" 
+	\end{lstlisting}
+	
+	\pause
+	
+	\begin{itemize}
+		\item Über das \pp{os}-Modul können Env-Variablen einfach \tb{eingelesen} werden.
+		\item Dabei kann, wie beim \pp{dict}, ein optionaler \tb{Default}-Parameter übergeben werden.
+	\end{itemize}
+	
+	\pause
+	
+	\begin{lstlisting}[language=pytiny]
+# load optional env-variable
+# envs are constant, so we do it in caps
+SLEEP_TOKEN = os.getenv("SLEEP_TOKEN", default="WORSHIP")
+print(SLEEP_TOKEN)  # >> "W A S P S H I P" 
+	\end{lstlisting}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Pfade}
+	\begin{itemize}
+		\item Jedes Programm wird aus einem \tb{Pfad} ausgeführt.
+		\item Wird ein Programm aus der Kommandozeile ausgeführt, ist sein \tb{Start-Pfad} das Verzeichnis, aus dem der Befehl aufgerufen wurde.
+		\pause
+		\item Das Verzeichnis, in dem sich das Programm gerade \tb{befindet}, kann mit \pp{os.getcwd()}\footnote{cwd steht für Current Working Directory} ausgelesen werden.
+	\end{itemize}
+	\begin{lstlisting}[language=pytiny]
+# assuming we execute the script from /home/user/git/python-vertiefungskurs/src
+current_dir = os.getcwd()
+print(current_dir)  # >> /home/user/git/python-vertiefungskurs/src
+\end{lstlisting}
+\begin{itemize}
+	\item Für das einfache Durchführen von \tb{komplexeren} Operationen auf Pfaden bietet Python die Module \pp{Pathlib}\furl{https://docs.python.org/3/library/pathlib.html\#methods-and-properties} und \pp{glob}\furl{https://docs.python.org/3/library/glob.html}.
+\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}[fragile]{Existenz von Pfaden und Dateien}
+	\begin{itemize}
+		\item Oft kommt es vor, dass ein Programm einen Ordner oder eine Datei \tb{verwenden} soll.
+		\pause
+		\item Hierbei ist das gewünschte \tb{Verhalten abhängig} davon, ob die Datei/ das Verzeichnis bereits existiert.
+		\pause
+		\item Das \pp{os}-Modul bietet schnelle Wege, um die Existenz dieser zu \tb{überprüfen} und ggf. zu erstellen.
+	\end{itemize}
+	\begin{lstlisting}[language=pytiny]
+log_folder = "logs/"
+if not os.path.exists(log_folder):
+    os.mkdir(log_folder)  # create folder, needed for writing the logs 
+	\end{lstlisting}
+    \begin{lstlisting}[language=pytiny]
+res_file = "result.txt"
+if os.path.isfile(res_file):
+    answer = input(f"The file '{res_file}' already exists, do you want to overwrite it? [Y/n]")
+\end{lstlisting}
+\end{frame}
+
+\framecardfragen
+
+
+\section{Übergebene Argumente}
+
+\begin{frame}{Argumente}
+	\begin{itemize}
+		\item Ein Programm kann bei Ausführung \tb{Argumente} übergeben bekommen.
+		\pause
+		\item Klassiker sind die Linux-Commandline-Programme wie \pp{cd} oder \pp{cp}.
+		\pause
+		\item Parameter werden beim \tb{Aufruf} des Programms mit \tb{übergeben} und können zur Laufzeit \tb{ausgelesen} werden.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Argumente in Python}
+	\begin{itemize}
+		\item Das \pp{sys}-Modul bitet über \pp{sys.argv}\furl{https://docs.python.org/3/library/sys.html\#sys.argv} einen low-level Weg, \tb{schnell} übergebene Argumente einzulesen.
+		
+		\pause
+		
+		\item Für eine \tb{einfachere} Arbeit mit übergebenen Argumenten und ein schöneres\\CLI-\tb{Interface} liefert Python \pp{argparse}\furl{https://docs.python.org/3/library/argparse.html}.
+		
+		\pause
+		
+		\item Mit diesem können mögliche \tb{Parameter definiert} und genau beschrieben werden.
+		
+		\pause
+		
+		\item \pp{argparse} übernimmt das \tb{Parsen} der übergebenen Argumente.
+		
+		\pause
+		
+		\item Dabei prüft es die \tb{Korrektheit} der Argumente.
+		\item[] Bei Unvollständigkeit und Typ-Fehlern werden \tb{Hilfsnachrichten} ausgegeben.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Argparse - Beispiel}
+	\begin{lstlisting}[language=pytiny]
+# python3 argparse_write.py output.txt -s "Hello, world!" -n 5
+import argparse
+
+def write_lines_to_file(file_path, sentence, num_lines):
+    with open(file_path, "w") as file:
+        file.write("\n".join([sentence] * num_lines))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Write lines to a file")
+    # positional (first) parameter
+    parser.add_argument("file", type=str, help="file path to write to")
+    # required named paraemter
+    parser.add_argument("-s", "--sentence", type=str, help="sentence to write", required=True)
+    # optional named paraemter with default value
+    parser.add_argument("-n", "--num_lines", type=int, help="number of lines to write", default=1)
+
+    args = parser.parse_args()  # trigger the parsing
+    # we receive a class that contains all given arguments as attributes
+    # if a --name is given then that's the argument's name not the -name
+    write_lines_to_file(args.file, args.sentence, args.num_lines)
+	\end{lstlisting}
+\end{frame}
+
+\framecardfragen
+
+\section{Eine witzige und doch nützliche Sache}
+\begin{frame}[fragile]{Einzeiler mit \glqq or\grqq}
+	\begin{itemize}
+		\item Das Keyword \pp{or} kann auch \tb{zwischen} Werte oder Funktionsaufrufe geschrieben werden.
+		
+		\pause
+		
+		\item Der \glqq Rückgabewert\grqq~ ist der \tb{erste} Wert, welcher eine Truthyness von \pp{True}\footnote{Selbiges Verfahren geht auch mit \texttt{and}, welches das erste \glqq falsche\grqq~ Element ergibt, dies ist aber ziemlich nutzlos.} hat.
+		
+		\pause
+		
+		\item Dies kann als simpler \tb{Ternary}-Operator beim Assignment von Variablen genutzt werden.
+	\end{itemize}
+	\begin{lstlisting}[language=pytiny]
+x = [] or 42  # >> x = 42
+
+y = print("what will the value be? :eyes:") or 42
+print(y)
+# >> "what will the value be? :eyes:"
+# >> 42
+	\end{lstlisting}
+	
+	\pause
+	
+	\begin{itemize}
+		\item Ein weiterer (hacky) Usecase ist das schnelle \tb{Einfügen} von Debug-Operatoren in Funktionen, welche an andere Funktionen übergeben werden.
+	\end{itemize}
+	\begin{lstlisting}[language=pytiny]
+some_library_fn(arg1, key=lambda x: logger.info(f"Inspecting '{x}' now") or x.value)
+	\end{lstlisting}
+\end{frame}
+
+
+\framecardfragen
+
+\end{document}
+

@@ -1,0 +1,206 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+
+\title{Zettel 03}
+\ausgabe{11. September 2023}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Hinweis}: \quad
+Dieser Zettel enthält mehr Aufgaben, als vermutlich innerhalb des Tutoriums machbar sind.\\
+Schauen Sie sich die Aufgaben an und bearbeiten Sie zuerst die Aufgaben, welche Sie ansprechen.\\
+Fühlen Sie sich frei, gegebene Aufgaben um beliebige Funktionaliät zu erweitern oder zu modifizieren.
+
+\medskip
+
+\noindent In einigen Aufgaben finden Sie Referenzen zu bereits vorbereiteten Programmen. Diese können Sie aus diesem Sciebo-Share\furl{https://uni-bonn.sciebo.de/s/O4bU6jJ8UAN2pFR} im Ordner des entsprechenden Tages finden und runterladen.
+
+\medskip
+
+
+\noindent \tb{Entwicklungsumgebung aufsetzen} \quad
+
+    \begin{enumerate}
+        \item Falls dies nicht bereits an einem vorherigen Tag geschehen ist, setzen Sie sich ein Virtual Environment und eine Entwicklungsumgebung auf.\\
+        Mehr dazu finden Sie auf Zettel 1.
+
+        \item Erweritern Sie ihr \pp{venv} um die Packages \pp{numpy}, \pp{pandas} und \pp{matplotlib}.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+\medskip
+\noindent \tb{Numpy-Warmup} \quad
+  
+    \noindent Die folgenden Aufgaben sollen Sie mit den Grundlagen von NumPy vertraut machen.
+
+    \begin{enumerate}
+
+            \item Erstellen Sie ein NumPy-Array von ganzen Zahlen von 1 bis 10 und berechnen Sie die Summe, den Durchschnitt und die Standardabweichung des Arrays.
+            
+            \item Generieren Sie eine zufällige $5 \times 5$ Matrix mit Hilfe von NumPy und finden Sie die maximalen und minimalen Werte in der Matrix.
+            
+            \item Erstellen Sie ein NumPy-Array der Form $(3, 4)$, gefüllt mit zufälligen Gleitkommazahlen zwischen 0 und 1. Änderen Sie die Form des Arrays in ein $(4, 3)$ Array und geben Sie dessen Transponierte aus.
+            
+            \item Erstellen Sie zwei NumPy-Arrays der Form $(3, 3)$ und führen Sie elementweise Addition, Subtraktion, Multiplikation und Division der Arrays durch.
+            
+            \item Generieren Sie ein NumPy-Array mit 100 zufälligen ganzen Zahlen zwischen 1 und 1000. Finden Sie die Indizes der fünf größten Werte im Array.
+            
+            \item Erstellen Sie ein NumPy-Array der Form $(4, 4)$ mit Werten von 1 bis 16. Extrahieren Sie die Diagonalelemente und berechnen Sie ihre Summe.
+            
+            \item Berechnen Sie das Skalarprodukt zweier NumPy-Arrays der Form $(2, 3)$ und $(3, 2)$.
+            
+            \item Erstellen Sie ein NumPy-Array der Form $(5, 5)$, bei dem alle Elemente den Wert 0 haben. Ersetzen Sie die Diagonalelemente mit den Zahlen von 1 bis 5.
+            
+            \item Generieren Sie ein NumPy-Array mit 20 zufälligen Zahlen zwischen -10 und 10. Ersetzen Sie alle negativen Zahlen mit 0 und geben Sie das resultierende Array aus.
+            
+            \item Erstellen Sie ein NumPy-Array der Form $(6, 6)$ mit zufälligen ganzen Zahlen zwischen 1 und 10. Sortieren Sie jede Zeile des Arrays in aufsteigender Reihenfolge.
+            
+            \item Erstellen Sie ein NumPy-Array mit 30 zufälligen Integern zwischen 0 und 20. Finden Sie alle Stellen, die den Wert 7 enthalten. Welche und wie viele sind es?
+    \end{enumerate}
+
+    
+\medskip
+\noindent \tb{Matrix II} \quad
+
+\noindent Besuchen Sie die Matrix Aufgabe von Tag 1 erneut. Nutzen Sie Ihr neu erlangtes Wissen über das \pp{slice}, um mit \pp{__get_item__()} Teil-Matrizen aus der Matrix zu extrahieren.\\
+Erweitern Sie die Funktionalität danach gerne ebenfalls bei \pp{__set_item__()}.
+
+\medskip
+
+\medskip
+\noindent \tb{Env-Variablen und Argparser } \quad
+
+\noindent Überlegen Sie, welche Ihrer Programme von heute oder aus früheren Tagen von \pp{env}-Variablen oder dem \pp{Argparser} profitieren könnten.\\
+Beispielsweise könnten Sie bei Hangman die Datei mit den zu verwendenden Wörtern via \pp{env}-Variable festlegen oder via Argument übergeben. 
+
+\medskip
+\noindent \tb{Logging} \quad
+
+\begin{enumerate}
+    \item Setzen Sie ein Logging-Setup auf, welches aus einem \pp{FileHandler} und einem \pp{StreamHandler} besteht.
+    \item Konfigurieren Sie das System so, dass \pp{error} und höher auf der Konsole ausgegeben werden und alles ab \pp{info} in der Datei gespeichert wird.
+    \item Sorgen Sie dafür, dass die Datei nun in einem Ordner \pp{data/} liegt.
+    \item[] Stellen Sie dabei sicher, dass der Ordner erstellt wird, falls er nicht bereits existiert.
+\end{enumerate}
+
+\pagebreak
+
+\medskip
+\noindent \tb{Sieb des Erathosthenes} \quad
+  
+    \noindent
+    In dieser Aufgabe ist es Ihr Ziel, alle Primzahlen bis zu einer gegebenen Zahl \pp{N} zu berechnen.\\
+    Das Sieb des Erathosthenes ist ein simples, aber effizientes Verfahren, zu Ermittlung dieser.\\
+    Das Ziel ist es, am Ende ein Array zu haben, welches an allen Primzahl-Indizes \pp{True} enthält, und überall sonst \pp{False} ist.\\
+
+    Die folgenden Schritte müssen getan werden:
+    \begin{enumerate}
+        \item Erstellen Sie zuerst ein \pp{numpy}-Array der Länge \pp{n+1}, welches komplett mit \pp{True} oder \pp{1} gefüllt ist.
+        \item Setzen Sie die Elemente an den Indizes \pp{0, 1} auf \pp{False}, da 1 und 0 keine Primzahlen sind.
+
+        \item Setzen Sie alle Vielfachen des Wertes 2 auf \pp{False}.
+        \item Führen Sie den selben Schritt für alle Indizes $3\leq i \leq \sqrt{n}$ durch, bei denen ein \pp{True} in dem Array steht, da Vielfache eines Wertes niemals eine Primzahl sind.
+        \item Alle nun noch auf \pp{True} stehenden Indizes sind Primzahlen.
+        \item Finden Sie einen eleganten Weg, mit Hilfe dieses Boolschen-Arrays nun die Indizes bzw. repräsentierenden Zahlenwerte dieser Stellen zu berechnen.
+        \item Geben Sie das Ergebnis aus.  
+    \end{enumerate}
+    Hinweis: Sie brauchen genau eine \pp{for}-Schleife, um die Aufgabe zu lösen. Alle anderen Operationen lassen sich durch NumPy realisieren.
+
+
+    \medskip
+    \noindent \tb{Spaß mit Matplotlib} \quad
+      
+        \noindent
+        Wir wollen ein wenig Spaß mit coolen Funktionen haben und diese interaktiv analysieren.\\
+        
+        \begin{enumerate}
+            \item Machen Sie sich erneut mit dem interaktiven Beispiel aus der Vorlesung vertraut.
+            \item Plotten Sie die Funktion $y = x \cdot \sin(1/x)$
+            \item Fügen Sie interaktive Regler für x hinzu. Wie verändert sich die Funktion?
+            \item Plotten Sie zwei Sinus Funktionen.
+            \item Fügen Sie einen Parameter für das Setzen eines Offsets zu Ihrer Sinus-Funktion hinzu, welche über einen Regler steuerbar ist.
+            \item Genießen Sie das zufriedenstellende Gefühl von sich gegeneinander verschiebenden Sinus-Wellen!
+            \item Welche Funktionen und Parameter können Sie noch Plotten bzw. verändern?
+        \end{enumerate}
+
+        \noindent \tb{Das Wetter} \quad
+    
+\noindent
+\begin{enumerate}
+    \item Machen Sie sich mit der \pp{open-metero}-API\furl{https://open-meteo.com/} vertraut.
+    \item Fragen Sie das Wetter ab und erstellen Sie sinnvolle Plots aus den empfangenen Daten.
+\end{enumerate}
+
+    \pagebreak
+
+    \medskip
+    \noindent \tb{Echte Datenanalyse} \quad
+      
+        \noindent
+        In dieser Aufgabe sollen Sie einen echten Datensatz auswerten. Hierzu haben Sie den Datensatz \pp{boulders\_habitat\_bonn.csv} und \pp{boulders\_habitat\_beuel.csv}\footnote{Die 2023er Versionen haben nur die halbe Größe und sind daher ggf. für langsame Systeme besser geeignet.} erhalten. Dieser enthält die Daten für die Auslastung der beiden Bonner Boulder Hallen von Mai 2022 bis heute.\\
+
+        \noindent Hinweis: Es kann Sinn machen, diese Aufgabe in einem Jupyter-Notebook zu lösen.
+
+        \begin{enumerate}
+            \item Machen Sie sich mit \pp{read_csv}\furl{https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html} von pandas vertraut und erstellen Sie einen der beiden Datensätze in einen \pp{DataFrame} aus der gegebenen CSV Datei.\\
+            Folgende Schritte können Sie direkt beim Einlesen erledigen, oder im Nachhinein tun:
+
+            \item \begin{itemize}
+                \item Konvertieren Sie die erste Spalte in \pp{Integer} und die zweite in \pp{datetime} Objekte.
+                \item Setzen Sie die \pp{datetime}-Spalte als Index.
+                \item Die dritte Spalte wird nicht benötigt.
+            \end{itemize}
+
+            \item Erste Analyse:\\
+            Nutzen Sie \pp{.describe()}, um sich einen ersten Eindruck über den Datensatz zu machen.
+            
+            
+            \item Der Datensatz ist mit einer Dichte von einem Datenpunkt alle fünf Minuten ziemlich mächtig.
+            Bilden Sie daher den Average über je eine Stunde.\\
+            Dies können Sie mit \pp{.resample("30min").mean()}\furl{https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html\#pandas.DataFrame.resample} tun.
+
+            \item Führen Sie die selben Schritte für den zweiten Datensatz durch.
+            
+            \item Fügen Sie die beiden nach Zeit gruppierten Datensätze zusammen.
+            
+            \item[] Sie können alle nachfolgenden Aufgaben entweder für beide Hallen oder nur die Halle Ihrer Wahl auswerten.
+
+            \item Welche halbe-Stunde(n) hatten insgesamt die höchste Auslastung? Waren es die selben Zeiten in Bonn und Beuel?
+            
+            \item Extrahieren Sie die Daten für Ihren Geburtstag. Wie hoch war die Aulastung an diesem Tag pro Stunde?\\
+            \item[] Plotten Sie den Verlauf des Tages.
+            \item[] Fragen Sie sich nun, warum all diese Leute nicht auf Ihrer Geburstagsfeier waren.
+            
+            \item Nachdem Sie die mittelschwere Weg-Krise überwunden haben: Gibt es eine Stunde, welche im Durchschnitt die geringste Auslastung hat?
+            
+            \item Gibt es Tage für welche keine oder nur wenige Datenpunkte vorliegen?\\
+            Gruppieren Sie die nicht zusammengefassten Daten nach Tag und zählen Sie die Einträge pro Tag.\\
+            Hinweis: Sie können mit \pp{.date} nur auf das Date Attribut eines \pp{datetime}-Objekts zugreifen.
+            
+            \item Gruppieren Sie die Daten nach der Uhrzeit des Indexes.\\
+            Iterieren Sie über die Zeitslots und berechnen Sie die durchschnittliche Auslastung. Welcher Zeitslot ist am beliebtesten?\\
+            Passt diese Beobachtung mit Ihrer Beobachtubng zur halben Stunde mit der höchsten Auslastung zusammen?\\
+            Hinweis, Sie kommen mit \pp{.time} nur an das Zeitattribut eines \pp{datetime}-Objekts.
+            
+            \item Erstellen Sie einen Bar-Plot, welcher die gemittelte Auslastung jeder halben Stunde darstellt.
+            
+            \item Fallen Ihnen weitere spannende Analysen ein? Lassen Sie Ihrer Kreativität freien Lauf! Wie wäre es z.B. mit einem Vergleich zwischen den Jahren?
+
+        \end{enumerate}
+
+
+
+\end{document}

@@ -1,0 +1,128 @@
+\documentclass{ubo_tex_uebungszettel/uebungszettel}
+\input{config/config.tex}
+\author{Chris Geron}
+\tutor{
+	Mathilde~Schreck,
+	Adrian~Oeyen
+}
+
+\title{Pycharm Einrichtung und Cheatsheet}
+\ausgabe{}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Hinweis}: \quad
+Diese Liste ist weit von vollständig. Sie soll nur ein best-off sein!
+
+\medskip
+
+
+\noindent \tb{Die IDE richtig einrichten} \quad
+
+    \begin{enumerate}
+        \item \tb{Aus- / Einkommentieren} auf Deutsche Tastatur anpassen und Refactor umlegen
+        \begin{itemize}
+        	\item Einstellungen öffnen: \pp{file/settings}
+        	$\rightarrow$ \pp{Keymap}
+        	
+        	\item nach \pp{line comment} suchen
+        	
+        	\item[] \pp{Comment with Line Comment} 
+        	wählen und durch Doppelklick auf etwas anderes z.B. 
+        	\pp{cmd+shift+7}\footnote{Dieser Shortcut ist bereits belegt, das Feature ist aber irrelevant. Also einfach ersetzen.} setzen.
+        	
+        \end{itemize}
+        
+        \item \tb{Rename} einer Variable auf einen sinnvollen Default setzen
+        \item[] In den \pp{Keymap}-Settings: \pp{Rename} suchen und die Option unter \pp{Refactor} wählen. Eine mögliche Option ist \pp{ctrl+w}. 
+        
+       \item Verändern der \tb{Textgröße} durch \pp{ctrl+scroll} aktivieren
+       \begin{itemize}
+       		\item In den Einstellungen \pp{Editor/General}, ganz oben den Haken bei \pp{Change font size...} setzen.
+       \end{itemize}
+       
+      \item Bei Bedarf: \tb{RAM}-Zuweisung
+       \begin{itemize}
+       	\item \pp{Help} $\rightarrow$ \pp{Change Memory Settings}
+       	\item[] Der Standard sind 2gB und das sollte in den meisten Fällen so passen.
+       \end{itemize}
+    \end{enumerate}
+    
+
+\noindent \tb{Virtual Environment\furl{https://docs.python.org/3/library/venv.html} / Interpreter einrichten} \quad
+
+\begin{enumerate}
+	\item Hinterlegen eines \pp{venv} in der IDE\footnote{\url{https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html\#existing-virtual-environment}}
+	\item Der IDE muss der Wurzel-\pp{source-folder}\furl{https://www.jetbrains.com/help/pycharm/configuring-project-structure.html\#mark-dir-project-view} angegeben werden.
+	\begin{itemize}
+		\item Dies ist in der Regel der \pp{/src}-Ordner, in welchem der eigentliche Code liegt.
+	\end{itemize}
+\end{enumerate}
+   
+\pagebreak
+
+\noindent \tb{Nützliche Features der UI} \quad
+\begin{itemize}
+	\item Durch Rechtsklick auf eine Datei, kann diese ausgeführt werden.
+	\item[] Genutzte \pp{Run-Configurations} können oben rechts neben dem \pp{Playbutton} ausgewählt und konfiguriert\footnote{Dies ist der Ort, wo z.B. Env-Variablen oder zu übergebende Argumente hinterlegt werden können.} werden.
+	
+	\item Unten links kann zwischen \pp{Run-Konsole}, einer \pp{System-Shell}, einer \pp{Python-Shell} und mehr gewählt werden.
+	
+	\item Offensichtlich unterstützt die UI mehrere Text-Fenster, welche durch Drag-and-Drop erstellt werden können.
+	
+	\item Durch \pp{Rechtsklick} auf eine Variable, Funktion oder ausgewählten Code-Block kann das Unter-Menü \pp{Refactor} aufgerufen werden. Es bietet einiges an nützlichen Features, zum Refactorn des Codes.
+	
+\end{itemize}
+
+    
+
+\noindent \tb{Sinnvolle Shortcuts} \quad
+
+	\begin{itemize}
+		\item \pp{ctrl+click}
+		\item[] Zur \tb{Definition} einer Funktion / Variable springen. Wird auf die Definition selbst geklickt, werden alle Verwendungsorte angezeigt.
+		
+
+		\item \pp{ctrl+alt+(arrow right | left)}
+		\item[] Erlaubt zwischen der (dateiübergreifenden) Positions-History des Cursors zu \tb{springen}.
+		\item[] $\rightarrow$ Sehr praktisch, wenn man etwas nachgeschaut hat und jetzt wieder zurück will.
+		
+		\item \pp{zwei mal shift hintereinander}: Öffnet die \tb{Universal-Suche}
+		\item[] Spannendeste Funktion: Die \pp{Scratch File}, eine Datei, welche nicht das eigene Verzeichnis voll müllt, aber auf die Module im aktuellen Projekt zugreifen kann.
+		\item[] $\rightarrow$ ideal zum schnellen Testen von Dingen.
+		
+		\item \pp{alt+enter} 
+		\item[] Zeigt Kontext-\tb{Vorschläge} zur aktuellen Position des Cursors an.
+		\item[] $\rightarrow$ Insbesondere spannend, wenn etwas rot oder gelb unterstrichen ist. Ermöglicht u.A. den schnellen Import eines fehlenden Moduls.
+		
+		\item \pp{ctrl+p} in der aufrufenden Klammer einer Funktion
+		\item[] Zeigt die Signaturen einer Funktion an.
+		
+		\item \pp{ctrl+alt+y} im Datei-Fenster
+		\item[] Dateien \tb{neu laden} durch Ausführen von \pp{Reloead from Disk}\footnote{Siehe Abschnitt \glqq Nervige Dinge\grqq}
+		
+	\end{itemize}
+
+\pagebreak
+
+\noindent \tb{Nervige Dinge} \quad
+
+\begin{itemize}
+	\item Von ausgeführten Programmen erstellte Dateien werden erst nach Ende des Programms angezeigt.
+	\item[] Dies ist insbesondere bei Jupyter-Notebooks sehr nervig.
+	\item[] $\rightarrow$  Eine Lösung ist \pp{Rechtsklick} $\rightarrow$ \pp{Reload from Disk} oder \pp{ctrl+alt+y}
+\end{itemize}	
+
+
+\end{document}

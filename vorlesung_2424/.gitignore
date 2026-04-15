@@ -1,0 +1,12 @@
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.snm
+*.toc
+*.out
+*.fls
+*.vrb
+python_vertiefung_*.pdf
+config/gitversion.tex

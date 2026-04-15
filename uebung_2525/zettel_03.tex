@@ -1,0 +1,206 @@
+\documentclass{config/minimal_uebungszettel}
+\input{config/config.tex}
+
+\title{Exercise 03}
+\ausgabe{september 10. 2025}
+\abgabe{}
+\hinweis{}
+
+
+\theoremstyle{definition}
+\newtheorem*{story}{Story}
+
+\newcommand{\pp}[1]{\lpl{#1}}
+\newcommand{\furl}[1]{\footnote{\url{#1}}}
+
+\begin{document}
+
+\maketitle
+
+\noindent \tb{Note}: \quad
+This worksheet contains more exercises than can likely be completed within the tutorial session.\\
+Look through the tasks and start with the ones that interest you most.\\
+Feel free to extend or modify the given exercises with any functionality you like.
+
+\medskip
+
+\noindent In some tasks, you will find references to pre-prepared programs. You can find and download them from this Sciebo share\furl{https://uni-bonn.sciebo.de/s/f3yJSCBKiDLHzHS} in the folder of the corresponding day.
+
+\medskip
+
+
+\noindent \tb{Setting up your development environment} \quad
+
+    \begin{enumerate}
+        \item If you have not done so on a previous day, set up a virtual environment and an IDE.\\
+        More information can be found on Worksheet 1.
+
+        \item Extend your \pp{venv} with the packages \pp{numpy}, \pp{pandas}, and \pp{matplotlib}.
+    \end{enumerate}
+
+\medskip
+\medskip
+
+\medskip
+\noindent \tb{NumPy Warmup} \quad
+  
+    \noindent The following exercises will help you get familiar with the basics of NumPy.
+
+    \begin{enumerate}
+
+            \item Create a NumPy array of integers from 1 to 10 and calculate the sum, average, and standard deviation of the array.
+            
+            \item Generate a random $5 \times 5$ matrix using NumPy and find the maximum and minimum values in the matrix.
+            
+            \item Create a NumPy array of shape $(3, 4)$ filled with random floating-point numbers between 0 and 1. Reshape the array into a $(4, 3)$ array and output its transpose.
+            
+            \item Create two NumPy arrays of shape $(3, 3)$ and perform element-wise addition, subtraction, multiplication, and division.
+            
+            \item Generate a NumPy array with 100 random integers between 1 and 1000. Find the indices of the five largest values in the array.
+            
+            \item Create a NumPy array of shape $(4, 4)$ with values from 1 to 16. Extract the diagonal elements and calculate their sum.
+            
+            \item Compute the dot product of two NumPy arrays with shapes $(2, 3)$ and $(3, 2)$.
+            
+            \item Create a NumPy array of shape $(5, 5)$ where all elements are 0. Replace the diagonal elements with the numbers 1 through 5.
+            
+            \item Generate a NumPy array with 20 random numbers between -10 and 10. Replace all negative numbers with 0 and output the resulting array.
+            
+            \item Create a NumPy array of shape $(6, 6)$ with random integers between 1 and 10. Sort each row of the array in ascending order.
+            
+            \item Create a NumPy array with 30 random integers between 0 and 20. Find all positions that contain the value 7. Which ones are they, and how many?
+    \end{enumerate}
+
+    
+\medskip
+\noindent \tb{Matrix II} \quad
+
+\noindent Revisit the Matrix exercise from Day 1. Use your newly acquired knowledge about \pp{slice} to extract sub-matrices from the matrix with \pp{__get_item__()}.\\
+Extend the functionality afterwards also for \pp{__set_item__()}.
+
+\medskip
+
+\medskip
+\noindent \tb{Env Variables and Argparser } \quad
+
+\noindent Consider which of your programs from today or previous days could benefit from \pp{env} variables or the \pp{Argparser}.\\
+For example, in Hangman you could set the file with the words to be used via an \pp{env} variable or pass it as an argument. 
+
+\medskip
+\noindent \tb{Logging} \quad
+
+\begin{enumerate}
+    \item Set up a logging configuration consisting of a \pp{FileHandler} and a \pp{StreamHandler}.
+    \item Configure the system so that \pp{error} and above are shown in the console, and everything from \pp{info} is stored in the file.
+    \item Ensure that the file is placed in a \pp{data/} folder.
+    \item[] Make sure that the folder is created if it does not already exist.
+\end{enumerate}
+
+\pagebreak
+
+\medskip
+\noindent \tb{Sieve of Eratosthenes} \quad
+  
+    \noindent
+    In this task, your goal is to compute all prime numbers up to a given number \pp{N}.\\
+    The Sieve of Eratosthenes is a simple but efficient method for doing so.\\
+    The goal is to end up with an array that contains \pp{True} at all prime number indices and \pp{False} everywhere else.\\
+
+    The following steps need to be carried out:
+    \begin{enumerate}
+        \item First, create a \pp{numpy} array of length \pp{n+1}, completely filled with \pp{True} or \pp{1}.
+        \item Set the elements at indices \pp{0, 1} to \pp{False}, since 1 and 0 are not prime numbers.
+
+        \item Set all multiples of the value 2 to \pp{False}.
+        \item Repeat the same step for all indices $3\leq i \leq \sqrt{n}$ where the array entry is \pp{True}, since multiples of a value can never be prime.
+        \item All remaining indices set to \pp{True} are prime numbers.
+        \item Find an elegant way, using this boolean array, to compute the indices (i.e., the actual numbers) corresponding to these positions.
+        \item Output the result.  
+    \end{enumerate}
+    Hint: You only need one \pp{for} loop to solve the task. All other operations can be implemented using NumPy.
+
+
+    \medskip
+    \noindent \tb{Fun with Matplotlib} \quad
+      
+        \noindent
+        Let’s have some fun with cool functions and analyze them interactively.\\
+        
+        \begin{enumerate}
+            \item Revisit the interactive example from the lecture.
+            \item Plot the function $y = x \cdot \sin(1/x)$
+            \item Add interactive sliders for $x$. How does the function change?
+            \item Plot two sine functions.
+            \item Add a parameter for setting an offset to your sine function, controllable via a slider.
+            \item Enjoy the satisfying effect of sine waves sliding against each other!
+            \item What other functions and parameters can you plot or change?
+        \end{enumerate}
+
+        \noindent \tb{The Weather} \quad
+    
+\noindent
+\begin{enumerate}
+    \item Get familiar with the \pp{open-metero} API\furl{https://open-meteo.com/}.
+    \item Query the weather and create meaningful plots from the received data.
+\end{enumerate}
+
+    \pagebreak
+
+    \medskip
+    \noindent \tb{Real Data Analysis} \quad
+      
+        \noindent
+        In this exercise, you will analyze a real dataset. For this purpose, you are given the datasets \pp{boulders\_habitat\_bonn.csv} and \pp{boulders\_habitat\_beuel.csv}\footnote{The 2023 versions are only half the size and may be better suited for slower systems.}. These contain data on the usage of the two Bonn bouldering gyms from May 2022 to today.\\
+
+        \noindent Note: It might make sense to solve this task in a Jupyter notebook.
+
+        \begin{enumerate}
+            \item Get familiar with \pp{read_csv}\furl{https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html} from pandas and load one of the datasets into a \pp{DataFrame} from the given CSV file.\\
+            The following steps can be performed directly when loading, or afterwards:
+
+            \item \begin{itemize}
+                \item Convert the first column to \pp{Integer} and the second to \pp{datetime} objects.
+                \item Set the \pp{datetime} column as the index.
+                \item The third column is not needed.
+            \end{itemize}
+
+            \item Initial analysis:\\
+            Use \pp{.describe()} to get a first overview of the dataset.
+            
+            
+            \item The dataset has a density of one data point every five minutes, which is quite large.
+            Therefore, calculate the average for each hour.\\
+            This can be done with \pp{.resample("30min").mean()}\furl{https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html\#pandas.DataFrame.resample}.
+
+            \item Repeat the same steps for the second dataset.
+            
+            \item Merge the two datasets grouped by time.
+            
+            \item[] You can perform all the following analyses either for both gyms or just for the one of your choice.
+
+            \item Which half-hour period(s) had the highest usage overall? Were they the same in Bonn and Beuel?
+            
+            \item Extract the data for your birthday. What was the hourly usage on that day?\\
+            \item[] Plot the course of the day.
+            \item[] Then wonder why all those people weren’t at your birthday party.
+            
+            \item After overcoming this minor existential crisis: Is there an hour that has the lowest average usage?
+            
+            \item Are there days with no or very few data points?\\
+            Group the unaggregated data by day and count the entries per day.\\
+            Note: You can access the date attribute of a \pp{datetime} object with \pp{.date}.
+            
+            \item Group the data by the time of the index.\\
+            Iterate over the time slots and calculate the average usage. Which time slot is the most popular?\\
+            Does this observation match your finding about the half-hour with the highest usage?\\
+            Note: You can access the time attribute of a \pp{datetime} object with \pp{.time}.
+            
+            \item Create a bar plot showing the average usage for each half-hour period.
+            
+            \item Do you notice any other interesting analyses? Let your creativity run free! How about a comparison between the years?
+
+        \end{enumerate}
+
+
+
+\end{document}
