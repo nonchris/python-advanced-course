@@ -3,7 +3,7 @@
 A five day lecture I held at the Computer Science department at University Bonn.
 
 The course was a voluntary offering for interested students.
-It didn't end with an exam and didn't give any credits points.
+It didn't end with an exam and didn't give any credit points.
 
 The target demographic for this lecture were computer science students with at least two semesters of experience.
 
@@ -82,7 +82,7 @@ I was also hired as a tutor in that year.
 
 Tutors:
 - Konstantin Hirschfeld
-- Miguel Cortina Zapp 
+- Miguel Cortina Zapp
 - Linus Rodríguez Gómez
 
 I was hired as lecturer and tutor.
@@ -95,7 +95,7 @@ I was hired as lecturer and tutor.
 I was hired as lecturer and tutor.
 
 # AI disclosure
-- The template to make the slides of 2025 render withot the original template was created by AI.
+- The template to make the slides of 2025 render without the original template was created by AI.
 - The translation from german to english was AI assisted.
 
 All other aspects of this lecture are 'handmade'.
